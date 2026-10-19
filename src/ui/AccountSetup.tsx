@@ -127,7 +127,9 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
                         {task.minutes} min
                       </span>
                     </span>
-                    <span className="pk-what">{task.what}</span>
+                    <span className="pk-what">
+                      {task.what} {task.why}
+                    </span>
                   </span>
                   <Button variation="primary" label={task.action} icon="ArrowForward" isSuffix onClick={() => start(t.id)} />
                 </li>
