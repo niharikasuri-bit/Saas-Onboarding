@@ -116,7 +116,8 @@ export function Channels({ embedded, onDone }: { embedded?: boolean; onDone?: (m
         </h2>
       </div>
       <ul className="geo-cards">
-        {CHANNELS.map((c) => {
+        {/* Connected first, then the ones not set up yet */}
+        {[...setUp, ...left].map((c) => {
           const st = account.sender[c.id];
           return (
             <li key={c.id} className={`geo-card${st.state === 'none' ? ' is-off' : ''}`}>
