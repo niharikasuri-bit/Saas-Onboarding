@@ -1767,6 +1767,31 @@ p { margin: 0; line-height: 1.5; }
 .osm-above:has(.fld-error) { align-items: flex-start; }
 .osm-above:has(.fld-error) .osm-mylocation { margin-top: 28px; }
 .osm-frame .osm-canvas { height: max(340px, calc(100vh - 504px)); }
+
+/* Side nav: full on Home, icons only (72px) on every other page. A toggle at the top opens it.
+   Collapsed, each icon shows its name on hover and keyboard focus; screen readers still get it. */
+.sh-nav { transition: width 0.18s ease; }
+.sh-nav-toggle { align-self: flex-end; width: 32px; height: 32px; margin: 0 var(--s3) var(--s2); display: grid; place-items: center; flex-shrink: 0; border: 1px solid var(--c-divider); border-radius: 6px; background: #fff; color: var(--c-secondary); cursor: pointer; }
+.sh-nav-toggle:hover { background: var(--digitv2-lightTheme-generic-background); }
+.sh-nav-toggle:focus-visible { outline: none; box-shadow: var(--focus); }
+.sh-mini-search { display: none; }
+@media (min-width: 721px) {
+  .sh-nav.is-mini { width: 72px; overflow: visible; }
+  .sh-nav.is-mini .sh-nav-toggle { align-self: center; margin: 0 0 var(--s2); }
+  .sh-nav.is-mini .sh-search, .sh-nav.is-mini .sh-powered { display: none; }
+  .sh-nav.is-mini .sh-mini-search { display: flex; }
+  .sh-nav.is-mini .sh-nav-item, .sh-nav.is-mini .sh-back, .sh-nav.is-mini .sh-restart, .sh-nav.is-mini .sh-nav-h { justify-content: center; padding-left: 0; padding-right: 0; }
+  .sh-nav.is-mini .sh-nav-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  /* the name, shown beside the icon */
+  .sh-nav.is-mini [data-label] { position: relative; }
+  .sh-nav.is-mini [data-label]:hover::after, .sh-nav.is-mini [data-label]:focus-visible::after {
+    content: attr(data-label); position: absolute; left: calc(100% + 8px); top: 50%; z-index: 50; transform: translateY(-50%);
+    padding: 6px 10px; border-radius: 6px; background: #1F2933; color: #fff; font-size: 0.875rem; font-weight: 500; white-space: nowrap; pointer-events: none;
+  }
+  .sh-nav.is-mini .sh-nav-item[aria-current='page']::before { width: 4px; }
+  .sh:has(.sh-nav.is-mini) .cg-bar { left: 72px; }
+}
+@media (prefers-reduced-motion: reduce) { .sh-nav { transition: none; } }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */

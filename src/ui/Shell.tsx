@@ -1,4 +1,4 @@
-import { useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Icon } from '../components/Icon';
 import { useAccount } from '../lib/store';
@@ -45,6 +45,12 @@ export function Shell({ children }: { children: ReactNode }) {
   };
   const b = account.branding;
   const product = (page === 'product' || page === 'golive') && params.product ? params.product : null;
+  // The nav shrinks to icons the moment they open any page from it; Home shows it in full.
+  // The toggle at the top opens or closes it again until the next page.
+  const [expanded, setExpanded] = useState(page === 'home');
+  useEffect(() => setExpanded(page === 'home'), [page, params.section, params.product]);
+  const searchInput = useRef<HTMLInputElement>(null);
+  const mini = !expanded;
 
   return (
     <div className="sh">
@@ -68,9 +74,39 @@ export function Shell({ children }: { children: ReactNode }) {
       </header>
 
       <div className="sh-body">
-        <nav className="sh-nav" aria-label={product ? PRODUCTS[product].name : 'Account'}>
+        <nav className={`sh-nav${mini ? ' is-mini' : ''}`} aria-label={product ? PRODUCTS[product].name : 'Account'}>
+          <button
+            type="button"
+            className="sh-nav-toggle"
+            aria-expanded={expanded}
+            aria-label={expanded ? 'Collapse menu' : 'Expand menu'}
+            title={expanded ? 'Collapse menu' : 'Expand menu'}
+            onClick={() => setExpanded((e) => !e)}
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <path d={expanded ? 'M15 6l-6 6 6 6' : 'M9 6l6 6-6 6'} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          {mini && (
+            <button
+              type="button"
+              className="sh-nav-item sh-mini-search"
+              data-label="Search the menu"
+              onClick={() => {
+                setExpanded(true);
+                requestAnimationFrame(() => searchInput.current?.focus());
+              }}
+            >
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+                <circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" strokeWidth="2.2" />
+                <path d="M15 15l5 5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+              </svg>
+              <span className="sh-nav-label">Search the menu</span>
+            </button>
+          )}
           <div className="sh-search">
             <input
+              ref={searchInput}
               type="search"
               placeholder="Search"
               aria-label="Search the menu"
@@ -84,13 +120,13 @@ export function Shell({ children }: { children: ReactNode }) {
           </div>
           {product ? (
             <div className="sh-nav-main">
-              <button type="button" className="sh-back" onClick={() => go('home')}>
+              <button type="button" className="sh-back" data-label="Home" onClick={() => go('home')}>
                 <Icon name="ArrowBack" size={18} />
-                Home
+                <span className="sh-nav-label">Home</span>
               </button>
               <p className="sh-nav-h">
                 <Icon name={PRODUCTS[product].icon} size={20} />
-                {PRODUCTS[product].name}
+                <span className="sh-nav-label">{PRODUCTS[product].name}</span>
               </p>
               <ul>
                 {NAVS[product].filter((s) => match(sectionLabel(product, s))).map((s) => (
@@ -115,6 +151,7 @@ export function Shell({ children }: { children: ReactNode }) {
             <button
               type="button"
               className="sh-restart"
+              data-label="Restart"
               onClick={() => {
                 if (window.confirm('Restart from the beginning? Everything you’ve entered will be cleared.')) restart();
               }}
@@ -122,7 +159,7 @@ export function Shell({ children }: { children: ReactNode }) {
               <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
                 <path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              Restart
+              <span className="sh-nav-label">Restart</span>
             </button>
             <p className="sh-powered">
               Powered by <img src={LOGO} alt="DIGIT" width={528} height={124} />
@@ -172,7 +209,7 @@ function NavItem({
 }) {
   return (
     <li>
-      <button type="button" className="sh-nav-item" aria-current={current ? 'page' : undefined} onClick={onClick}>
+      <button type="button" className="sh-nav-item" data-label={label} aria-current={current ? 'page' : undefined} onClick={onClick}>
         <Icon name={icon} size={20} />
         <span className="sh-nav-label">{label}</span>
       </button>
