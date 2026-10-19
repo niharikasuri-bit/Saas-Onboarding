@@ -277,6 +277,17 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
     );
   }
 
+  const countLine = (
+    <p className={creating === null && (adding || term) ? 'geo-count' : 'ux-visually-hidden'} role="status">
+      {msg ||
+        (term
+          ? `${hits.length} ${hits.length === 1 ? 'geography' : 'geographies'} found`
+          : adding
+            ? `${all.length} ${all.length === 1 ? 'geography' : 'geographies'} you can add`
+            : `${all.length} ${all.length === 1 ? 'geography' : 'geographies'} in your account`)}
+    </p>
+  );
+
   return (
     <div className={`geo${adding ? '' : ' is-overview'}${creating !== null ? ' is-creating' : ''}`}>
       {toastEl}
@@ -309,6 +320,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
 
       {creating === null && (
       <div className="geo-bar">
+        {/* Adding: search on the left, Cards / List on the right, the count underneath. */}
         {!adding && (
           <h2 className="geo-section-h">
             Your geographies <span className="geo-section-n">{all.length}</span>
@@ -346,14 +358,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
       </div>
       )}
 
-      <p className={creating === null && (adding || term) ? 'geo-count' : 'ux-visually-hidden'} role="status">
-        {msg ||
-          (term
-            ? `${hits.length} ${hits.length === 1 ? 'geography' : 'geographies'} found`
-            : adding
-              ? `${all.length} ${all.length === 1 ? 'geography' : 'geographies'} you can add`
-              : `${all.length} ${all.length === 1 ? 'geography' : 'geographies'} in your account`)}
-      </p>
+      {countLine}
 
       {creating !== null ? (
         <CreateGeography
