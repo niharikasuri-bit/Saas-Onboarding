@@ -1635,3 +1635,26 @@ p { margin: 0; line-height: 1.5; }
 .geo-foot { position: sticky; bottom: 16px; z-index: 4; width: fit-content; max-width: calc(100% - 32px); margin: var(--s5, 20px) auto 0; padding: 8px 16px; border: 1px solid #E3E3E3; border-top: 1px solid #E3E3E3; border-radius: 8px; background: #fff; box-shadow: 0 4px 16px rgb(16 24 40 / 0.12); font-size: 0.875rem; }
 .geo-foot { display: flex; align-items: center; gap: 8px; }
 .geo-foot-cta { display: inline-flex; align-items: center; gap: 4px; }
+
+/* Accessibility sweep fixes */
+/* 1.4.10 Reflow: on narrow screens the Add your geographies search and Cards / List stack */
+@media (max-width: 720px) {
+  .geo .geo:not(.is-overview) .geo-tools, .geo:not(.is-overview) .geo-tools, .geo:not(.is-overview):not(.is-creating) .geo-tools { flex-wrap: wrap; }
+  .geo .geo:not(.is-overview) .geo-search, .geo:not(.is-overview) .geo-search { width: 100%; flex-basis: 100%; }
+}
+/* 1.4.10 Reflow: toasts never get wider than the screen */
+.cg-toast .digit-toast-success, .cg-toast [class*='digit-toast'] { max-width: calc(100vw - 32px); box-sizing: border-box; }
+.cg-toast .toast-label { white-space: normal; overflow-wrap: anywhere; }
+/* 2.5.8 Target size: breadcrumb links are at least 24px tall */
+.cg-crumbs button { min-height: 24px; }
+.cg-toast .digit-toast-success { min-width: min(420px, calc(100vw - 32px)); }
+/* OpenStreetMap step: the country search box sits in the field column */
+.cg-split > .fld .cg-osm-search { width: 100%; height: 48px; box-sizing: border-box; }
+.cg-split > .fld .cg-osm-search input { height: auto; padding: 0; border: 0; border-radius: 0; box-shadow: none; }
+/* OpenStreetMap step: label above the search box, the map below it, all in one column */
+.cg-split.is-stacked > .fld { display: flex; flex-direction: column; align-items: stretch; gap: 8px; max-width: 720px; }
+.cg-split.is-stacked > .fld > label { font-size: 1rem; }
+.cg-split.is-stacked > .osm-map { margin-left: 0; max-width: 720px; }
+.cg-split.is-stacked > .fld > label { align-self: flex-start; text-align: left; }
+.cg .cg-split > .fld .cg-osm-search { flex: none; display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 16px; border-radius: 8px; }
+.cg .cg-split > .fld .cg-osm-search input { flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; outline: none; font-size: 1.0625rem; }

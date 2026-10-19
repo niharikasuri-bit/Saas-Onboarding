@@ -47,7 +47,7 @@ const TASK: Record<
     minutes: 2,
     icon: 'Group',
     page: 'team',
-    action: 'Add emails',
+    action: 'Add team members',
     view: 'View team members',
   },
 };

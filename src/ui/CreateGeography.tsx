@@ -277,18 +277,31 @@ export function CreateGeography({
         }}
       >
         {step === 'country' && (
-          <div className="cg-split">
-          <Field id={`${uid}-country`} label={method === 'osm' ? 'Country' : 'Country name'} error={errors.country}>
-            <input
-              id={`${uid}-country`}
-              type="text"
-              value={country}
-              placeholder={method === 'osm' ? 'For example Rwanda' : undefined}
-              autoComplete="country-name"
-              aria-invalid={!!errors.country || undefined}
-              aria-describedby={describedBy(`${uid}-country`, undefined, errors.country)}
-              onChange={(e) => setCountry(e.target.value)}
-            />
+          <div className={`cg-split${method === 'osm' ? ' is-stacked' : ''}`}>
+          <Field id={`${uid}-country`} label={method === 'osm' ? 'Search by country' : 'Country name'} error={errors.country}>
+            {(() => {
+              const input = (
+                <input
+                  id={`${uid}-country`}
+                  type={method === 'osm' ? 'search' : 'text'}
+                  value={country}
+                  placeholder={method === 'osm' ? 'For example Rwanda' : undefined}
+                  autoComplete="country-name"
+                  aria-invalid={!!errors.country || undefined}
+                  aria-describedby={describedBy(`${uid}-country`, undefined, errors.country)}
+                  onChange={(e) => setCountry(e.target.value)}
+                />
+              );
+              // OpenStreetMap: a search box, like every other search here (icon inside, 8px corners).
+              return method === 'osm' ? (
+                <div className="geo-search cg-osm-search">
+                  <Icon name="Search" size={20} />
+                  {input}
+                </div>
+              ) : (
+                input
+              );
+            })()}
           </Field>
           {method === 'osm' && <OsmMap query={country} />}
           </div>
