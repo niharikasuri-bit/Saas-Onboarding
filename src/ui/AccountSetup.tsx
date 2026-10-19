@@ -6,6 +6,7 @@ import { Geographies } from './Geographies';
 import { Channels } from './Channels';
 import { Team } from './Team';
 import { usePageToast } from './PageToast';
+import { firstName } from '../setup/steps';
 import { todoDone, todosFor, type PageId, type TodoId } from '../lib/model';
 
 /**
@@ -53,7 +54,7 @@ const TASK: Record<
 
 /** onFlow: tells Home when a setup flow takes over the page, so it can hide the products. */
 export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = {}) {
-  const { account } = useAccount();
+  const { account, answers } = useAccount();
   const todos = todosFor(account);
   // Only what's left: a finished step drops off, so they pick up where they left off.
   const open = todos.filter((t) => !todoDone(t.id, account));
@@ -85,18 +86,23 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
     ? `Your products are unlocked. ${open.length === 1 ? 'One step' : `${open.length} steps`} left, whenever you’re ready.`
     : 'Add your geographies to unlock your products. Notification channels and your team are optional for now.';
 
-  // Coming back: the orange band titled Finish setting up account, with what's left as rows in one white panel.
+  // Coming back: an orange header greets them; what's left sits below as rows in one white panel, like the product panels.
   if (started) {
     return (
       <div className="pk">
         {toastEl}
         <header className="pk-head">
           <h1 ref={heading} tabIndex={-1}>
-            Finish setting up <em>account</em>
+            Welcome back, <em>{firstName(answers)}</em>
           </h1>
           <p>{lead}</p>
         </header>
-        <section className="pk-panel" aria-label="Steps left">
+        <section className="hm-sec pk-panel" aria-labelledby="pk-h">
+          <div className="geo-bar">
+            <h2 id="pk-h" className="geo-section-h">
+              Finish setting up account <span className="geo-section-n">{open.length} left</span>
+            </h2>
+          </div>
           <ul className="pk-list">
             {open.map((t, i) => {
               const task = TASK[t.id];

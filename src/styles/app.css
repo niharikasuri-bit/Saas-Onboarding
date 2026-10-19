@@ -1540,3 +1540,8 @@ p { margin: 0; line-height: 1.5; }
 .pk-head h1 { font-size: 2.75rem; font-weight: 400; line-height: 1.15; letter-spacing: -0.02em; }
 .pk-head h1 em { font-style: normal; font-weight: 700; color: var(--c-primary); }
 .pk-panel { padding: 8px 28px; }
+
+/* Coming back, v3: only the header sits in the orange band; the steps panel is white, below it */
+.pk { margin: 0 0 var(--s8); padding: 0; background: none; }
+.pk-head { margin: calc(-1 * var(--s8)) calc(-1 * clamp(24px, 4vw, 56px)) var(--s8); padding: var(--s6) clamp(24px, 4vw, 56px) var(--s8); background: var(--c-primary-bg); }
+.pk-panel { padding: 24px 28px 12px; }
