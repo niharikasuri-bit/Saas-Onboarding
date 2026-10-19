@@ -1252,3 +1252,5 @@ p { margin: 0; line-height: 1.5; }
 .hm-done .pc .pc-actions { align-self: flex-start; }
 .hm-done .pc .pc-actions > button { width: auto; min-width: 180px; }
 .tm-fields dd { font-weight: 500; }
+.tm-you { gap: var(--s2); padding: 10px 14px; border-radius: 8px; background: var(--c-info-bg); color: var(--c-text); font-size: 0.9375rem; }
+.tm-you .ux-icon { flex-shrink: 0; color: var(--digitv2-lightTheme-alert-info); }

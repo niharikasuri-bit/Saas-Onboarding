@@ -208,7 +208,10 @@ export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => 
               </dl>
               <div className="geo-actions">
                 {u.admin ? (
-                  <p className="tm-you">This is you. Your access can’t be changed here.</p>
+                  <p className="tm-you">
+                    <Icon name="Info" size={18} />
+                    Your access cannot be changed.
+                  </p>
                 ) : (
                   <Button variation="secondary" icon="Edit" label="Edit member details" title={`Edit ${u.name}’s details`} onClick={() => setEditing(u.id)} />
                 )}
