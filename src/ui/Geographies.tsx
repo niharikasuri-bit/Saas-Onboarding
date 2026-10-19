@@ -190,25 +190,18 @@ export function Geographies() {
                 <th scope="col">Name</th>
                 <th scope="col">Country</th>
                 <th scope="col">Levels</th>
+                <th scope="col">Level names</th>
                 <th scope="col">Geographies</th>
                 <th scope="col">Status</th>
-                <th scope="col">
-                  <span className="ux-visually-hidden">Actions</span>
-                </th>
+                <th scope="col">Actions</th>
               </tr>
             </thead>
             <tbody>
               {hits.map((s) => (
                 <tr key={s.id}>
-                  <th scope="row">
-                    <span className="geo-row-name">
-                      <span className="geo-icon is-sm" aria-hidden="true">
-                        <Icon name="Public" size={16} />
-                      </span>
-                      {s.name}
-                    </span>
-                  </th>
+                  <th scope="row">{s.name}</th>
                   <td>{s.country}</td>
+                  <td>{s.levels.length}</td>
                   <td>
                     <span className="geo-tag">{s.levels.join(' › ')}</span>
                   </td>
@@ -218,14 +211,12 @@ export function Geographies() {
                   </td>
                   <td>
                     <div className="geo-row-actions">
-                      {!added.has(s.id) && (
-                        <button type="button" className="geo-lnk" onClick={() => add(s)}>
-                          Add to account<span className="ux-visually-hidden">: {s.name}</span>
-                        </button>
+                      {added.has(s.id) ? (
+                        <p className="geo-added">Added</p>
+                      ) : (
+                        <Button variation="primary" size="small" label="Add to account" title={`Add ${s.name} to your account`} onClick={() => add(s)} />
                       )}
-                      <button type="button" className="geo-lnk" onClick={() => download(s)}>
-                        Download<span className="ux-visually-hidden"> {s.name} data</span>
-                      </button>
+                      <Button variation="secondary" size="small" label="Download" title={`Download ${s.name} data`} onClick={() => download(s)} />
                     </div>
                   </td>
                 </tr>
