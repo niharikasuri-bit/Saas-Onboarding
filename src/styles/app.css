@@ -1834,3 +1834,14 @@ p { margin: 0; line-height: 1.5; }
 .hm-v5 .pk ~ .hm-sec::before { content: ''; position: absolute; top: 0; left: calc(-1 * clamp(24px, 4vw, 56px)); right: calc(-1 * clamp(24px, 4vw, 56px)); border-top: 1px solid var(--c-divider); }
 .hm-v5 .pk .pk-sec { padding: 8px 0 32px; }
 .hm-v5 > .pk:first-child + .hm-sec, .hm-v5 .pk:only-child { padding-top: 32px; }
+
+/* Home, v7: sections marked by full-width background bands instead of divider lines */
+.hm-v5 .pk ~ .hm-sec::before, .hm-v5 .hm-sec + .hm-sec::before { content: none; }
+.hm-v5 .hm-sec.is-mine, .hm-v5 .hm-sec.is-other {
+  margin: 0 calc(-1 * clamp(24px, 4vw, 56px)); padding: 36px clamp(24px, 4vw, 56px) 40px;
+}
+.hm-v5 .hm-sec.is-mine { background: #fff; }
+.hm-v5 .hm-sec.is-other { background: #F1F2F3; }
+/* the last band runs to the bottom of the page */
+.hm-v5 > .hm-sec:last-child { margin-bottom: -96px; padding-bottom: 96px; }
+.hm-v5 .hm-sec.is-other .pt-card.is-off { background: #F9F9F9; }
