@@ -1604,5 +1604,6 @@ p { margin: 0; line-height: 1.5; }
 
 /* Page descriptions run the full width of the page instead of wrapping early */
 .geo-lead, .cg-sub, .as-lead, .rv-head p, .pk-head p, .hm-lead, .sf2-lead, .wb-lead, .hc-why { max-width: none; }
-.geo-band-text { flex: 1 1 0; min-width: 0; }
+/* Orange header bands keep their description to a comfortable width and let it wrap */
+.geo-band .geo-lead, .pk-head p { max-width: 720px; }
 .rv-head > div { flex: 1 1 0; min-width: 0; }
