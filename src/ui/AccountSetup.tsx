@@ -6,6 +6,7 @@ import { Geographies } from './Geographies';
 import { Channels } from './Channels';
 import { Team } from './Team';
 import { usePageToast } from './PageToast';
+import { firstName } from '../setup/steps';
 import { todoDone, todosFor, type PageId, type TodoId } from '../lib/model';
 
 /**
@@ -56,12 +57,14 @@ const TASK: Record<
  * done, so it reads as their account's starting point rather than a setup step.
  */
 export function HomeHeader({ ref }: { ref?: React.Ref<HTMLHeadingElement> }) {
+  const { answers } = useAccount();
+  const org = answers.org.trim() || 'your organisation';
   return (
     <header className="pk-head">
       <h1 ref={ref} tabIndex={-1}>
-        Your <em>workspace</em>
+        Hi <em>{firstName(answers)}</em>
       </h1>
-      <p>Open your products, manage your team and change your settings, all from here.</p>
+      <p>Your one stop to access your products for {org}, manage your account and its settings.</p>
     </header>
   );
 }
