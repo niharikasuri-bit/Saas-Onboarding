@@ -1498,6 +1498,8 @@ p { margin: 0; line-height: 1.5; }
 /* Home: the section headings (Your products, Other products) outrank the product names under them */
 .hm-v5 .geo-section-h { font-size: 1.5rem; }
 .hm-v5 .pt-card h3 { font-size: 1.375rem; }
+/* Locked card: one quiet line where the button will be (the corner lock says the rest) */
+.pt-card.is-locked .pt-lock-cta { background: none; border: 1px dashed #C9C9C9; font-weight: 400; }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */

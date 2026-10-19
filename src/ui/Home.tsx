@@ -68,12 +68,6 @@ export function Home() {
             <p className="ux-visually-hidden" role="status">
               {opening ? 'Your products are unlocked.' : ''}
             </p>
-            {!unlocked && (
-              <p className="hm-locked-note">
-                <Icon name="Lock" size={18} />
-                To start using your products, add your geographies.
-              </p>
-            )}
             <ul className="pt-list">
               {on.map((p) => (
                 <ProductTile key={p} p={p} locked={!unlocked} opening={opening} />
@@ -143,13 +137,11 @@ function ProductTile({ p, locked, opening }: { p: Product; locked: boolean; open
       </span>
       <h3>{meta.name}</h3>
       <p className="pt-about">{meta.about}</p>
-      <About p={p} />
+      {/* Locked cards keep it short: the numbers arrive when the product unlocks */}
+      {!locked && <About p={p} />}
       <div className="pt-actions">
         {locked ? (
-          <p className="pt-lock-cta">
-            <Icon name="Lock" size={16} />
-            Locked until you add geographies
-          </p>
+          <p className="pt-lock-cta">Unlocks when you add geographies</p>
         ) : (
           <Button variation="primary" label="View product" title={`View ${meta.name}`} onClick={() => openProduct(p)} />
         )}
