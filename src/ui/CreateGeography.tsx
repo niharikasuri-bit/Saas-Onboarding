@@ -300,7 +300,7 @@ export function CreateGeography({
             }}
             search={
               <div className={`fld osm-fld${errors.country ? ' has-error' : ''}`}>
-                <label htmlFor={`${uid}-country`} className="ux-visually-hidden">
+                <label htmlFor={`${uid}-country`} className="osm-label">
                   Search by country
                 </label>
                 <div className="geo-search">
@@ -309,7 +309,7 @@ export function CreateGeography({
                     id={`${uid}-country`}
                     type="search"
                     value={country}
-                    placeholder="Search by country"
+                    placeholder="For example Kenya"
                     autoComplete="country-name"
                     aria-invalid={!!errors.country || undefined}
                     aria-describedby={errors.country ? `${uid}-country-err` : undefined}

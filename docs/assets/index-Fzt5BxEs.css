@@ -1750,6 +1750,23 @@ p { margin: 0; line-height: 1.5; }
   .osm-float-search { flex-wrap: wrap; right: 12px; }
   .osm-float-search .osm-fld { width: 100%; }
 }
+/* Leaflet draws a translucent frame round the zoom pair; with the gap between the buttons the map
+   showed through it. Two separate buttons, no frame. */
+.osm-frame .leaflet-touch .leaflet-bar, .osm-frame .leaflet-bar { border: 0; background: none; box-shadow: none; }
+.osm-frame .leaflet-control-zoom a { box-shadow: 0 1px 4px rgb(16 24 40 / 0.18); }
+
+/* OpenStreetMap step, v6: search and Use my location in a row above the map */
+.osm-above { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px 12px; margin-bottom: 12px; }
+.osm-above .osm-fld { width: min(440px, 100%); }
+.osm-above .osm-mylocation { position: static; flex-shrink: 0; height: 44px; }
+.osm-frame .osm-canvas { height: max(340px, calc(100vh - 476px)); }
+.osm-above .osm-fld .geo-search { width: 100%; max-width: none; flex: none; }
+/* Visible label above the OpenStreetMap search; Use my location lines up with the box */
+.osm-label { display: block; margin-bottom: 6px; font-size: 1rem; font-weight: 700; color: var(--c-text); }
+.osm-above { align-items: flex-end; }
+.osm-above:has(.fld-error) { align-items: flex-start; }
+.osm-above:has(.fld-error) .osm-mylocation { margin-top: 28px; }
+.osm-frame .osm-canvas { height: max(340px, calc(100vh - 504px)); }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */
