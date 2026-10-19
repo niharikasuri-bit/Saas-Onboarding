@@ -21,10 +21,10 @@ const CARD: Record<Product, { stats: [string, string][] }> = {
     stats: [['6', 'Complaint types'], ['5', 'Modules'], ['14', 'Features']],
   },
   hcm: {
-    stats: [['4+', 'Templates'], ['8', 'Modules'], ['12', 'Features']],
+    stats: [['4+', 'Campaign templates'], ['8', 'Modules'], ['12', 'Features']],
   },
   lnp: {
-    stats: [['3', 'Templates'], ['6', 'Modules'], ['10', 'Features']],
+    stats: [['3', 'Licence templates'], ['6', 'Modules'], ['10', 'Features']],
   },
 };
 
