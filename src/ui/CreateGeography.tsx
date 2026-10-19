@@ -210,7 +210,7 @@ export function CreateGeography({
 
   const LEADS: Record<Step, string> = {
     method:
-      'Would you like to import geography details in bulk to save time, or create geographies manually from scratch?\nChoosing to import will allow you to quickly add multiple geographies at once, while creating manually gives you full control over each geography’s configuration.',
+      'Choose how to set up your geography data. Upload a file using the template for bulk setup, add geographies manually one at a time, or open the map to select them visually.',
     country: 'Your geography starts here. Everything you add sits inside it.',
     levels: 'List the boundary levels from largest to smallest — for example Country, Region, District.',
     // No description on the upload and add pages for now.
