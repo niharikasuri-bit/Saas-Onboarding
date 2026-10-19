@@ -1499,3 +1499,6 @@ p { margin: 0; line-height: 1.5; }
 .hm-v5 .hm-sec.is-mine .pt-card { box-shadow: none; }
 
 .pt-card.is-locked .pt-lock-cta { padding: 10px 8px; font-size: 0.9375rem; }
+
+/* First landing: the setup steps as a list, one per row */
+.hm-v5 .as-list.is-first { grid-template-columns: minmax(0, 1fr); }

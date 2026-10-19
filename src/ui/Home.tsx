@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { Button } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
 import { useAccount } from '../lib/store';
-import { PRODUCTS, PRODUCT_ORDER, hasGeography, setupDone, type Product } from '../lib/model';
+import { PRODUCTS, PRODUCT_ORDER, hasGeography, setupDone, todoDone, todosFor, type Product } from '../lib/model';
 import { firstName } from '../setup/steps';
 import { AccountSetup } from './AccountSetup';
 
@@ -13,6 +13,8 @@ import { AccountSetup } from './AccountSetup';
  * 2. Your products. Locked until the account has geographies; when they
  *    arrive the lock opens once, then each card leads to the product.
  * 3. Other products, not in their plan yet, to add.
+ * When they first land, only the setup shows, as a list; the products appear once
+ * they've set up anything (locked until that includes geographies).
  */
 
 /** Prototype values: the card's three numbers. */
@@ -52,12 +54,17 @@ export function Home() {
   }, [unlocked]);
 
   const done = setupDone(account);
+  const started = todosFor(account).some((t) => todoDone(t.id, account));
 
   return (
     <div className="geo is-overview hm-v5">
       {done ? <Hero name={firstName(answers)} admin={admin} /> : <AccountSetup onFlow={setFlow} />}
 
-      {!flow && (
+      {/* Always mounted, so the unlock is announced even when the products first appear unlocked */}
+      <p className="ux-visually-hidden" role="status">
+        {opening ? 'Your products are unlocked.' : ''}
+      </p>
+      {!flow && started && (
         <>
           <section aria-labelledby={`${uid}-p`} className="hm-sec is-mine">
             <div className="geo-bar">
@@ -65,9 +72,6 @@ export function Home() {
                 Your products <span className="geo-section-n">{on.length}</span>
               </h2>
             </div>
-            <p className="ux-visually-hidden" role="status">
-              {opening ? 'Your products are unlocked.' : ''}
-            </p>
             <ul className="pt-list">
               {on.map((p) => (
                 <ProductTile key={p} p={p} locked={!unlocked} opening={opening} />

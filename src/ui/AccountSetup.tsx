@@ -98,7 +98,7 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
       </header>
 
       <section className="as-wrap" aria-label="What you need to do">
-        <ol className="as-list" style={{ '--as-n': open.length } as React.CSSProperties}>
+        <ol className={`as-list${started ? '' : ' is-first'}`} style={{ '--as-n': open.length } as React.CSSProperties}>
           {open.map((t) => {
             const isDone = todoDone(t.id, account);
             const task = TASK[t.id];
