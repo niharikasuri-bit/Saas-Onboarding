@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Icon } from '../components/Icon';
 import { useAccount } from '../lib/store';
@@ -46,9 +46,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const b = account.branding;
   const product = (page === 'product' || page === 'golive') && params.product ? params.product : null;
   // The nav shrinks to icons the moment they open any page from it; Home shows it in full.
-  // "Collapse menu" / "Expand menu" at the foot of the nav changes it until the next page.
-  const [expanded, setExpanded] = useState(page === 'home');
-  useEffect(() => setExpanded(page === 'home'), [page, params.section, params.product]);
+  const expanded = page === 'home';
   const mini = !expanded;
 
   return (
@@ -117,18 +115,6 @@ export function Shell({ children }: { children: ReactNode }) {
             </ul>
           )}
           <div className="sh-nav-foot">
-            <button
-              type="button"
-              className="sh-collapse"
-              aria-expanded={expanded}
-              data-label="Expand menu"
-              onClick={() => setExpanded((e) => !e)}
-            >
-              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-                <path d={expanded ? 'M15 6l-6 6 6 6' : 'M9 6l6 6-6 6'} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <span className="sh-nav-label">{expanded ? 'Collapse menu' : 'Expand menu'}</span>
-            </button>
             <button
               type="button"
               className="sh-restart"
