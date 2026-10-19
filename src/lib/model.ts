@@ -364,7 +364,8 @@ export type Account = {
   admin: { name: string; email: string };
   branding: { name: string; logo: string; colour: string; saved: boolean };
   users: User[];
-  geography: { areas: Area[] };
+  /** sets: catalogue geographies added to the account; custom: ones they created. */
+  geography: { areas: Area[]; sets?: string[]; custom?: GeoSet[] };
   sender: Record<Channel, { state: SenderState; fields: Record<string, string> }>;
   products: Record<Product, ProductState>;
   /** Complaints: the service, its departments and type → department map. */
@@ -473,6 +474,25 @@ export const REFERENCE_AREAS: { name: string; parent: string; level: number }[] 
     ];
   }),
 ];
+
+/**
+ * Geographies DIGIT holds, by country (prototype). Each one is a place with its
+ * levels, largest first, and how many geographies it contains in all.
+ */
+export type GeoSet = { id: string; name: string; country: string; levels: string[]; count: number; custom?: boolean };
+export const GEO_SETS: GeoSet[] = [
+  { id: 'nairobi', name: 'Nairobi', country: 'Kenya', levels: LEVELS, count: REFERENCE_AREAS.length },
+  { id: 'mombasa', name: 'Mombasa County', country: 'Kenya', levels: ['County', 'Sub-county', 'Ward'], count: 37 },
+  { id: 'kisumu', name: 'Kisumu County', country: 'Kenya', levels: ['County', 'Sub-county', 'Ward'], count: 42 },
+  { id: 'kampala', name: 'Kampala Capital City', country: 'Uganda', levels: ['City', 'Division', 'Parish'], count: 104 },
+  { id: 'lagos', name: 'Lagos State', country: 'Nigeria', levels: ['State', 'Local government area', 'Ward'], count: 265 },
+  { id: 'punjab', name: 'Punjab', country: 'India', levels: ['State', 'District', 'Block', 'Village'], count: 318 },
+  { id: 'odisha', name: 'Odisha', country: 'India', levels: ['State', 'District', 'Block', 'Gram panchayat'], count: 412 },
+  { id: 'maputo', name: 'Maputo City', country: 'Mozambique', levels: ['City', 'District', 'Neighbourhood'], count: 64 },
+  { id: 'addis', name: 'Addis Ababa', country: 'Ethiopia', levels: ['City', 'Sub-city', 'Woreda'], count: 132 },
+  { id: 'freetown', name: 'Western Area Urban', country: 'Sierra Leone', levels: ['District', 'Chiefdom', 'Section'], count: 48 },
+];
+
 
 export const BRAND_COLOURS = [
   { value: '#C84C0E', label: 'Orange' },

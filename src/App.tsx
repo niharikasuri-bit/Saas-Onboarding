@@ -9,7 +9,7 @@ import { Home } from './ui/Home';
 import { Branding } from './ui/Branding';
 import { ProductPage } from './ui/ProductPage';
 import { GoLive } from './ui/GoLive';
-import { GeographyBody } from './ui/GeographyPage';
+import { Geographies } from './ui/Geographies';
 import { SenderBody } from './ui/Sender';
 import { UsersBody } from './ui/Users';
 import { Page } from './ui/StepFrame';
@@ -44,13 +44,7 @@ function Pages() {
     case 'branding':
       return <Branding />;
     case 'geographies':
-      return (
-        <Page title="Geographies" lead="The areas you work in. Every product uses them.">
-          <div className="sm-body is-page">
-            <GeographyBody create={geoMode(account) === 'create'} />
-          </div>
-        </Page>
-      );
+      return <Geographies />;
     case 'sender':
       return (
         <Page
