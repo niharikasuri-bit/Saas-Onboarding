@@ -86,7 +86,6 @@ export function Home() {
                   Other products
                 </h2>
               </div>
-              <p className="hm-sub">Not in your plan yet. Add one when you need it.</p>
               <ul className="pt-list">
                 {off.map((p) => (
                   <OffTile key={p} p={p} admin={admin} />
