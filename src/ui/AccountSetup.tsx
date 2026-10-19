@@ -55,7 +55,6 @@ const TASK: Record<
 export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = {}) {
   const { account, go } = useAccount();
   const todos = todosFor(account);
-  const done = todos.filter((t) => todoDone(t.id, account)).length;
   // Open steps first, in their usual order; finished ones move to the bottom.
   const ordered = [...todos.filter((t) => !todoDone(t.id, account)), ...todos.filter((t) => todoDone(t.id, account))];
   // Adding geographies happens right here on Home, not on the Geographies page.
@@ -89,23 +88,6 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
             Let’s complete <em>account setup</em>
           </h1>
           <p className="as-lead">Add your geographies to unlock your products. Notification channels and your team are optional for now.</p>
-          <div className="as-progress">
-            <p id="as-progress-l">Your account setup</p>
-            <p className="as-count">
-              <strong>{done}</strong> of {todos.length} done
-            </p>
-          </div>
-          <div
-            className="as-bar"
-            role="progressbar"
-            aria-labelledby="as-progress-l"
-            aria-valuemin={0}
-            aria-valuemax={todos.length}
-            aria-valuenow={done}
-            aria-valuetext={`${done} of ${todos.length} done`}
-          >
-            <span style={{ width: `${(done / todos.length) * 100}%` }} />
-          </div>
         </div>
       </header>
 
