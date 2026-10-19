@@ -1571,3 +1571,13 @@ p { margin: 0; line-height: 1.5; }
 /* How to proceed with upload: a #FAFAFA card, its three steps white inside it */
 .us { padding: 20px 24px 24px; border: 1px solid #E3E3E3; border-radius: 12px; background: #FAFAFA; }
 .us-step { background: #fff; }
+
+/* Product cards line up across a row: descriptions take three lines' room, the About box
+   stretches to the same height, and its numbers and labels sit in the same places */
+.pt-list { align-items: stretch; }
+.pt-card .pt-about { min-height: calc(1.5em * 3); }
+.pt-card .pt-about-box { flex: 1 0 auto; display: flex; flex-direction: column; }
+.pt-about-box dl > div { justify-content: flex-start; }
+
+/* Home header: the soft orange gradient of the first-landing page, fading into the page */
+.pk-head { background: linear-gradient(180deg, var(--c-primary-bg) 0%, rgb(251 238 232 / 0.6) 55%, rgb(251 238 232 / 0) 100%); }
