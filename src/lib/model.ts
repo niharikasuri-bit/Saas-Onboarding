@@ -542,9 +542,13 @@ export const todoDone = (id: TodoId, a: Account) =>
 export const setupDone = (a: Account) => todosFor(a).every((t) => todoDone(t.id, a));
 
 export function todoResult(id: TodoId, a: Account) {
-  if (id === 'geography') return `${a.geography.areas.length.toLocaleString('en')} areas`;
+  if (id === 'geography') {
+    const n = a.geography.areas.length;
+    return `${n.toLocaleString('en')} ${n === 1 ? 'geography' : 'geographies'} added`;
+  }
   if (id === 'users') return `${a.users.length} ${a.users.length === 1 ? 'user' : 'users'} invited`;
-  return 'Submitted for approval';
+  const n = Object.values(a.sender).filter((c) => c.state !== 'none').length;
+  return `${n} ${n === 1 ? 'channel' : 'channels'} activated`;
 }
 
 /* ---------------------------------------------------------------- */

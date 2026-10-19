@@ -6,12 +6,13 @@ import { todoDone, todoResult, todosFor, type PageId, type TodoId } from '../lib
 /**
  * The account to-do, leading Home until it's done. A centred column: a header,
  * the welcome, the progress, then one DIGIT Card per step: its icon, title and
- * time, then what to do and why it matters as one description, and a primary button.
+ * time (or, once done, a blue tag with what was done), then what to do and why it
+ * matters as one description, and a button.
  */
 
 const TASK: Record<
   TodoId,
-  { title: string; what: string; why: string; minutes: number; icon: string; page: PageId; action: string }
+  { title: string; what: string; why: string; minutes: number; icon: string; page: PageId; action: string; view: string }
 > = {
   geography: {
     title: 'Add your geographies',
@@ -21,6 +22,7 @@ const TASK: Record<
     icon: 'Public',
     page: 'geographies',
     action: 'Add geographies',
+    view: 'View geographies',
   },
   sender: {
     title: 'Set up notification channels',
@@ -30,6 +32,7 @@ const TASK: Record<
     icon: 'Email',
     page: 'sender',
     action: 'Set up channels',
+    view: 'View channels',
   },
   users: {
     title: 'Invite your team',
@@ -39,6 +42,7 @@ const TASK: Record<
     icon: 'Group',
     page: 'team',
     action: 'Add emails',
+    view: 'View team members',
   },
 };
 
@@ -93,7 +97,12 @@ export function AccountSetup() {
                       </span>
                       {task.title}
                     </h3>
-                    {!isDone && (
+                    {isDone ? (
+                      <p className="as-result">
+                        <Icon name="CheckCircle" size={16} />
+                        {todoResult(t.id, account)}
+                      </p>
+                    ) : (
                       <p className="as-time">
                         <Icon name="Schedule" size={16} />
                         {task.minutes} min
@@ -101,18 +110,13 @@ export function AccountSetup() {
                     )}
                   </div>
                   <div className="as-body">
-                    {isDone ? (
-                      <p className="as-result">{todoResult(t.id, account)}</p>
-                    ) : (
-                      <p className="as-what">
-                        {task.what} {task.why}
-                      </p>
-                    )}
+                    <p className="as-what">
+                      {task.what} {task.why}
+                    </p>
                     <div className="as-foot">
                       <Button
                         variation={isDone ? 'secondary' : 'primary'}
-                        label={isDone ? 'View' : task.action}
-                        title={isDone ? `View: ${task.title}` : undefined}
+                        label={isDone ? task.view : task.action}
                         icon="ArrowForward"
                         isSuffix
                         onClick={() => go(task.page)}
