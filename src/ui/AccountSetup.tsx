@@ -100,7 +100,10 @@ export function AccountSetup() {
                     ) : (
                       <>
                         <p className="as-what">{task.what}</p>
-                        <p className="as-why">{task.why}</p>
+                        <p className="as-why">
+                          <Icon name="LightbulbOutline" size={18} />
+                          <span>{task.why}</span>
+                        </p>
                       </>
                     )}
                     <div className="as-foot">
