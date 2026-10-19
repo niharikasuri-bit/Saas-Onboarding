@@ -1,6 +1,8 @@
+import { useEffect, useRef, useState } from 'react';
 import { Button, Card } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
 import { useAccount } from '../lib/store';
+import { Geographies } from './Geographies';
 import { todoDone, todoResult, todosFor, type PageId, type TodoId } from '../lib/model';
 
 /**
@@ -54,13 +56,23 @@ export function AccountSetup() {
   const done = todos.filter((t) => todoDone(t.id, account)).length;
   // Open steps first, in their usual order; finished ones move to the bottom.
   const ordered = [...todos.filter((t) => !todoDone(t.id, account)), ...todos.filter((t) => todoDone(t.id, account))];
+  // Adding geographies happens right here on Home, not on the Geographies page.
+  const [addingGeo, setAddingGeo] = useState(false);
+  const heading = useRef<HTMLHeadingElement>(null);
+  const wasAdding = useRef(false);
+  useEffect(() => {
+    if (wasAdding.current && !addingGeo) heading.current?.focus();
+    wasAdding.current = addingGeo;
+  }, [addingGeo]);
+
+  if (addingGeo) return <Geographies embedded onDone={() => setAddingGeo(false)} />;
 
   return (
     <div className="as">
       <header className="as-head">
         <div className="as-wrap">
           <p className="as-eyebrow">Welcome aboard</p>
-          <h1 tabIndex={-1}>
+          <h1 ref={heading} tabIndex={-1}>
             Let’s complete <em>account setup</em>
           </h1>
           <p className="as-lead">Finish these {COUNT[todos.length] ?? todos.length} things to unlock your products.</p>
@@ -118,7 +130,7 @@ export function AccountSetup() {
                         label={isDone ? task.view : task.action}
                         icon="ArrowForward"
                         isSuffix
-                        onClick={() => go(task.page)}
+                        onClick={() => (t.id === 'geography' && !isDone ? setAddingGeo(true) : go(task.page))}
                       />
                     </div>
                   </div>

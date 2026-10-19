@@ -60,7 +60,8 @@ function download(set: GeoSet) {
 const COUNTRIES = [...new Set(GEO_SETS.map((s) => s.country))].sort();
 const TOP_LEVELS = ['Country', 'State', 'Region', 'County', 'City', 'District', 'Municipality'];
 
-export function Geographies() {
+/** embedded: shown inside Home's account setup; always adding, and onDone goes back. */
+export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?: () => void } = {}) {
   const { account, update } = useAccount();
   const uid = useId();
   const [q, setQ] = useState('');
@@ -69,12 +70,14 @@ export function Geographies() {
   const [msg, setMsg] = useState('');
   const added = new Set(account.geography.sets ?? []);
   const [addingChosen, setAdding] = useState(!added.size);
-  const adding = addingChosen || !added.size;
+  const adding = embedded || addingChosen || !added.size;
   const heading = useRef<HTMLHeadingElement>(null);
   const first = useRef(true);
   useEffect(() => {
-    if (first.current) first.current = false;
-    else heading.current?.focus();
+    if (first.current) {
+      first.current = false;
+      if (embedded) heading.current?.focus();
+    } else heading.current?.focus();
   }, [adding]);
 
   const catalogue = [...GEO_SETS, ...(account.geography.custom ?? [])];
@@ -90,6 +93,7 @@ export function Geographies() {
 
   /** After adding, go back to the account's geographies. */
   const done = (m: string) => {
+    if (embedded) return onDone?.();
     setAdding(false);
     setQ('');
     setCreating(null);
@@ -111,11 +115,10 @@ export function Geographies() {
             Add the places you’ll serve, wherever your team sits. Every product uses your geographies to know where
             things happen, so work reaches the right place.
           </p>
-          <p className="geo-time">
-            <Icon name="Schedule" size={16} />5 min
-          </p>
-          {!!added.size && (
-            <Button variation="link" label="Back to your geographies" onClick={() => done('')} />
+          {embedded ? (
+            <Button variation="link" label="Back to account setup" onClick={() => onDone?.()} />
+          ) : (
+            !!added.size && <Button variation="link" label="Back to your geographies" onClick={() => done('')} />
           )}
         </header>
       ) : (
