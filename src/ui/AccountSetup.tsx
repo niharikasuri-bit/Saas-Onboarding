@@ -150,10 +150,7 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
           <h1 ref={heading} tabIndex={-1}>
             Let’s complete <em>account setup</em>
           </h1>
-          <p className="as-lead">
-            Complete these tasks to set up your account. Start with your geographies to unlock your products. Notification
-            channels are needed before your products can go live.
-          </p>
+          <p className="as-lead">Complete the following tasks to set up your account and get your products ready to use.</p>
         </div>
       </header>
 
