@@ -108,7 +108,7 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
         <section className="hm-sec pk-panel" aria-labelledby="pk-h">
           <div className="geo-bar">
             <h2 id="pk-h" className="geo-section-h">
-              Finish setting up account <span className="geo-section-n">{open.length} left</span>
+              Finish setting up your account <span className="geo-section-n">{open.length} left</span>
             </h2>
           </div>
           <ul className="pk-list">
