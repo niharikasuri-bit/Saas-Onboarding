@@ -4,6 +4,7 @@ import { Icon } from '../components/Icon';
 import { useAccount } from '../lib/store';
 import { Geographies } from './Geographies';
 import { Channels } from './Channels';
+import { Team } from './Team';
 import { todoDone, todoResult, todosFor, type PageId, type TodoId } from '../lib/model';
 
 /**
@@ -19,7 +20,7 @@ const TASK: Record<
 > = {
   geography: {
     title: 'Add your geographies',
-    what: 'Add the places you’ll serve, wherever your team sits.',
+    what: 'Add the geographies you’ll serve, wherever your team sits.',
     why: 'Every product uses your geographies to know where things happen, so work reaches the right place.',
     minutes: 5,
     icon: 'Public',
@@ -34,7 +35,7 @@ const TASK: Record<
     minutes: 5,
     icon: 'Email',
     page: 'sender',
-    action: 'Set up channels',
+    action: 'Add notification channels',
     view: 'View channels',
   },
   users: {
@@ -60,15 +61,17 @@ export function AccountSetup() {
   // Adding geographies happens right here on Home, not on the Geographies page.
   const [addingGeo, setAddingGeo] = useState(false);
   const [addingSender, setAddingSender] = useState(false);
+  const [addingTeam, setAddingTeam] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const wasAdding = useRef(false);
   useEffect(() => {
-    if (wasAdding.current && !addingGeo && !addingSender) heading.current?.focus();
-    wasAdding.current = addingGeo || addingSender;
-  }, [addingGeo, addingSender]);
+    if (wasAdding.current && !addingGeo && !addingSender && !addingTeam) heading.current?.focus();
+    wasAdding.current = addingGeo || addingSender || addingTeam;
+  }, [addingGeo, addingSender, addingTeam]);
 
   if (addingGeo) return <Geographies embedded onDone={() => setAddingGeo(false)} />;
   if (addingSender) return <Channels embedded onDone={() => setAddingSender(false)} />;
+  if (addingTeam) return <Team embedded onDone={() => setAddingTeam(false)} />;
 
   return (
     <div className="as">
@@ -133,7 +136,7 @@ export function AccountSetup() {
                         label={isDone ? task.view : task.action}
                         icon="ArrowForward"
                         isSuffix
-                        onClick={() => (isDone ? go(task.page) : t.id === 'geography' ? setAddingGeo(true) : t.id === 'sender' ? setAddingSender(true) : go(task.page))}
+                        onClick={() => (isDone ? go(task.page) : t.id === 'geography' ? setAddingGeo(true) : t.id === 'sender' ? setAddingSender(true) : t.id === 'users' ? setAddingTeam(true) : go(task.page))}
                       />
                     </div>
                   </div>

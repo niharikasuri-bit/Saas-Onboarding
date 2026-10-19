@@ -13,7 +13,7 @@ import { Crumbs } from './Crumbs';
  * and its state, with "Set up channels" for the rest.
  */
 
-const ICON: Record<Channel, string> = { sms: 'Message', email: 'Email', whatsapp: 'Whatsapp' };
+const ICON: Record<Channel, string> = { sms: 'Message', email: 'Email', whatsapp: 'WhatsAppFilled' };
 const TILE: Record<Channel, string> = { sms: 'SMS', email: 'Email', whatsapp: 'WhatsApp' };
 
 function check(id: Channel, key: string, v: string): string {
@@ -27,18 +27,19 @@ function check(id: Channel, key: string, v: string): string {
 }
 
 export function Channels({ embedded, onDone }: { embedded?: boolean; onDone?: () => void } = {}) {
-  const { account, go } = useAccount();
+  const { account, update, go } = useAccount();
   const setUp = CHANNELS.filter((c) => account.sender[c.id].state !== 'none');
   const left = CHANNELS.filter((c) => account.sender[c.id].state === 'none');
   const [chosen, setChosen] = useState(!setUp.length);
   const [toast, setToast] = useState('');
+  const [editing, setEditing] = useState<Channel | null>(null);
   const setting = embedded || (chosen && left.length > 0) || !setUp.length;
   const heading = useRef<HTMLHeadingElement>(null);
   const first = useRef(true);
   useEffect(() => {
     if (first.current) first.current = false;
-    else if (!setting) heading.current?.focus();
-  }, [setting]);
+    else if (!setting && !editing) heading.current?.focus();
+  }, [setting, editing]);
   useEffect(() => {
     if (!toast) return;
     const t = setTimeout(() => setToast(''), 5000);
@@ -51,6 +52,30 @@ export function Channels({ embedded, onDone }: { embedded?: boolean; onDone?: ()
       {toast && <Toast type="success" label={toast} onClose={() => setToast('')} />}
     </div>
   );
+
+  if (editing && !embedded) {
+    const spec = CHANNELS.find((c) => c.id === editing)!;
+    return (
+      <div className="geo is-creating">
+        <ChannelFlow
+          trail={[home, { label: 'Notification channels', onClick: () => setEditing(null) }]}
+          channels={[spec]}
+          edit={account.sender[editing].fields}
+          onCancel={() => setEditing(null)}
+          onSubmitted={() => {
+            setEditing(null);
+            setToast(`${spec.label} details saved`);
+          }}
+          onDeactivate={() => {
+            update((a) => ({ ...a, sender: { ...a.sender, [spec.id]: { ...a.sender[spec.id], state: 'none' } } }));
+            setEditing(null);
+            setToast(`${spec.label} deactivated`);
+          }}
+        />
+        {toastEl}
+      </div>
+    );
+  }
 
   if (setting)
     return (
@@ -77,11 +102,12 @@ export function Channels({ embedded, onDone }: { embedded?: boolean; onDone?: ()
             Notification channels
           </h1>
           <p className="geo-lead">
-            Who your messages come from. Submit early: approvals take days, and messages can be turned on once one is
+            A notification channel is the sender your messages come from, such as an email address or phone number. Each
+            channel needs approval, which can take a few days, so submit early. You can turn on messages once a channel is
             submitted.
           </p>
         </div>
-        {left.length > 0 && <Button variation="primary" icon="Add" label="Set up channels" onClick={() => setChosen(true)} />}
+        {left.length > 0 && <Button variation="primary" icon="Add" label="Add notification channels" onClick={() => setChosen(true)} />}
       </header>
       <div className="geo-bar">
         <h2 className="geo-section-h">
@@ -92,7 +118,7 @@ export function Channels({ embedded, onDone }: { embedded?: boolean; onDone?: ()
         {CHANNELS.map((c) => {
           const st = account.sender[c.id];
           return (
-            <li key={c.id} className="geo-card">
+            <li key={c.id} className={`geo-card${st.state === 'none' ? ' is-off' : ''}`}>
               <div className="geo-card-top">
                 <span className="geo-icon" aria-hidden="true">
                   <Icon name={ICON[c.id]} size={20} />
@@ -113,6 +139,17 @@ export function Channels({ embedded, onDone }: { embedded?: boolean; onDone?: ()
                   ))}
                 </dl>
               )}
+              {st.state !== 'none' && (
+                <div className="geo-actions">
+                  <Button
+                    variation="secondary"
+                    icon="Edit"
+                    label="Edit channel details"
+                    title={`Edit ${c.label} details`}
+                    onClick={() => setEditing(c.id)}
+                  />
+                </div>
+              )}
             </li>
           );
         })}
@@ -127,20 +164,31 @@ function ChannelFlow({
   channels,
   onCancel,
   onSubmitted,
+  edit,
+  onDeactivate,
 }: {
   trail: { label: string; onClick?: () => void }[];
   channels: typeof CHANNELS;
   onCancel: () => void;
   onSubmitted: (n: number) => void;
+  /** Editing one connected channel: start at its details, with what it has. */
+  edit?: Record<string, string>;
+  onDeactivate?: () => void;
 }) {
-  const { update } = useAccount();
+  const { account: acct, update } = useAccount();
+  const saved = Object.fromEntries(Object.entries(acct.sender).map(([k, v]) => [k, v.fields])) as Record<string, Record<string, string>>;
   const uid = useId();
-  const [picked, setPicked] = useState<Channel[]>([]);
-  const [step, setStep] = useState(0); // 0 = pick the channels, 1 = add sender details
+  const [picked, setPicked] = useState<Channel[]>(edit ? channels.map((c) => c.id) : []);
+  const [step, setStep] = useState(edit ? 1 : 0); // 0 = pick the channels, 1 = add sender details
   // Prototype: filled in with the example details, so the flow can be clicked straight through.
   const [values, setValues] = useState<Record<string, Record<string, string>>>(() =>
-    Object.fromEntries(
-      channels.map((c) => [c.id, Object.fromEntries(c.fields.map((f) => [f.key, f.options ? f.options[0] : f.secret ? 'example-secret' : f.placeholder ?? '']))]),
+    edit ? { [channels[0].id]: { ...edit } } : Object.fromEntries(
+      channels.map((c) => [
+        c.id,
+        Object.keys(saved?.[c.id] ?? {}).length
+          ? { ...saved![c.id] }
+          : Object.fromEntries(c.fields.map((f) => [f.key, f.options ? f.options[0] : f.secret ? 'example-secret' : f.placeholder ?? ''])),
+      ]),
     ),
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -154,7 +202,7 @@ function ChannelFlow({
 
   const back = () => {
     setErrors({});
-    if (step === 0) onCancel();
+    if (step === 0 || edit) onCancel();
     else setStep(step - 1);
   };
   const next = () => {
@@ -187,10 +235,10 @@ function ChannelFlow({
 
   return (
     <div className="cg-page">
-      <Crumbs items={[...trail, { label: 'Set up channels' }]} />
+      <Crumbs items={[...trail, { label: edit ? `Edit ${channels[0].label}` : 'Add notification channels' }]} />
       <section className="cg" aria-labelledby={`${uid}-h`}>
         <h1 id={`${uid}-h`} ref={heading} tabIndex={-1}>
-          {step === 1 ? 'Add sender details' : 'Which channels do you want to set up?'}
+          {edit ? `Edit ${channels[0].label} details` : step === 1 ? 'Add sender details' : 'Which channels do you want to set up?'}
         </h1>
         <div className="cg-sub">
           <p>
@@ -255,7 +303,7 @@ function ChannelFlow({
                     <div className="ch-sec-title">
                       <h2 id={`${uid}-${c.id}-h`}>{c.label}</h2>
                     </div>
-                    <span className="geo-status">Not connected</span>
+                    <span className={`geo-status${edit ? ' is-active' : ''}`}>{edit ? 'Connected' : 'Not connected'}</span>
                   </div>
                   <p className="ch-why">
                     <Icon name="Info" size={18} />
@@ -308,13 +356,23 @@ function ChannelFlow({
       </section>
       <footer className="cg-bar">
         <Button variation="secondary" icon="ArrowBack" label="Back" onClick={back} />
+        <div className="cg-bar-end">
+        {edit && onDeactivate && (
+          <Button
+            variation="secondary"
+            icon="Close"
+            label="Deactivate channel"
+            onClick={() => window.confirm(`Deactivate ${channels[0].label}? Messages stop going out on it until you add it again.`) && onDeactivate()}
+          />
+        )}
         <Button
           variation="primary"
-          label={last ? 'Connect channels' : 'Next'}
+          label={edit ? 'Save changes' : last ? 'Connect channels' : 'Next'}
           icon={last ? undefined : 'ArrowForward'}
           isSuffix
           onClick={next}
         />
+        </div>
       </footer>
     </div>
   );

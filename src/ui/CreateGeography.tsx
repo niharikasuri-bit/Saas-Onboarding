@@ -182,7 +182,7 @@ export function CreateGeography({
     }
     if (step === 'method' && !method) e.method = 'Choose how you’d like to create your geographies';
     if (step === 'places') {
-      if (!places.length) e.places = `Add at least one ${cleanLevels[0] || 'place'}`;
+      if (!places.length) e.places = `Add at least one ${cleanLevels[0] || 'geography'}`;
       else if (problems.some(Boolean)) e.places = 'Some rows have gaps. Fix the highlighted rows.';
     }
     setErrors(e);
@@ -205,16 +205,16 @@ export function CreateGeography({
     country: 'Which country is it?',
     levels: `How is ${country.trim() || 'it'} divided?`,
     method: 'How would you like to create your geographies?',
-    places: method === 'upload' ? 'Upload geography data' : method === 'osm' ? 'Check the places we fetched' : 'Add geography data',
+    places: method === 'upload' ? (uploaded ? 'Review geography data' : 'Upload geography data') : method === 'osm' ? 'Check the geographies we fetched' : 'Add geography data',
   };
 
   const LEADS: Record<Step, string> = {
     method:
       'Choose how to set up your geography data. Upload a file using the template for bulk setup, add geographies manually one at a time, or open the map to select them visually.',
     country: 'Your geography starts here. Everything you add sits inside it.',
-    levels: 'List the boundary levels from largest to smallest — for example Country, Region, District.',
+    levels: 'List the geography levels from largest to smallest — for example Country, Region, District.',
     // No description on the upload and add pages for now.
-    places: method === 'osm' ? 'Check the places, and fix any before you create the geography.' : '',
+    places: method === 'osm' ? 'Check the geographies, and fix any before you create the geography.' : '',
   };
 
   return (
@@ -313,7 +313,7 @@ export function CreateGeography({
             {method === 'osm' && !fetched && (
               <p className="cg-fetching" role="status">
                 <span className="cg-spinner" aria-hidden="true" />
-                Fetching the boundaries for {country.trim()} from OpenStreetMap…
+                Fetching the geographies for {country.trim()} from OpenStreetMap…
               </p>
             )}
             {method === 'osm' && fetched && (
@@ -335,9 +335,6 @@ export function CreateGeography({
                       Tree
                     </button>
                   </div>
-                  <p className="cg-count" role="status">
-                    {places.length} {places.length === 1 ? 'place' : 'places'}
-                  </p>
                 </div>
                 {errors.places && (
                   <p id={`${uid}-places`} className="fld-error" tabIndex={-1}>
@@ -504,7 +501,7 @@ function LevelsEditor({
   return (
     <div className="lv">
       <p className="lv-h" id={`${uid}-lv-h`}>
-        Boundary levels
+        Geography levels
       </p>
       <ol className="lv-list" aria-labelledby={`${uid}-lv-h`}>
         {levels.map((l, i) => {
@@ -618,12 +615,8 @@ function Upload({
   // Once uploaded the box goes; a toast says so, and Back clears it to upload another.
   if (uploaded) return null;
   return (
-    <section className="up" aria-labelledby={`${uid}-up-h`}>
+    <div className="up" role="group" aria-label="Upload a file">
       <div className="up-head">
-        <div>
-          <h2 id={`${uid}-up-h`}>Upload document</h2>
-          <p className="up-hint">A CSV with one column per level: {levels.join(', ')}.</p>
-        </div>
         <Button variation="secondary" icon="FileDownload" label="Download template" onClick={() => downloadTemplate(country, levels)} />
       </div>
       <input
@@ -667,7 +660,7 @@ function Upload({
           {error}
         </p>
       )}
-    </section>
+    </div>
   );
 }
 

@@ -104,7 +104,7 @@ export function GeoTree({
                 onChange &&
                 (() => {
                   const n = descendants(rows, r.key).length;
-                  if (window.confirm(`Remove ${r.name}${n ? ` and the ${n} ${n === 1 ? 'place' : 'places'} inside it` : ''}?`))
+                  if (window.confirm(`Remove ${r.name}${n ? ` and the ${n} ${n === 1 ? 'geography' : 'geographies'} inside it` : ''}?`))
                     onChange(removePlace(rows, r.key));
                 })
               }
@@ -259,7 +259,7 @@ function PlacesTable({ levels, rows, onChange }: { levels: string[]; rows: GeoRo
                     aria-label={`Remove ${r.name}`}
                     onClick={() => {
                       const n = descendants(rows, r.key).length;
-                      if (window.confirm(`Remove ${r.name}${n ? ` and the ${n} ${n === 1 ? 'place' : 'places'} inside it` : ''}?`))
+                      if (window.confirm(`Remove ${r.name}${n ? ` and the ${n} ${n === 1 ? 'geography' : 'geographies'} inside it` : ''}?`))
                         onChange(removePlace(rows, r.key));
                     }}
                   >

@@ -1183,6 +1183,32 @@ p { margin: 0; line-height: 1.5; }
 /* Channel tiles: same size and look as the geography method tiles; a tick shows each chosen one */
 .ch-tiles .qz-tile .qz-tile-tick { top: 10px; right: 10px; }
 .ch-sec-head { align-items: center; }
+
+.up-head { justify-content: flex-end; }
+/* Table / Tree tabs: bigger */
+.pt-tabs button { height: 52px; padding: 0 28px; gap: 8px; font-size: 1rem; }
+.pt-tabs button .ux-icon svg { width: 20px; height: 20px; }
+
+/* Channels not added yet: disabled look (text stays readable) */
+.geo-card.is-off { background: #F3F3F3; border-style: dashed; box-shadow: none; }
+.geo-card.is-off:hover { border-color: var(--c-divider); box-shadow: none; }
+.geo-card.is-off .geo-icon { background: #E6E6E6; color: #6F777B; }
+.geo-card.is-off .geo-card-h { color: #505A5F; }
+
+/* Footer right side: a second action next to the primary one */
+.cg-bar-end { display: flex; flex-wrap: wrap; gap: var(--s3); }
+.cg-bar-end > button { height: 44px; min-width: 120px; padding: 0 22px; }
+.cg-bar-end > button .digit-button-label { font-size: 1rem; font-weight: 500; }
+
+/* Team */
+.tm-email { word-break: break-all; }
+.tm-rows { display: flex; flex-direction: column; }
+.tm-row { display: grid; grid-template-columns: 96px 1fr 1fr 36px; align-items: end; gap: var(--s3); padding: 14px 12px 14px 16px; border: 1px solid #E3E3E3; border-radius: 12px; background: #FAFAFA; }
+.tm-row .lv-n { height: 48px; }
+.tm-row .fld input { width: 100%; height: 48px; padding: 0 14px; border: 1px solid var(--digitv2-lightTheme-text-secondary); border-radius: 10px; background: #fff; font: inherit; font-size: 1rem; }
+.tm-row .fld input:focus { outline: none; border-color: var(--digitv2-lightTheme-primary-2); box-shadow: var(--focus); }
+@media (max-width: 720px) { .tm-row { grid-template-columns: 1fr 36px; } .tm-row .lv-n { height: auto; grid-column: 1 / -1; } .tm-row .fld { grid-column: 1; } }
+.geo-card-top:has(> .geo-status:only-child) { justify-content: flex-end; }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */

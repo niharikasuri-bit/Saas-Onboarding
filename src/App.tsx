@@ -11,7 +11,7 @@ import { ProductPage } from './ui/ProductPage';
 import { GoLive } from './ui/GoLive';
 import { Geographies } from './ui/Geographies';
 import { Channels } from './ui/Channels';
-import { UsersBody } from './ui/Users';
+import { Team } from './ui/Team';
 import { Page } from './ui/StepFrame';
 
 /**
@@ -48,13 +48,7 @@ function Pages() {
     case 'sender':
       return <Channels />;
     case 'team':
-      return (
-        <Page title="Team" lead="Everyone in your account. Assign them inside each product.">
-          <div className="sm-body is-page">
-            <UsersBody />
-          </div>
-        </Page>
-      );
+      return <Team />;
     case 'health':
       return <Health />;
     case 'languages':

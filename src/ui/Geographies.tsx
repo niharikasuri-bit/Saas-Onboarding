@@ -217,7 +217,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
             Add your geographies
           </h1>
           <p className="geo-lead">
-            Add the places you’ll serve, wherever your team sits. Every product uses your geographies to know where
+            Add the geographies you’ll serve, wherever your team sits. Every product uses your geographies to know where
             things happen, so work reaches the right place.
           </p>
         </header>
@@ -228,7 +228,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
               Geographies
             </h1>
             <p className="geo-lead">
-              Geographies are the places your organisation serves, from the largest area down to the smallest. Every
+              Geographies are the areas your organisation serves, from the largest area down to the smallest. Every
               product uses them to know where things happen, so work reaches the right place. A geography becomes
               active once a product starts using it.
             </p>

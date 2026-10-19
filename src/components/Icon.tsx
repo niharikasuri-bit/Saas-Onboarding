@@ -18,6 +18,16 @@ export function Icon({ name, size = 20 }: { name: string; size?: number }) {
       </span>
     );
   }
+  // A filled WhatsApp mark, to match the solid Email and SMS glyphs.
+  if (name === 'WhatsAppFilled') {
+    return (
+      <span className="ux-icon" aria-hidden="true">
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12.04 2a9.9 9.9 0 0 0-8.5 15L2 22l5.2-1.4A9.9 9.9 0 1 0 12.04 2Zm5.8 14.1c-.25.7-1.45 1.35-2 1.4-.5.05-1 .25-3.4-.7-2.9-1.15-4.7-4.1-4.85-4.3-.15-.2-1.15-1.55-1.15-2.95s.75-2.1 1-2.4c.25-.3.55-.35.75-.35h.55c.15 0 .4-.05.6.45l.85 2.05c.05.15.1.35 0 .55-.1.2-.15.35-.3.5l-.45.55c-.15.15-.3.3-.15.6.2.3.8 1.3 1.7 2.1 1.15 1 2.15 1.35 2.45 1.5.3.15.5.1.65-.05l.95-1.15c.2-.3.4-.25.65-.15l2 .95c.3.15.5.2.55.35.1.1.1.65-.15 1.35Z" />
+        </svg>
+      </span>
+    );
+  }
   // Nor a plus in a circle.
   if (name === 'AddCircle') {
     return (
