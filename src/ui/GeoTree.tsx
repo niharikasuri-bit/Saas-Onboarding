@@ -8,7 +8,7 @@ import { newId, type GeoRow } from '../lib/model';
  * A geography's places as a tree or a table, read-only or editable.
  * Tree: the country at the top, each place a small card with its level, a
  * caret to open and close it, and (when editable) rename and remove. Under
- * each open place, "+ Add <next level>". Table: one row per place.
+ * each open place, "+ Add <next level>". Table: one column per level, one row per path.
  */
 
 const childrenOf = (rows: GeoRow[], parent: string) => rows.filter((r) => r.parent === parent);
@@ -211,18 +211,40 @@ function PlaceCard({
   );
 }
 
-/** One row per place. Editable: rename in place, remove, and add a place with its level and parent. */
+/** Every full path from the top level down, as the place keys at each level (one per row). */
+function pathsOf(rows: GeoRow[], depth: number) {
+  const out: (GeoRow | undefined)[][] = [];
+  const walk = (parent: string, level: number, trail: GeoRow[]) => {
+    const kids = childrenOf(rows, parent).filter((r) => r.level === level);
+    if (!kids.length) {
+      if (trail.length) out.push(Array.from({ length: depth }, (_, i) => trail[i]));
+      return;
+    }
+    kids.forEach((k) => walk(k.key, level + 1, [...trail, k]));
+  };
+  walk('', 0, []);
+  return out;
+}
+
+/**
+ * One column per geography level and one row per path, like the upload sheet.
+ * A name repeated from the row above is shown lighter, so each group reads at a
+ * glance. Editable: rename any cell (the place changes everywhere), remove the
+ * row's last place, and add a geography.
+ */
 function PlacesTable({ levels, rows, onChange }: { levels: string[]; rows: GeoRow[]; onChange?: (rows: GeoRow[]) => void }) {
-  const nameOf = new Map(rows.map((r) => [r.key, r.name]));
+  const paths = pathsOf(rows, levels.length);
   const [adding, setAdding] = useState(false);
   return (
     <div className="cg-grid-wrap">
-      <table className={`cg-grid${onChange ? '' : ' is-read'}`}>
+      <table className={`cg-grid pt-levels${onChange ? '' : ' is-read'}`}>
         <thead>
           <tr>
-            <th scope="col">Name</th>
-            <th scope="col">Level</th>
-            <th scope="col">Sits inside</th>
+            {levels.map((l) => (
+              <th key={l} scope="col">
+                {l}
+              </th>
+            ))}
             {onChange && (
               <th scope="col" className="cg-grid-x">
                 <span className="ux-visually-hidden">Remove</span>
@@ -231,44 +253,54 @@ function PlacesTable({ levels, rows, onChange }: { levels: string[]; rows: GeoRo
           </tr>
         </thead>
         <tbody>
-          {rows.map((r) => (
-            <tr key={r.key}>
-              {onChange ? (
-                <td>
-                  <input
-                    defaultValue={r.name}
-                    aria-label={`Name of ${levels[r.level]} ${r.name}`}
-                    onBlur={(e) => {
-                      const v = e.target.value.trim();
-                      if (v && v !== r.name) onChange(rows.map((x) => (x.key === r.key ? { ...x, name: v } : x)));
-                      else e.target.value = r.name;
-                    }}
-                    onKeyDown={(e) => e.key === 'Enter' && (e.currentTarget as HTMLInputElement).blur()}
-                  />
-                </td>
-              ) : (
-                <th scope="row">{r.name}</th>
-              )}
-              <td className="pt-cell">{levels[r.level]}</td>
-              <td className="pt-cell">{nameOf.get(r.parent) ?? '—'}</td>
-              {onChange && (
-                <td className="cg-grid-x">
-                  <button
-                    type="button"
-                    className="gt-icon"
-                    aria-label={`Remove ${r.name}`}
-                    onClick={() => {
-                      const n = descendants(rows, r.key).length;
-                      if (window.confirm(`Remove ${r.name}${n ? ` and the ${n} ${n === 1 ? 'geography' : 'geographies'} inside it` : ''}?`))
-                        onChange(removePlace(rows, r.key));
-                    }}
-                  >
-                    <Icon name="Delete" size={18} />
-                  </button>
-                </td>
-              )}
-            </tr>
-          ))}
+          {paths.map((path, i) => {
+            const last = [...path].reverse().find(Boolean)!;
+            return (
+              <tr key={last.key}>
+                {path.map((r, j) => {
+                  const same = !!r && paths[i - 1]?.[j]?.key === r.key;
+                  if (!r)
+                    return (
+                      <td key={j} className="pt-cell is-empty">
+                        <span aria-hidden="true">—</span>
+                        <span className="ux-visually-hidden">None</span>
+                      </td>
+                    );
+                  return onChange ? (
+                    <td key={j} className={same ? 'is-same' : undefined}>
+                      <input
+                        key={`${r.key}:${r.name}`}
+                        defaultValue={r.name}
+                        aria-label={`${levels[j]}, row ${i + 1}`}
+                        onBlur={(e) => {
+                          const v = e.target.value.trim();
+                          if (v && v !== r.name) onChange(rows.map((x) => (x.key === r.key ? { ...x, name: v } : x)));
+                          else e.target.value = r.name;
+                        }}
+                        onKeyDown={(e) => e.key === 'Enter' && (e.currentTarget as HTMLInputElement).blur()}
+                      />
+                    </td>
+                  ) : (
+                    <td key={j} className={`pt-cell${same ? ' is-same' : ''}`}>
+                      {r.name}
+                    </td>
+                  );
+                })}
+                {onChange && (
+                  <td className="cg-grid-x">
+                    <button
+                      type="button"
+                      className="gt-icon"
+                      aria-label={`Remove ${last.name}`}
+                      onClick={() => window.confirm(`Remove ${last.name}?`) && onChange(removePlace(rows, last.key))}
+                    >
+                      <Icon name="Delete" size={18} />
+                    </button>
+                  </td>
+                )}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
       {onChange && (

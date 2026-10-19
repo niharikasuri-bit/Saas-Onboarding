@@ -1553,3 +1553,7 @@ p { margin: 0; line-height: 1.5; }
 @media (max-width: 760px) { .pk-row { grid-template-columns: auto minmax(0, 1fr); } .pk-time { grid-column: auto; } }
 /* Unlocked product cards lift off the white panel */
 .hm-v5 .hm-sec.is-mine .pt-card:not(.is-locked) { box-shadow: 0 1px 3px rgb(16 24 40 / 0.08), 0 8px 24px rgb(16 24 40 / 0.10); }
+
+/* Geography table: one column per level; a name repeated from the row above is lighter */
+.pt-levels td.is-same, .pt-levels td.is-same input { color: #6B7378; }
+.pt-levels td.is-empty { color: #6B7378; }
