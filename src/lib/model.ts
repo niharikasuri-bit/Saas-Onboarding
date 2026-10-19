@@ -9,11 +9,12 @@
 
 export type PageId =
   | 'home'
-  | 'dashboard'
+  | 'health'
   | 'geographies'
   | 'sender'
   | 'team'
   | 'integrations'
+  | 'languages'
   | 'branding'
   | 'product'
   | 'golive'
@@ -52,18 +53,18 @@ export const PRODUCTS: Record<Product, { name: string; icon: string; about: stri
   },
 };
 
-export type Section = 'overview' | 'data' | 'departments' | 'users' | 'notifications' | 'translations' | 'health';
+export type Section = 'overview' | 'data' | 'departments' | 'users' | 'notifications' | 'translations';
 
 export const NAVS: Record<Product, Section[]> = {
-  cms: ['overview', 'data', 'departments', 'users', 'notifications', 'translations', 'health'],
-  hcm: ['overview', 'data', 'users', 'notifications', 'translations', 'health'],
-  lnp: ['overview', 'data', 'users', 'notifications', 'translations', 'health'],
+  cms: ['overview', 'data', 'departments', 'users', 'notifications', 'translations'],
+  hcm: ['overview', 'data', 'users', 'notifications', 'translations'],
+  lnp: ['overview', 'data', 'users', 'notifications', 'translations'],
 };
 
 export const sectionLabel = (p: Product, s: Section) =>
   s === 'data'
     ? PRODUCTS[p].data
-    : { overview: 'Overview', departments: 'Departments', users: 'Users', notifications: 'Notifications', translations: 'Translations', health: 'Health' }[s];
+    : { overview: 'Overview', departments: 'Departments', users: 'Users', notifications: 'Notifications', translations: 'Translations' }[s];
 
 export const SECTION_ICON: Record<Section, string> = {
   overview: 'Dashboard',
@@ -72,7 +73,6 @@ export const SECTION_ICON: Record<Section, string> = {
   users: 'Group',
   notifications: 'Notifications',
   translations: 'Translate',
-  health: 'Analytics',
 };
 
 /* ---------------------------------------------------------------- */
@@ -528,8 +528,8 @@ export const geoMode = (a: Account): 'search' | 'create' => (a.products.cms.enab
 export type TodoId = 'geography' | 'users' | 'sender';
 export const TODOS: { id: TodoId; label: string; unlocks: string }[] = [
   { id: 'geography', label: 'Add geographies', unlocks: 'This unlocks opening any product.' },
+  { id: 'sender', label: 'Set up notification channels', unlocks: 'This unlocks messages.' },
   { id: 'users', label: 'Invite users', unlocks: 'This unlocks assigning people.' },
-  { id: 'sender', label: 'Add sender details', unlocks: 'This unlocks messages.' },
 ];
 
 export const todosFor = (a: Account) =>
@@ -537,6 +537,9 @@ export const todosFor = (a: Account) =>
 
 export const todoDone = (id: TodoId, a: Account) =>
   id === 'geography' ? hasGeography(a) : id === 'users' ? a.users.length > 0 : senderReady(a);
+
+/** True once every account task is done; until then only account setup is open. */
+export const setupDone = (a: Account) => todosFor(a).every((t) => todoDone(t.id, a));
 
 export function todoResult(id: TodoId, a: Account) {
   if (id === 'geography') return `${a.geography.areas.length.toLocaleString('en')} areas`;
@@ -577,7 +580,7 @@ export const ROWS: Record<Product, RowDef[]> = {
     { id: 'flow', label: 'Set how complaints move around', what: 'Check the steps a complaint goes through.', section: 'data', after: 'owners' },
     { id: 'sla', label: 'Set deadlines and alerts', what: 'How long a complaint can stay open, and who hears when it’s late.', section: 'data', after: 'flow' },
     { id: 'notify', label: 'Keep people informed', what: 'The messages citizens get at each step.', section: 'notifications', account: true },
-    { id: 'perf', label: 'Set up performance tracking', what: 'Choose what your dashboard and Health track.', section: 'health' },
+    { id: 'perf', label: 'Set up performance tracking', what: 'Choose what Product health tracks.', section: 'data' },
   ],
   hcm: [
     { id: 'basics', label: 'Set up your campaign basics', what: 'Name, dates and who you’re reaching.', section: 'data' },
@@ -586,7 +589,7 @@ export const ROWS: Record<Product, RowDef[]> = {
     { id: 'apk', label: 'Customize your field APK', what: 'The app field workers use: its name and what’s in it.', section: 'data', after: 'strategy' },
     { id: 'plan', label: 'Upload your campaign plan', what: 'Targets and resources for each campaign area.', section: 'data', after: 'areas' },
     { id: 'checklists', label: 'Set up field checklists', what: 'The checks field workers fill in at each visit.', section: 'data', after: 'apk' },
-    { id: 'monitor', label: 'Choose what to monitor', what: 'What your dashboard and Health track.', section: 'data', after: 'basics' },
+    { id: 'monitor', label: 'Choose what to monitor', what: 'What Product health tracks.', section: 'data', after: 'basics' },
   ],
   lnp: [
     { id: 'types', label: 'Choose what people can apply for', what: 'Turn on the licences and permits you issue.', section: 'data' },
@@ -601,7 +604,7 @@ export const ROWS: Record<Product, RowDef[]> = {
     },
     { id: 'flow', label: 'Set how applications move around', what: 'Check the steps an application goes through.', section: 'data', after: 'owners' },
     { id: 'notify', label: 'Keep people informed', what: 'The messages applicants get at each step.', section: 'notifications', account: true },
-    { id: 'perf', label: 'Set up performance tracking', what: 'Choose what your dashboard and Health track.', section: 'health' },
+    { id: 'perf', label: 'Set up performance tracking', what: 'Choose what Product health tracks.', section: 'data' },
   ],
 };
 
@@ -646,7 +649,6 @@ export function sectionStatus(p: Product, s: Section, a: Account): { label: stri
     const rows = ROWS[p].filter((r) => r.section === 'users');
     if (!rows.length) return { label: `${a.users.length} ${a.users.length === 1 ? 'user' : 'users'}`, tone: a.users.length ? 'is-completed' : 'is-not-started' };
   }
-  if (s === 'health' && st.live) return { label: 'Healthy', tone: 'is-completed' };
   if (s === 'notifications' && p === 'hcm') return { label: 'Optional', tone: 'is-locked' };
   const rows = ROWS[p].filter((r) => r.section === s);
   if (!rows.length) return null;

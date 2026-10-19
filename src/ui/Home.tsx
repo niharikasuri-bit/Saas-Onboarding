@@ -15,11 +15,13 @@ import {
   type TodoId,
 } from '../lib/model';
 import { firstName } from '../setup/steps';
+import { setupDone } from '../lib/model';
+import { AccountSetup } from './AccountSetup';
 
 const TODO_ACTION: Record<TodoId, [string, string]> = {
   geography: ['Add Geographies', 'View Geographies'],
   users: ['Invite Users', 'Invite More'],
-  sender: ['Add Sender Details', 'View Sender Details'],
+  sender: ['Set Up Notification Channels', 'View Notification Channels'],
 };
 
 /**
@@ -33,10 +35,15 @@ export function Home() {
   const on = PRODUCT_ORDER.filter((p) => account.products[p].enabled);
   const off = PRODUCT_ORDER.filter((p) => !account.products[p].enabled);
 
-  return (
-    <div className="hm">
-      <Hero name={firstName(answers)} admin={admin} />
+  // Until the account to-do is done it leads Home; the products sit below it.
+  const setup = !setupDone(account);
 
+  return (
+    <div className={`hm${setup ? ' is-setup' : ''}`}>
+      {setup ? <AccountSetup /> : <Hero name={firstName(answers)} admin={admin} />}
+
+      {/* products appear once the account to-do is done */}
+      {!setup && (
       <section aria-labelledby={`${uid}-p`} className="pc-wrap">
         <h2 id={`${uid}-p`} className="tg-h">
           Your products
@@ -54,6 +61,7 @@ export function Home() {
           </ul>
         )}
       </section>
+      )}
     </div>
   );
 }
@@ -138,9 +146,10 @@ function ProductCard({ p }: { p: Product }) {
           <p className="pc-about">{meta.about}</p>
           <p className="pc-note">
             <Icon name="Lock" size={16} />
-            {admin ? 'Define geography to open' : 'Waiting for an admin to define geography'}
+            {admin ? 'Opens once you add the areas you work in' : 'Waiting for an admin to add areas'}
           </p>
-          {admin && (
+          {/* while the account to-do is open, adding areas happens there, not here */}
+          {admin && setupDone(account) && (
             <div className="pc-actions">
               <Button variation="primary" label="Define Geography" onClick={() => openModal({ kind: 'gate', product: p })} />
             </div>

@@ -33,11 +33,11 @@ export function GoLive() {
           <div>
             <p className="ms-eyebrow">Live</p>
             <h1 className="ms-title">{name} is live</h1>
-            <p>Its card on Home now shows how it’s doing. Health takes over from the checklist.</p>
+            <p>Its card on Home now shows how it’s doing. Product health takes over from the checklist.</p>
           </div>
         </div>
         <div className="form-foot">
-          <Button variation="primary" label="Open Health" onClick={() => go('product', { product: p, section: 'health' })} />
+          <Button variation="primary" label="Open Product Health" onClick={() => go('health')} />
           <Button variation="link" label="Back to Home" onClick={() => go('home')} />
         </div>
       </div>

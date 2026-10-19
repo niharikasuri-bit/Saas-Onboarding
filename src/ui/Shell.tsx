@@ -6,14 +6,7 @@ import {
   NAVS,
   PRODUCTS,
   SECTION_ICON,
-  enabledProducts,
-  hasGeography,
   sectionLabel,
-  sectionStatus,
-  senderReady,
-  todoDone,
-  todosFor,
-  type Account,
   type PageId,
 } from '../lib/model';
 import { Widget } from './Widget';
@@ -21,68 +14,23 @@ import { Modals } from './Modals';
 import { HelpButton } from './HelpButton';
 import { HelpPanel } from './HelpPanel';
 
-type Badge = { label: string; tone: string } | null;
-
-/** The account's own pages, each with its status beside it. */
-const ACCOUNT_NAV: { id: PageId; label: string; icon: string; badge: (a: Account) => Badge }[] = [
-  {
-    id: 'home',
-    label: 'Home',
-    icon: 'Home',
-    badge: (a) => {
-      if (a.ui.viewAs !== 'admin') return null;
-      const left = todosFor(a).filter((t) => !todoDone(t.id, a)).length;
-      return left ? { label: `${left} to do`, tone: 'is-in-progress' } : { label: 'Done', tone: 'is-completed' };
-    },
-  },
-  {
-    id: 'dashboard',
-    label: 'Dashboard',
-    icon: 'Analytics',
-    badge: (a) => {
-      const live = enabledProducts(a).filter((p) => a.products[p].live).length;
-      return live ? { label: `${live} live`, tone: 'is-completed' } : { label: 'No data', tone: 'is-locked' };
-    },
-  },
-  {
-    id: 'geographies',
-    label: 'Geographies',
-    icon: 'Public',
-    badge: (a) =>
-      hasGeography(a)
-        ? { label: `${a.geography.areas.length} areas`, tone: 'is-completed' }
-        : { label: 'To do', tone: 'is-not-started' },
-  },
-  {
-    id: 'sender',
-    label: 'Sender details',
-    icon: 'Email',
-    badge: (a) =>
-      senderReady(a)
-        ? { label: 'Submitted', tone: 'is-waiting' }
-        : a.products.cms.enabled || a.products.lnp.enabled
-          ? { label: 'To do', tone: 'is-not-started' }
-          : { label: 'Optional', tone: 'is-locked' },
-  },
-  {
-    id: 'team',
-    label: 'Team',
-    icon: 'Group',
-    badge: (a) =>
-      a.users.length ? { label: `${a.users.length} users`, tone: 'is-completed' } : { label: 'To do', tone: 'is-not-started' },
-  },
-  { id: 'integrations', label: 'Integrations', icon: 'Extension', badge: () => ({ label: 'Optional', tone: 'is-locked' }) },
-  {
-    id: 'branding',
-    label: 'Branding',
-    icon: 'InvertColors',
-    badge: (a) => (a.branding.saved ? { label: 'Done', tone: 'is-completed' } : { label: 'Optional', tone: 'is-locked' }),
-  },
+/** The account's own pages. The side nav shows where things live, not their status. */
+const ACCOUNT_NAV: { id: PageId; label: string; icon: string }[] = [
+  { id: 'home', label: 'Home', icon: 'Home' },
+  { id: 'health', label: 'Product health', icon: 'Analytics' },
+  { id: 'geographies', label: 'Geographies', icon: 'Public' },
+  { id: 'team', label: 'Team', icon: 'Group' },
+  { id: 'sender', label: 'Notification channels', icon: 'Email' },
+  { id: 'integrations', label: 'Integrations', icon: 'Extension' },
+  { id: 'branding', label: 'Branding', icon: 'InvertColors' },
+  { id: 'languages', label: 'Language', icon: 'Translate' },
 ];
 
 /** Top bar + side nav. Inside a product, the nav is that product's. */
 export function Shell({ children }: { children: ReactNode }) {
-  const { account, page, params, go, restart, update } = useAccount();
+  const { account, page, params, go, restart } = useAccount();
+  const [query, setQuery] = useState('');
+  const match = (label: string) => label.toLowerCase().includes(query.trim().toLowerCase());
   const [helpOpen, setHelpOpen] = useState(false);
   const helpBtn = useRef<HTMLButtonElement>(null);
   const panelId = useId();
@@ -116,6 +64,19 @@ export function Shell({ children }: { children: ReactNode }) {
 
       <div className="sh-body">
         <nav className="sh-nav" aria-label={product ? PRODUCTS[product].name : 'Account'}>
+          <div className="sh-search">
+            <input
+              type="search"
+              placeholder="Search"
+              aria-label="Search the menu"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+              <circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" strokeWidth="2.2" />
+              <path d="M15 15l5 5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+            </svg>
+          </div>
           {product ? (
             <div className="sh-nav-main">
               <button type="button" className="sh-back" onClick={() => go('home')}>
@@ -127,12 +88,11 @@ export function Shell({ children }: { children: ReactNode }) {
                 {PRODUCTS[product].name}
               </p>
               <ul>
-                {NAVS[product].map((s) => (
+                {NAVS[product].filter((s) => match(sectionLabel(product, s))).map((s) => (
                   <NavItem
                     key={s}
                     label={sectionLabel(product, s)}
                     icon={SECTION_ICON[s]}
-                    badge={sectionStatus(product, s, account)}
                     current={page === 'product' && params.section === s}
                     onClick={() => go('product', { product, section: s })}
                   />
@@ -141,45 +101,26 @@ export function Shell({ children }: { children: ReactNode }) {
             </div>
           ) : (
             <ul>
-              {ACCOUNT_NAV.map((n) => (
-                <NavItem
-                  key={n.id}
-                  label={n.label}
-                  icon={n.icon}
-                  badge={n.badge(account)}
-                  current={page === n.id}
-                  onClick={() => go(n.id)}
-                />
+              {ACCOUNT_NAV.filter((n) => match(n.label)).map((n) => (
+                <NavItem key={n.id} label={n.label} icon={n.icon} current={page === n.id} onClick={() => go(n.id)} />
               ))}
             </ul>
           )}
           <div className="sh-nav-foot">
-            <fieldset className="sh-viewas">
-              <legend>Demo: view as</legend>
-              {(['admin', 'member'] as const).map((v) => (
-                <label key={v}>
-                  <input
-                    type="radio"
-                    name="viewas"
-                    checked={account.ui.viewAs === v}
-                    onChange={() => update((a) => ({ ...a, ui: { ...a.ui, viewAs: v } }))}
-                  />
-                  {v === 'admin' ? 'Admin' : 'Member'}
-                </label>
-              ))}
-            </fieldset>
             <button
               type="button"
               className="sh-restart"
               onClick={() => {
-                if (window.confirm('Restart the demo? Everything you’ve entered will be cleared.'))
-                  restart();
+                if (window.confirm('Restart from the beginning? Everything you’ve entered will be cleared.')) restart();
               }}
             >
-              Restart demo
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+                <path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Restart
             </button>
-            <p>
-              Powered by <strong>DIGIT</strong>
+            <p className="sh-powered">
+              Powered by <img src="/digit-logo.png" alt="DIGIT" width={528} height={124} />
             </p>
           </div>
         </nav>
@@ -216,13 +157,11 @@ export function Shell({ children }: { children: ReactNode }) {
 function NavItem({
   label,
   icon,
-  badge,
   current,
   onClick,
 }: {
   label: string;
   icon: string;
-  badge: Badge;
   current: boolean;
   onClick: () => void;
 }) {
@@ -231,12 +170,6 @@ function NavItem({
       <button type="button" className="sh-nav-item" aria-current={current ? 'page' : undefined} onClick={onClick}>
         <Icon name={icon} size={20} />
         <span className="sh-nav-label">{label}</span>
-        {badge && (
-          <span className={`tag nb ${badge.tone}`}>
-            <span className="ux-visually-hidden">, </span>
-            {badge.label}
-          </span>
-        )}
       </button>
     </li>
   );

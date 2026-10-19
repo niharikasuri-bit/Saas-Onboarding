@@ -3,7 +3,7 @@ import { Button } from '@egovernments/digit-ui-components';
 import { SetupFlow } from './setup/SetupFlow';
 import type { Answers } from './setup/steps';
 import { AccountProvider, loadSaved, useAccount } from './lib/store';
-import { PRODUCTS, enabledProducts, geoMode, type Account } from './lib/model';
+import { METRICS, PRODUCTS, enabledProducts, geoMode, type Account } from './lib/model';
 import { Shell } from './ui/Shell';
 import { Home } from './ui/Home';
 import { Branding } from './ui/Branding';
@@ -54,7 +54,7 @@ function Pages() {
     case 'sender':
       return (
         <Page
-          title="Sender details"
+          title="Notification channels"
           lead="Who your messages come from. Submit early: approvals take days, and messages can be turned on once one is submitted."
         >
           <div className="sm-body is-page">
@@ -70,8 +70,10 @@ function Pages() {
           </div>
         </Page>
       );
-    case 'dashboard':
-      return <Dashboard />;
+    case 'health':
+      return <Health />;
+    case 'languages':
+      return <Page title="Language" lead="Choose the languages your team and citizens can use DIGIT in. Coming soon." />;
     case 'integrations':
       return <Page title="Integrations" lead="Connect DIGIT to the systems you already use. Coming soon." />;
     case 'tutorials':
@@ -83,23 +85,35 @@ function Pages() {
   }
 }
 
-function Dashboard() {
+/** Health for the whole account: how each live product is doing. */
+function Health() {
   const { account, go } = useAccount();
   const live = enabledProducts(account).filter((p) => account.products[p].live);
   return (
-    <Page title="Dashboard" lead="How your live products are doing.">
+    <Page title="Product health" lead="How your live products are doing.">
       {live.length ? (
-        <ul className="ov-list">
-          {live.map((p) => (
-            <li key={p}>
-              <button type="button" className="ov-item" onClick={() => go('product', { product: p, section: 'health' })}>
+        live.map((p) => {
+          const st = account.products[p];
+          const tracked = st.data.metrics.length ? st.data.metrics : METRICS[p].slice(0, 3);
+          return (
+            <section key={p} className="card" aria-labelledby={`hl-${p}`}>
+              <h2 id={`hl-${p}`}>{PRODUCTS[p].name}</h2>
+              <p className="pc-health">
                 <span className="dot is-ok" aria-hidden="true" />
-                <span className="ov-name">{PRODUCTS[p].name}</span>
-                <span className="tag is-completed">Healthy</span>
-              </button>
-            </li>
-          ))}
-        </ul>
+                <strong>Healthy</strong>. Everything is working.
+              </p>
+              <ul className="stats">
+                {tracked.map((m) => (
+                  <li key={m}>
+                    <span>{m}</span>
+                    <strong>0</strong>
+                  </li>
+                ))}
+              </ul>
+              <p className="card-lead">Just live, so the numbers start at zero.</p>
+            </section>
+          );
+        })
       ) : (
         <section className="card empty">
           <h2>No data yet</h2>

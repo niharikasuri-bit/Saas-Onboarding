@@ -180,7 +180,7 @@ function Content({
       <>
         <Top
           eyebrow="Account"
-          title="Sender details"
+          title="Notification channels"
           lead="Who your messages come from. Submit early: approvals take days, and messages can be turned on once one is submitted."
           head={head}
           close={close}

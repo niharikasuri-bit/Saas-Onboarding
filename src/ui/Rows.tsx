@@ -362,7 +362,7 @@ function Notify({ p }: { p: 'cms' | 'lnp' }) {
         <div className="acct-note">
           <span className="tag acct">Account</span>
           <p>
-            Turning messages on needs sender details. You can edit the messages now.
+            Turning messages on needs your notification channels set up. You can edit the messages now.
           </p>
           <button
             type="button"
@@ -373,7 +373,7 @@ function Notify({ p }: { p: 'cms' | 'lnp' }) {
               go('home', { highlight: 'sender' });
             }}
           >
-            Add Sender Details on Home
+            Set Up Notification Channels on Home
           </button>
         </div>
       )}
@@ -397,7 +397,7 @@ function Notify({ p }: { p: 'cms' | 'lnp' }) {
         </ul>
         {!ready && (
           <p className="fld-hint">
-            <Icon name="Lock" size={14} /> Locked until sender details are submitted on Home.
+            <Icon name="Lock" size={14} /> Locked until your notification channels are set up on Home.
           </p>
         )}
       </section>

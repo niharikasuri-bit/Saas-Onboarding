@@ -1,7 +1,7 @@
 /**
- * Sign-up and login, then a few questions to set up the account:
- * your name → name your account → what you'll use DIGIT for →
- * branding (skippable) → invite your team (skippable) → Home.
+ * Sign-up and log-in, then four grouped steps (see Questions.tsx):
+ * about you (name, account name) → what you'll use DIGIT for →
+ * logo and colour (optional) → invite your team (optional) → Home.
  * Geography is not asked here.
  */
 import type { Product } from '../lib/model';
@@ -18,6 +18,8 @@ export type Answers = {
   logo: string;
   colour: string;
   invites: string;
+  /** The chosen first part of the account link; empty means made from the account name. */
+  link: string;
 };
 
 export const EMPTY_ANSWERS: Answers = {
@@ -30,6 +32,7 @@ export const EMPTY_ANSWERS: Answers = {
   logo: '',
   colour: '',
   invites: '',
+  link: '',
 };
 
 /**
@@ -45,105 +48,30 @@ export const LANGUAGES = [
   { value: 'sw', label: 'Kiswahili' },
 ];
 
-/** A temporary password shown once on the credentials screen. */
-export const TEMP_PASSWORD = 'Digit-4821';
+/** The demo account: the log-in screen starts filled in with it. */
+export const DEFAULT_LOGIN = { email: 'saas@gmail.com', password: '12345' };
 
 type Option = { value: string; label: string; hint: string; icon: string };
-
-export type Step =
-  | {
-      key: 'name' | 'org' | 'invites';
-      kind: 'text' | 'textarea';
-      heading: (a: Answers) => string;
-      body: string;
-      label: string;
-      placeholder: string;
-      hint?: string;
-      error?: string;
-      optional?: boolean;
-    }
-  | {
-      key: 'look';
-      kind: 'look';
-      heading: (a: Answers) => string;
-      body: string;
-    }
-  | {
-      key: 'products';
-      kind: 'multi';
-      heading: (a: Answers) => string;
-      body: string;
-      label: string;
-      options: Option[];
-      error: string;
-    };
 
 export const PRODUCT_OPTIONS: Option[] = [
   {
     value: 'hcm',
-    label: 'Health Campaigns',
-    hint: 'Plan, deliver and track campaigns like bed net drives and vaccinations.',
-    icon: 'Public',
+    label: 'Run health campaigns',
+    hint: 'Plan campaigns, run them in the field and track coverage.',
+    icon: 'MedicalServices',
   },
   {
     value: 'cms',
-    label: 'Complaints',
-    hint: 'Take complaints from citizens and send each one to the right team.',
+    label: 'Resolve complaints',
+    hint: 'Capture complaints, assign owners and track each one until it’s closed.',
     icon: 'Feedback',
   },
   {
     value: 'lnp',
-    label: 'Licences and Permits',
+    label: 'Manage licences and permits',
     hint: 'Take applications, collect fees and issue licences.',
-    icon: 'Assignment',
+    icon: 'CardMembership',
   },
 ];
 
 export const firstName = (a: { name: string }) => a.name.trim().split(/\s+/)[0] ?? '';
-
-export const STEPS: Step[] = [
-  {
-    key: 'name',
-    kind: 'text',
-    heading: () => 'First, what’s your name?',
-    body: 'We’ll use this to personalise your workspace and show your teammates who set things up.',
-    label: 'Your name',
-    placeholder: 'e.g. Amina Bello',
-    hint: 'Just your name, no titles needed.',
-    error: 'Enter your name',
-  },
-  {
-    key: 'org',
-    kind: 'text',
-    heading: () => 'Name your account',
-    body: 'This is the name your team sees when they log in, and the name on messages going out to citizens.',
-    label: 'Account name',
-    placeholder: 'e.g. Nairobi City County',
-    error: 'Enter a name for your account',
-  },
-  {
-    key: 'products',
-    kind: 'multi',
-    heading: () => 'What will you use DIGIT for?',
-    body: 'Choose everything you need. You can add more later from Home.',
-    label: 'I want to use DIGIT for',
-    options: PRODUCT_OPTIONS,
-    error: 'Choose at least one',
-  },
-  {
-    key: 'look',
-    kind: 'look',
-    heading: (a) => `Make it look like ${a.org.trim() || 'you'}`,
-    body: 'Add your logo and pick a colour, so your team and citizens know it’s you. You can change these later in Branding.',
-  },
-  {
-    key: 'invites',
-    kind: 'textarea',
-    heading: () => 'Invite your team',
-    body: 'Add the people who’ll work with you. You can invite more later from Home.',
-    label: 'Their work email addresses',
-    placeholder: 'john.otieno@nairobi.go.ke, mary.chebet@nairobi.go.ke',
-    hint: 'Separate addresses with commas.',
-    optional: true,
-  },
-];

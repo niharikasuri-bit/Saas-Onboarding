@@ -28,7 +28,7 @@ export function Branding() {
   };
 
   const save = () => {
-    if (!draft.name.trim()) return setError('Enter your organisation’s name');
+    if (!draft.name.trim()) return setError('Enter your account name');
     update((a) => ({ ...a, branding: { ...draft, name: draft.name.trim(), saved: true } }));
   };
 
@@ -48,7 +48,7 @@ export function Branding() {
         >
           <Field
             id={`${uid}-name`}
-            label="Organisation name"
+            label="Account name"
             hint="What citizens see. It can be different from your legal name."
             error={error && !draft.name.trim() ? error : undefined}
           >
@@ -161,7 +161,7 @@ function Preview({ name, logo, colour }: { name: string; logo: string; colour: s
           ) : (
             <span className="pv-mark">{(name[0] ?? '?').toUpperCase()}</span>
           )}
-          <span>{name || 'Your organisation'}</span>
+          <span>{name || 'Your account'}</span>
         </div>
         <div className="pv-body">
           <p className="pv-title">Report a problem</p>

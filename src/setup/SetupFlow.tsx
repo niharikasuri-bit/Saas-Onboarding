@@ -1,29 +1,30 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import type { FormEvent, ReactNode, RefObject } from 'react';
-import { Button } from '@egovernments/digit-ui-components';
+import { Button, TextInput } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
-import { BRAND_COLOURS, type Product } from '../lib/model';
 import {
+  DEFAULT_LOGIN,
   DEMO_ACCOUNT,
   EMPTY_ANSWERS,
-  LANGUAGES,
-  STEPS,
-  TEMP_PASSWORD,
-  firstName,
   type Answers,
   type Provider,
 } from './steps';
+import { WelcomeArt } from './WelcomeArt';
+import { Backdrop } from './Backdrop';
+import { GROUPS, Questions } from './Questions';
+import { Building } from './Building';
+import { Language } from './Language';
 import '../styles/setup.css';
 
 type Props = { onDone: (a: Answers) => void };
-type Stage = 'blank' | 'welcome' | 'signup' | 'inbox' | 'credentials' | 'login' | 'questions';
+type Stage = 'blank' | 'welcome' | 'signup' | 'login' | 'language' | 'questions' | 'building';
 
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
- * Sign up → verify email → receive credentials → log in (with a language
- * selector) → a few questions → Home. One calm column throughout.
+ * Welcome → sign up (email, then a password; or a work account) → choose a
+ * language → a few questions → "Setting up your account" → Home. Log in is one click away from sign-up.
  */
 export function SetupFlow({ onDone }: Props) {
   const [stage, setStage] = useState<Stage>('blank');
@@ -46,21 +47,43 @@ export function SetupFlow({ onDone }: Props) {
 
   if (stage === 'blank') return <div className="sf" aria-busy="true" />;
 
+  if (stage === 'language')
+    return (
+      <Language
+        a={a}
+        headingRef={headingRef}
+        update={update}
+        onBack={() => setStage('signup')}
+        onNext={() => {
+          setQ(0);
+          setStage('questions');
+        }}
+      />
+    );
+
+  if (stage === 'building') return <Building a={a} headingRef={headingRef} onDone={() => onDone(a)} />;
+
   if (stage === 'welcome') {
     return (
-      <Shell wide>
-        <p className="sf-kicker sf-rise">Welcome to</p>
-        <h1 className="sf-hero-logo sf-rise sf-d1">
-          <img src="/digit-logo.png" alt="DIGIT" width={528} height={124} />
-        </h1>
-        <p className="sf-lead sf-rise sf-d2">
-          Your home for running public services that reach every community, built for the people
-          doing the work, on the ground.
-        </p>
-        <div className="sf-rise sf-d3 sf-full">
-          <Button variation="primary" label="Get Started" onClick={() => setStage('signup')} />
-        </div>
-      </Shell>
+      <div className="sf wl">
+        <main className="wl-grid">
+          <div className="wl-copy">
+            <h1 className="wl-title sf-rise">
+              Welcome to <img src="/digit-logo.png" alt="DIGIT" width={528} height={124} />
+            </h1>
+            <p className="sf-lead wl-lead sf-rise sf-d2">
+              Public services work better when the people who run them have the right tools.
+            </p>
+            <p className="wl-start sf-rise sf-d2">Let’s get you started.</p>
+            <div className="sf-rise sf-d3 sf-full wl-cta">
+              <Button variation="primary" label="Get Started" onClick={() => setStage('signup')} />
+            </div>
+          </div>
+          <div className="wl-art sf-rise sf-d2">
+            <WelcomeArt />
+          </div>
+        </main>
+      </div>
     );
   }
 
@@ -68,80 +91,18 @@ export function SetupFlow({ onDone }: Props) {
     return (
       <SignUp
         headingRef={headingRef}
+        onLogin={() => setStage('login')}
         onDone={(via, email) => {
           update(
             via === 'email'
               ? { via, email }
               : { via, email: DEMO_ACCOUNT.email, name: DEMO_ACCOUNT.name },
           );
-          setStage('inbox');
+          // Signed up: straight into the first question, no email check.
+          setQ(0);
+          setStage('language');
         }}
       />
-    );
-  }
-
-  if (stage === 'inbox') {
-    return (
-      <Shell>
-        <span className="sf-badge" aria-hidden="true">
-          <Icon name="Email" size={28} />
-        </span>
-        <h1 ref={headingRef} tabIndex={-1}>
-          Check your inbox
-        </h1>
-        <p className="sf-lead">
-          We’ve sent a link to <strong>{a.email}</strong>. Open it to verify your email, and we’ll
-          send your login details.
-        </p>
-
-        <figure className="sf-mail" aria-label="Preview of the verification email">
-          <div className="sf-mail-head">
-            <img src="/digit-logo.png" alt="" width={528} height={124} />
-            <span>Welcome to DIGIT</span>
-          </div>
-          <div className="sf-mail-body">
-            <p className="sf-mail-hi">Hi {firstName(a) || 'there'},</p>
-            <p>Verify your email to finish creating your account.</p>
-            <span className="sf-mail-cta" aria-hidden="true">
-              Verify My Email
-            </span>
-          </div>
-        </figure>
-
-        <div className="sf-full">
-          <Button variation="primary" label="Verify My Email" onClick={() => setStage('credentials')} />
-        </div>
-      </Shell>
-    );
-  }
-
-  if (stage === 'credentials') {
-    return (
-      <Shell>
-        <span className="sf-badge" aria-hidden="true">
-          <Icon name="CheckCircle" size={28} />
-        </span>
-        <h1 ref={headingRef} tabIndex={-1}>
-          Your email is verified
-        </h1>
-        <p className="sf-lead">Here are your login details. We’ve emailed them to you too.</p>
-        <dl className="sf-cred">
-          <div>
-            <dt>Username</dt>
-            <dd>{a.email}</dd>
-          </div>
-          <div>
-            <dt>Temporary password</dt>
-            <dd>
-              <code>{TEMP_PASSWORD}</code>
-            </dd>
-          </div>
-        </dl>
-        <p className="sf-fine">You’ll be asked to change the password after your first login.</p>
-        <div className="sf-full">
-          <Button variation="primary" label="Go to Login" onClick={() => setStage('login')} />
-        </div>
-      </Shell>
     );
   }
 
@@ -150,10 +111,11 @@ export function SetupFlow({ onDone }: Props) {
       <Login
         a={a}
         headingRef={headingRef}
-        onLanguage={(language) => update({ language })}
-        onDone={() => {
+        onSignUp={() => setStage('signup')}
+        onDone={(patch) => {
+          update(patch);
           setQ(0);
-          setStage('questions');
+          setStage('language');
         }}
       />
     );
@@ -165,10 +127,13 @@ export function SetupFlow({ onDone }: Props) {
       q={q}
       headingRef={headingRef}
       update={update}
-      onBack={() => (q === 0 ? setStage('login') : setQ(q - 1))}
+      onBack={() => (q === 0 ? setStage('language') : setQ(q - 1))}
       onNext={(patch) => {
-        if (q < STEPS.length - 1) setQ(q + 1);
-        else onDone({ ...a, ...patch });
+        if (q < GROUPS.length - 1) setQ(q + 1);
+        else {
+          if (patch) update(patch);
+          setStage('building');
+        }
       }}
     />
   );
@@ -176,495 +141,323 @@ export function SetupFlow({ onDone }: Props) {
 
 /* ---------------------------------------------------------------- */
 
-function Shell({ children, wide, top }: { children: ReactNode; wide?: boolean; top?: ReactNode }) {
+/** The frame shared by sign-up and log-in: brand light behind one card, with an optional Back above it. */
+function AuthFrame({
+  back,
+  children,
+  foot,
+}: {
+  back?: () => void;
+  children: ReactNode;
+  foot: ReactNode;
+}) {
   return (
-    <div className="sf">
-      <header className="sf-top">
-        {top ?? (
-          <img className="sf-logo" src="/digit-logo.png" alt="DIGIT" width={528} height={124} />
-        )}
+    <div className="sf su">
+      <Backdrop />
+      <header className="su-top">
+        <img className="sf-logo" src="/digit-logo.png" alt="DIGIT" width={528} height={124} />
       </header>
-      <main className={`sf-col${wide ? ' is-wide' : ''}`}>{children}</main>
+      <main className="su-main">
+        <div className="su-stack">
+          {/* The Back row keeps its space on every screen, so the card never jumps. */}
+          {back ? (
+            <button type="button" className="su-back" onClick={back}>
+              <Icon name="ArrowBack" size={20} />
+              Back
+            </button>
+          ) : (
+            <span className="su-back is-empty" aria-hidden="true" />
+          )}
+          <div className="su-card">
+            <div className="su-inner">{children}</div>
+            <p className="su-foot">{foot}</p>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
 
-function SignUp({
-  headingRef,
-  onDone,
+/** A labelled DIGIT TextInput with its error above it. */
+function DigitField({
+  id,
+  label,
+  type,
+  value,
+  error,
+  inputRef,
+  onChange,
 }: {
-  headingRef: RefObject<HTMLHeadingElement | null>;
-  onDone: (via: Provider, email: string) => void;
+  id: string;
+  label: string;
+  type: 'email' | 'password';
+  value: string;
+  error: string;
+  inputRef: RefObject<HTMLInputElement | null>;
+  onChange: (v: string) => void;
 }) {
-  const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
-  const uid = useId();
-
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!email.trim()) setError('Enter your email address');
-    else if (!EMAIL_RE.test(email.trim()))
-      setError('Enter an email address in the correct format, like name@example.com');
-    else return onDone('email', email.trim());
-    inputRef.current?.focus();
-  };
-
   return (
-    <Shell>
-      <h1 ref={headingRef} tabIndex={-1}>
-        Create your account
-      </h1>
-      <p className="sf-lead">Use your work account, or sign up with your email.</p>
+    <div className={`su-field${error ? ' has-error' : ''}`}>
+      <label htmlFor={id}>{label}</label>
+      {error && <ErrorText id={`${id}-error`}>{error}</ErrorText>}
+      <div className="text-input digit-text-input-field">
+        <TextInput
+          id={id}
+          name={type}
+          type={type}
+          label={label}
+          inputRef={inputRef}
+          value={value}
+          error={error || undefined}
+          errorStyle={!!error}
+          // The library passes the bare value back when the password eye is toggled.
+          onChange={(e: string | { target: { value: string } }) => onChange(typeof e === 'string' ? e : e.target.value)}
+        />
+      </div>
+    </div>
+  );
+}
 
+/** Full-width work-account buttons, under an "or" divider. */
+function SocialButtons({ onPick }: { onPick: (via: Provider) => void }) {
+  return (
+    <>
+      <p className="sf-or">
+        <span>or</span>
+      </p>
       <div className="sf-sso">
-        <button type="button" className="sf-sso-btn" onClick={() => onDone('google', '')}>
+        <button type="button" className="sf-sso-btn" onClick={() => onPick('google')}>
           <GoogleMark />
           Continue with Google
         </button>
-        <button type="button" className="sf-sso-btn" onClick={() => onDone('microsoft', '')}>
+        <button type="button" className="sf-sso-btn" onClick={() => onPick('microsoft')}>
           <MicrosoftMark />
           Continue with Microsoft
         </button>
       </div>
-
-      <p className="sf-or">
-        <span>or</span>
-      </p>
-
-      <form onSubmit={submit} noValidate className="sf-form">
-        <Field id={`${uid}-email`} label="Work email" error={error}>
-          <input
-            ref={inputRef}
-            id={`${uid}-email`}
-            type="email"
-            autoComplete="email"
-            spellCheck={false}
-            placeholder="name@organization.gov"
-            value={email}
-            aria-invalid={!!error}
-            aria-describedby={error ? `${uid}-email-err` : undefined}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              setError('');
-            }}
-          />
-        </Field>
-        <div className="sf-full">
-          <Button variation="primary" label="Continue with Email" onClick={submit} />
-        </div>
-      </form>
-
-      <p className="sf-fine">
-        By continuing, you agree to the DIGIT terms of use and privacy policy.
-      </p>
-    </Shell>
-  );
-}
-
-/** Log in with the emailed details. The language chosen here sticks. */
-function Login({
-  a,
-  headingRef,
-  onLanguage,
-  onDone,
-}: {
-  a: Answers;
-  headingRef: RefObject<HTMLHeadingElement | null>;
-  onLanguage: (l: string) => void;
-  onDone: () => void;
-}) {
-  const uid = useId();
-  const [user, setUser] = useState(a.email);
-  const [pass, setPass] = useState(TEMP_PASSWORD);
-  const [errors, setErrors] = useState<{ user?: string; pass?: string }>({});
-
-  const submit = (e?: FormEvent) => {
-    e?.preventDefault();
-    const err = {
-      user: user.trim() ? '' : 'Enter your username',
-      pass: pass ? '' : 'Enter your password',
-    };
-    setErrors(err);
-    if (err.user || err.pass) return;
-    onDone();
-  };
-
-  const top = (
-    <div className="sf-login-top">
-      <img className="sf-logo" src="/digit-logo.png" alt="DIGIT" width={528} height={124} />
-      <label className="sf-lang">
-        <Icon name="Translate" size={18} />
-        <span className="ux-visually-hidden">Language</span>
-        <select value={a.language} onChange={(e) => onLanguage(e.target.value)}>
-          {LANGUAGES.map((l) => (
-            <option key={l.value} value={l.value}>
-              {l.label}
-            </option>
-          ))}
-        </select>
-      </label>
-    </div>
-  );
-
-  return (
-    <Shell top={top}>
-      <h1 ref={headingRef} tabIndex={-1}>
-        Log in
-      </h1>
-      <p className="sf-lead">Use the details we emailed you.</p>
-      <form onSubmit={submit} noValidate className="sf-form">
-        <Field id={`${uid}-u`} label="Username" error={errors.user}>
-          <input
-            id={`${uid}-u`}
-            type="text"
-            autoComplete="username"
-            value={user}
-            aria-invalid={!!errors.user}
-            aria-describedby={errors.user ? `${uid}-u-err` : undefined}
-            onChange={(e) => setUser(e.target.value)}
-          />
-        </Field>
-        <Field id={`${uid}-p`} label="Password" error={errors.pass}>
-          <input
-            id={`${uid}-p`}
-            type="password"
-            autoComplete="current-password"
-            value={pass}
-            aria-invalid={!!errors.pass}
-            aria-describedby={errors.pass ? `${uid}-p-err` : undefined}
-            onChange={(e) => setPass(e.target.value)}
-          />
-        </Field>
-        <div className="sf-full">
-          <Button variation="primary" label="Log In" onClick={() => submit()} />
-        </div>
-      </form>
-    </Shell>
-  );
-}
-
-function Questions({
-  a,
-  q,
-  headingRef,
-  update,
-  onBack,
-  onNext,
-}: {
-  a: Answers;
-  q: number;
-  headingRef: RefObject<HTMLHeadingElement | null>;
-  update: (p: Partial<Answers>) => void;
-  onBack: () => void;
-  onNext: (patch?: Partial<Answers>) => void;
-}) {
-  const step = STEPS[q];
-  const last = q === STEPS.length - 1;
-  const [error, setError] = useState('');
-  const fieldRef = useRef<HTMLInputElement & HTMLTextAreaElement>(null);
-  const uid = useId();
-
-  useEffect(() => setError(''), [q]);
-
-  const value = step.kind === 'text' || step.kind === 'textarea' ? a[step.key] : '';
-  const submit = (e?: FormEvent) => {
-    e?.preventDefault();
-    if (step.kind === 'look') return onNext();
-    if (step.kind === 'multi') {
-      if (!a.products.length) {
-        setError(step.error);
-        requestAnimationFrame(() => document.getElementById(`${uid}-0`)?.focus());
-        return;
-      }
-      return onNext();
-    }
-    if (!step.optional && !value.trim()) {
-      setError(step.error ?? '');
-      requestAnimationFrame(() => fieldRef.current?.focus());
-      return;
-    }
-    onNext();
-  };
-
-  const top = (
-    <div className="sf-progress-top">
-      <button type="button" className="sf-back" onClick={onBack}>
-        <Icon name="ArrowBack" size={18} />
-        Back
-      </button>
-      <span className="sf-progress" aria-hidden="true">
-        <span style={{ width: `${((q + 1) / STEPS.length) * 100}%` }} />
-      </span>
-      <span className="sf-count">{last ? 'Last one' : `${q + 1} of ${STEPS.length}`}</span>
-    </div>
-  );
-
-  return (
-    <Shell top={top}>
-      <p className="ux-visually-hidden">
-        Question {q + 1} of {STEPS.length}
-      </p>
-      <h1 ref={headingRef} tabIndex={-1}>
-        {step.heading(a)}
-      </h1>
-      <p className="sf-lead">{step.body}</p>
-
-      <form onSubmit={submit} noValidate className="sf-form">
-        {step.kind === 'look' ? (
-          <Look a={a} update={update} />
-        ) : step.kind === 'multi' ? (
-          <fieldset className={`sf-choices${error ? ' has-error' : ''}`}>
-            <legend className="ux-visually-hidden">{step.label}</legend>
-            {error && <ErrorText id={`${uid}-err`}>{error}</ErrorText>}
-            {step.options.map((o, n) => {
-              const checked = a.products.includes(o.value as Product);
-              return (
-                <label key={o.value} className={`sf-choice${checked ? ' is-checked' : ''}`}>
-                  <input
-                    id={`${uid}-${n}`}
-                    type="checkbox"
-                    value={o.value}
-                    checked={checked}
-                    aria-describedby={error ? `${uid}-err` : undefined}
-                    onChange={() => {
-                      const p = o.value as Product;
-                      update({
-                        products: checked ? a.products.filter((x) => x !== p) : [...a.products, p],
-                      });
-                      setError('');
-                    }}
-                  />
-                  <span className="sf-choice-icon" aria-hidden="true">
-                    <Icon name={o.icon} size={22} />
-                  </span>
-                  <span className="sf-choice-text">
-                    <span className="sf-choice-label">{o.label}</span>
-                    <span className="sf-choice-hint">{o.hint}</span>
-                  </span>
-                  <span className="sf-choice-tick is-box" aria-hidden="true">
-                    <Icon name="Check" size={14} />
-                  </span>
-                </label>
-              );
-            })}
-          </fieldset>
-        ) : (
-          <Field
-            id={`${uid}-f`}
-            label={step.label}
-            optional={step.optional}
-            hint={step.hint}
-            error={error}
-          >
-            {step.kind === 'text' ? (
-              <input
-                ref={fieldRef}
-                id={`${uid}-f`}
-                type="text"
-                autoComplete={step.key === 'name' ? 'name' : 'organization'}
-                placeholder={step.placeholder}
-                value={value}
-                aria-invalid={!!error}
-                aria-describedby={describe(uid, step.hint, error)}
-                onChange={(e) => {
-                  update({ [step.key]: e.target.value });
-                  setError('');
-                }}
-              />
-            ) : (
-              <textarea
-                ref={fieldRef}
-                id={`${uid}-f`}
-                rows={3}
-                placeholder={step.placeholder}
-                value={value}
-                aria-describedby={describe(uid, step.hint, error)}
-                onChange={(e) => update({ [step.key]: e.target.value })}
-              />
-            )}
-          </Field>
-        )}
-
-        <div className="sf-full">
-          <Button
-            variation="primary"
-            label={last && a.invites.trim() ? 'Send Invites' : 'Continue'}
-            onClick={() => submit()}
-          />
-        </div>
-        {step.kind === 'look' && (
-          <div className="sf-full">
-            <Button variation="link" label="Skip" onClick={() => onNext()} />
-          </div>
-        )}
-        {step.key === 'invites' && (
-          <div className="sf-full">
-            <Button
-              variation="link"
-              label="Skip"
-              onClick={() => {
-                update({ invites: '' });
-                onNext({ invites: '' });
-              }}
-            />
-          </div>
-        )}
-      </form>
-    </Shell>
-  );
-}
-
-/** Logo and colour, with a live preview of their console header. */
-function Look({ a, update }: { a: Answers; update: (p: Partial<Answers>) => void }) {
-  const uid = useId();
-  const [over, setOver] = useState(false);
-  const [error, setError] = useState('');
-  const org = a.org.trim() || 'Your organisation';
-  const colour = a.colour || BRAND_COLOURS[0].value;
-
-  const take = (file?: File) => {
-    if (!file) return;
-    if (!/^image\/(png|svg\+xml|jpeg)$/.test(file.type)) {
-      setError('Choose a PNG, SVG or JPG image');
-      return;
-    }
-    setError('');
-    // A data URL, so the logo survives a reload.
-    const r = new FileReader();
-    r.onload = () => update({ logo: String(r.result) });
-    r.readAsDataURL(file);
-  };
-
-  return (
-    <>
-      <figure className="lk-preview" aria-label="Preview of your workspace">
-        <div className="lk-bar">
-          {a.logo ? (
-            <img src={a.logo} alt="" className="lk-logo" />
-          ) : (
-            <span className="lk-mark" style={{ background: colour }} aria-hidden="true">
-              {org.charAt(0).toUpperCase()}
-            </span>
-          )}
-          <span className="lk-org">{org}</span>
-        </div>
-        <div className="lk-body">
-          <span className="lk-line" />
-          <span className="lk-line is-short" />
-          <span className="lk-btn" style={{ background: colour }} aria-hidden="true" />
-        </div>
-        <figcaption className="ux-visually-hidden">
-          {org}, {a.logo ? 'with your logo' : 'no logo yet'},{' '}
-          {BRAND_COLOURS.find((c) => c.value === colour)?.label ?? ''} colour
-        </figcaption>
-      </figure>
-
-      <div className={`sf-field${error ? ' has-error' : ''}`}>
-        <span className="sf-label" id={`${uid}-logo`}>
-          Logo <span className="sf-optional">(optional)</span>
-        </span>
-        <p className="sf-hint" id={`${uid}-logo-hint`}>
-          PNG, SVG or JPG, at least 128 pixels square.
-        </p>
-        {error && <ErrorText id={`${uid}-logo-err`}>{error}</ErrorText>}
-        <label
-          className={`lk-drop${over ? ' is-over' : ''}`}
-          onDragOver={(e) => {
-            e.preventDefault();
-            setOver(true);
-          }}
-          onDragLeave={() => setOver(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setOver(false);
-            take(e.dataTransfer.files[0]);
-          }}
-        >
-          <input
-            type="file"
-            accept="image/png,image/svg+xml,image/jpeg"
-            aria-labelledby={`${uid}-logo`}
-            aria-describedby={`${uid}-logo-hint${error ? ` ${uid}-logo-err` : ''}`}
-            onChange={(e) => take(e.target.files?.[0])}
-          />
-          <span className="lk-drop-icon" aria-hidden="true">
-            <Icon name="CloudUpload" size={22} />
-          </span>
-          <span>
-            <strong>{a.logo ? 'Replace logo' : 'Upload your logo'}</strong>
-            <span className="lk-drop-sub">or drag it here</span>
-          </span>
-        </label>
-        {a.logo && (
-          <button type="button" className="sf-link lk-remove" onClick={() => update({ logo: '' })}>
-            Remove logo
-          </button>
-        )}
-      </div>
-
-      <fieldset className="sf-field lk-colours">
-        <legend className="sf-label">
-          Colour <span className="sf-optional">(optional)</span>
-        </legend>
-        <div className="lk-swatches">
-          {BRAND_COLOURS.map((c) => (
-            <label key={c.value} className={`lk-swatch${a.colour === c.value ? ' is-on' : ''}`}>
-              <input
-                type="radio"
-                name={`${uid}-colour`}
-                value={c.value}
-                checked={a.colour === c.value}
-                onChange={() => update({ colour: c.value })}
-              />
-              <span className="lk-dot" style={{ background: c.value }} aria-hidden="true" />
-              {c.label}
-            </label>
-          ))}
-        </div>
-      </fieldset>
     </>
   );
 }
 
-/* ---------------------------------------------------------------- */
-
-function describe(uid: string, hint?: string, error?: string) {
+/** Round icon-only work-account buttons, for the password step. */
+function SocialIcons({ onPick }: { onPick: (via: Provider) => void }) {
   return (
-    [error ? `${uid}-f-err` : '', hint ? `${uid}-f-hint` : ''].filter(Boolean).join(' ') ||
-    undefined
+    <>
+      <p className="sf-or">
+        <span>or sign up with</span>
+      </p>
+      <div className="su-icons">
+        <button type="button" className="su-icon" aria-label="Sign up with Google" onClick={() => onPick('google')}>
+          <GoogleMark />
+        </button>
+        <button type="button" className="su-icon" aria-label="Sign up with Microsoft" onClick={() => onPick('microsoft')}>
+          <MicrosoftMark />
+        </button>
+      </div>
+    </>
   );
 }
 
-function Field({
-  id,
-  label,
-  optional,
-  hint,
-  error,
-  children,
+const checkEmail = (v: string) =>
+  !v.trim()
+    ? 'Enter your email address'
+    : !EMAIL_RE.test(v.trim())
+      ? 'Enter an email address in the correct format, like name@example.com'
+      : '';
+
+const TERMS = 'By signing up, you agree to the DIGIT terms of use and acknowledge you’ve read the privacy policy.';
+
+/**
+ * Sign up, after Wix: first the email (or a work account); then a second
+ * step, with Back, to choose a password and press Sign Up.
+ */
+function SignUp({
+  headingRef,
+  onLogin,
+  onDone,
 }: {
-  id: string;
-  label: string;
-  optional?: boolean;
-  hint?: string;
-  error?: string;
-  children: ReactNode;
+  headingRef: RefObject<HTMLHeadingElement | null>;
+  onLogin: () => void;
+  onDone: (via: Provider, email: string) => void;
 }) {
+  const [step, setStep] = useState<'email' | 'password'>('email');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passRef = useRef<HTMLInputElement>(null);
+  const uid = useId();
+  const first = useRef(true);
+
+  // Moving between the two steps: put the cursor where the next thing to type is.
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    requestAnimationFrame(() => (step === 'password' ? passRef : emailRef).current?.focus());
+  }, [step]);
+
+  const continueWithEmail = (e?: FormEvent) => {
+    e?.preventDefault();
+    const err = checkEmail(email);
+    if (err) {
+      setErrors({ email: err });
+      emailRef.current?.focus();
+      return;
+    }
+    setErrors({});
+    setStep('password');
+  };
+
+  const signUp = (e?: FormEvent) => {
+    e?.preventDefault();
+    const next = { email: checkEmail(email), password: password ? '' : 'Choose a password' };
+    setErrors(next);
+    if (next.email) return emailRef.current?.focus();
+    if (next.password) return passRef.current?.focus();
+    onDone('email', email.trim());
+  };
+
+  const heading = (
+    <>
+      <h1 ref={headingRef} tabIndex={-1}>
+        Sign up
+      </h1>
+      <p className="su-sub">
+        Already have an account?{' '}
+        <button type="button" className="ux-link su-login" onClick={onLogin}>
+          Log in
+        </button>
+      </p>
+    </>
+  );
+
+  if (step === 'password')
+    return (
+      <AuthFrame
+        back={() => {
+          setErrors({});
+          setStep('email');
+        }}
+        foot={TERMS}
+      >
+        {heading}
+        <form onSubmit={signUp} noValidate className="sf-form">
+          <DigitField
+            id={`${uid}-email`}
+            label="Email"
+            type="email"
+            value={email}
+            error={errors.email ?? ''}
+            inputRef={emailRef}
+            onChange={(v) => {
+              setEmail(v);
+              setErrors((x) => ({ ...x, email: '' }));
+            }}
+          />
+          <DigitField
+            id={`${uid}-pass`}
+            label="Choose a password"
+            type="password"
+            value={password}
+            error={errors.password ?? ''}
+            inputRef={passRef}
+            onChange={(v) => {
+              setPassword(v);
+              setErrors((x) => ({ ...x, password: '' }));
+            }}
+          />
+          <div className="sf-full">
+            <Button variation="primary" label="Sign Up" submit onClick={() => {}} />
+          </div>
+        </form>
+        <SocialIcons onPick={(via) => onDone(via, '')} />
+      </AuthFrame>
+    );
+
   return (
-    <div className={`sf-field${error ? ' has-error' : ''}`}>
-      <label htmlFor={id}>
-        {label}
-        {optional && <span className="sf-optional"> (optional)</span>}
-      </label>
-      {hint && (
-        <p id={`${id}-hint`} className="sf-hint">
-          {hint}
-        </p>
-      )}
-      {error && <ErrorText id={`${id}-err`}>{error}</ErrorText>}
-      {children}
-    </div>
+    <AuthFrame foot={TERMS}>
+      {heading}
+      <form onSubmit={continueWithEmail} noValidate className="sf-form">
+        <DigitField
+          id={`${uid}-email`}
+          label="Email"
+          type="email"
+          value={email}
+          error={errors.email ?? ''}
+          inputRef={emailRef}
+          onChange={(v) => {
+            setEmail(v);
+            setErrors({});
+          }}
+        />
+        <div className="sf-full">
+          <Button variation="primary" label="Continue with Email" onClick={() => continueWithEmail()} />
+        </div>
+      </form>
+      <SocialButtons onPick={(via) => onDone(via, '')} />
+    </AuthFrame>
+  );
+}
+
+/**
+ * Log in, same frame as sign-up. For now any email and password are
+ * accepted; it starts filled in with the account just made, or the demo one.
+ */
+function Login({
+  a,
+  headingRef,
+  onSignUp,
+  onDone,
+}: {
+  a: Answers;
+  headingRef: RefObject<HTMLHeadingElement | null>;
+  onSignUp: () => void;
+  onDone: (patch: Partial<Answers>) => void;
+}) {
+  const uid = useId();
+  const [email, setEmail] = useState(a.email || DEFAULT_LOGIN.email);
+  const [pass, setPass] = useState(DEFAULT_LOGIN.password);
+  const [resetSent, setResetSent] = useState(false);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passRef = useRef<HTMLInputElement>(null);
+
+  const submit = (e?: FormEvent) => {
+    e?.preventDefault();
+    onDone({ email: email.trim() || DEFAULT_LOGIN.email, via: a.via || 'email' });
+  };
+
+  return (
+    <AuthFrame foot="DIGIT terms of use · Privacy policy">
+      <h1 ref={headingRef} tabIndex={-1}>
+        Log in
+      </h1>
+      <p className="su-sub">
+        Don’t have an account?{' '}
+        <button type="button" className="ux-link su-login" onClick={onSignUp}>
+          Sign up
+        </button>
+      </p>
+      <form onSubmit={submit} noValidate className="sf-form">
+        <DigitField id={`${uid}-email`} label="Email" type="email" value={email} error="" inputRef={emailRef} onChange={setEmail} />
+        <div className="su-pass">
+          <DigitField id={`${uid}-pass`} label="Password" type="password" value={pass} error="" inputRef={passRef} onChange={setPass} />
+          <button type="button" className="ux-link su-login su-forgot" onClick={() => setResetSent(true)}>
+            Forgot password?
+          </button>
+          {resetSent && (
+            <p className="su-note" role="status">
+              We’ve sent a reset link to {email.trim() || 'your email'}.
+            </p>
+          )}
+        </div>
+        <div className="sf-full">
+          <Button variation="primary" label="Log In" submit onClick={() => {}} />
+        </div>
+      </form>
+      <SocialButtons onPick={(via) => onDone({ via, email: DEMO_ACCOUNT.email, name: a.name || DEMO_ACCOUNT.name })} />
+    </AuthFrame>
   );
 }
 

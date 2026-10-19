@@ -150,7 +150,7 @@ function Panel({ p, open, setOpen }: { p: Product; open: boolean; setOpen: (v: b
                       <p>{r.what}</p>
                       {r.account && !senderReady(account) && (
                         <p className="cl-acct">
-                          Messages can be edited now. Turning them on needs sender details.{' '}
+                          Messages can be edited now. Turning them on needs your notification channels set up.{' '}
                           <button type="button" className="lnk" onClick={() => go('home', { highlight: 'sender' })}>
                             Go to Home
                           </button>

@@ -1,14 +1,5 @@
 /* Account → products rebuild. Loaded after app.css and flow.css. */
 
-/* ---------- Sign-up: credentials and login ---------- */
-.sf-cred { margin: 0 0 var(--s2); padding: var(--s4); border: 1px solid var(--c-divider); border-radius: 12px; background: var(--c-surface-muted); display: grid; gap: var(--s3); }
-.sf-cred dt { font-size: 0.8125rem; font-weight: 700; }
-.sf-cred dd { margin: 2px 0 0; font-size: 1rem; word-break: break-all; }
-.sf-cred code { font-size: 1.0625rem; font-weight: 700; letter-spacing: 0.04em; }
-.sf-login-top { width: 100%; max-width: 960px; display: flex; align-items: center; justify-content: space-between; gap: var(--s4); }
-.sf-lang { display: inline-flex; align-items: center; gap: var(--s2); color: var(--c-secondary); }
-.sf-lang select { height: 40px; padding: 0 var(--s3); border: 1px solid var(--c-input-border); border-radius: 8px; background: var(--c-surface); font: inherit; color: var(--c-text); }
-.sf-lang select:focus { outline: none; box-shadow: var(--focus); }
 .sf-choice-tick.is-box { border-radius: 6px; }
 
 /* ---------- Side nav ---------- */
@@ -20,9 +11,6 @@
 .sh-back:focus-visible { outline: none !important; box-shadow: var(--focus); }
 .sh-nav-h { display: flex; align-items: center; gap: var(--s2); margin: var(--s3) var(--s4) var(--s2); font-weight: 700; font-size: 1rem; }
 .sh-nav-h .ux-icon { color: var(--c-primary); }
-.sh-viewas { margin: 0 0 var(--s2); padding: 0; border: 0; display: flex; flex-wrap: wrap; gap: var(--s1) var(--s3); }
-.sh-viewas legend { width: 100%; margin-bottom: 4px; font-weight: 700; }
-.sh-viewas label { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
 
 /* ---------- Home: lavender hero ---------- */
 .hero { margin-bottom: var(--s6); padding: var(--s6) var(--s6) var(--s4); border-radius: 20px; background: #FBEEE8; border: 1px solid #F2D3C4; }

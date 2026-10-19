@@ -5,7 +5,6 @@ import { useAccount } from '../lib/store';
 import {
   HCM_TEMPLATES,
   LNP_TEMPLATES,
-  METRICS,
   NAVS,
   PRODUCTS,
   ROWS,
@@ -39,7 +38,7 @@ export function ProductPage() {
   if (!ok || !p) return null;
   const st = account.products[p];
   if (!st.templateId) return <Start p={p} />;
-  const section = params.section ?? 'overview';
+  const section = params.section && NAVS[p].includes(params.section) ? params.section : 'overview';
   if (section === 'overview') return <Overview p={p} />;
   return <SectionPage p={p} s={section} />;
 }
@@ -205,7 +204,7 @@ function LiveSummary({ p }: { p: Product }) {
         {p === 'hcm' ? 'Field workers can sign in to the app and start.' : `People can use it from ${link}`}
       </p>
       <div className="form-foot">
-        <Button variation="primary" label="Open Health" onClick={() => go('product', { product: p, section: 'health' })} />
+        <Button variation="primary" label="Open Product Health" onClick={() => go('health')} />
       </div>
     </section>
   );
@@ -232,8 +231,6 @@ function SectionPage({ p, s }: { p: Product; s: Section }) {
       <p className="sv-eyebrow">{PRODUCTS[p].name}</p>
       <h1 tabIndex={-1}>{sectionLabel(p, s)}</h1>
       {SECTION_LEAD[s] && <p className="sf2-lead">{s === 'data' ? '' : SECTION_LEAD[s]}</p>}
-
-      {s === 'health' && <Health p={p} />}
 
       {rows.length > 0 && (
         <ul className="rc-list">
@@ -287,35 +284,5 @@ function SectionPage({ p, s }: { p: Product; s: Section }) {
       )}
       {s === 'translations' && <p className="tip">English is on. Add other languages any time, before or after going live.</p>}
     </div>
-  );
-}
-
-function Health({ p }: { p: Product }) {
-  const { account } = useAccount();
-  const st = account.products[p];
-  const tracked = st.data.metrics.length ? st.data.metrics : METRICS[p].slice(0, 3);
-  if (!st.live)
-    return (
-      <p className="tip">
-        <Icon name="Info" size={18} />
-        Health shows here once you’re live. Until then, it’s where you choose what to track.
-      </p>
-    );
-  return (
-    <section className="card" aria-labelledby="hl-h">
-      <p className="pc-health">
-        <span className="dot is-ok" aria-hidden="true" />
-        <strong id="hl-h">Healthy</strong>. Everything is working.
-      </p>
-      <ul className="stats">
-        {tracked.map((m) => (
-          <li key={m}>
-            <span>{m}</span>
-            <strong>0</strong>
-          </li>
-        ))}
-      </ul>
-      <p className="card-lead">Just live, so the numbers start at zero.</p>
-    </section>
   );
 }
