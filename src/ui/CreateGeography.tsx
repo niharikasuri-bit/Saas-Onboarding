@@ -187,7 +187,7 @@ export function CreateGeography({
     country: 'Which country is it?',
     levels: `How is ${country.trim() || 'it'} divided?`,
     method: 'How would you like to create your geographies?',
-    places: method === 'upload' ? 'Upload your places' : method === 'osm' ? 'Check the places we fetched' : 'Add your places',
+    places: method === 'upload' ? (uploaded ? 'Check the places you uploaded' : 'Upload your places') : method === 'osm' ? 'Check the places we fetched' : 'Add your places',
   };
 
   const LEADS: Record<Step, string> = {
@@ -196,7 +196,9 @@ export function CreateGeography({
     levels: 'List the boundary levels from largest to smallest — for example Country, Region, District.',
     places:
       method === 'upload'
-        ? 'Download the template, fill it in, and upload it. You can check every place before you save.'
+        ? uploaded
+          ? 'Fix anything that’s wrong, then create the geography.'
+          : 'Download the template, fill it in, and upload it. You can check every place before you save.'
         : method === 'osm'
           ? 'Check the places, and fix any before you create the geography.'
           : 'Add one row per place, from the largest level down. Switch to the tree to see how they fit.',
@@ -222,6 +224,7 @@ export function CreateGeography({
         }}
       >
         {step === 'country' && (
+          <div className="cg-split">
           <Field id={`${uid}-country`} label="Country name" error={errors.country}>
             <input
               id={`${uid}-country`}
@@ -232,6 +235,7 @@ export function CreateGeography({
               onChange={(e) => setCountry(e.target.value)}
             />
           </Field>
+          </div>
         )}
 
         {step === 'levels' && <LevelsEditor uid={uid} levels={levels} errors={errors} onChange={setLevels} />}
@@ -543,10 +547,9 @@ function LevelsEditor({
       <p className="ux-visually-hidden" role="status">
         {moved}
       </p>
-      <button type="button" className="lv-add" onClick={() => onChange([...levels, ''])}>
-        <Icon name="Add" size={18} />
-        Add level
-      </button>
+      <div className="lv-add">
+        <Button variation="secondary" icon="Add" label="Add level" onClick={() => onChange([...levels, ''])} />
+      </div>
     </div>
   );
 }
@@ -566,7 +569,6 @@ function Upload({
   onRows: (rows: Path[], file: string) => void;
 }) {
   const [error, setError] = useState('');
-  const [file, setFile] = useState<File | null>(null);
   const [over, setOver] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   const take = async (f: File | undefined) => {
@@ -578,10 +580,28 @@ function Upload({
       return;
     }
     setError('');
-    setFile(f);
     onRows(data.slice(1), f.name);
   };
   const browse = () => input.current?.click();
+  // Once uploaded, only a slim line stays; the places below are what matters.
+  if (uploaded)
+    return (
+      <p className="up-done" role="status">
+        <Icon name="CheckCircle" size={18} />
+        <span>
+          <strong>{uploaded}</strong> uploaded.
+        </span>
+        <button
+          type="button"
+          className="up-browse"
+          onClick={() => {
+            onRows([], '');
+          }}
+        >
+          Upload a different file
+        </button>
+      </p>
+    );
   return (
     <section className="up" aria-labelledby={`${uid}-up-h`}>
       <div className="up-head">
@@ -604,7 +624,7 @@ function Upload({
           e.target.value = '';
         }}
       />
-      {!uploaded && (
+      {(
         <div
           className={`up-drop${over ? ' is-over' : ''}`}
           onDragOver={(e) => {
@@ -632,46 +652,6 @@ function Upload({
           {error}
         </p>
       )}
-      {uploaded && (
-        <div className="up-file">
-          <span className="up-file-icon" aria-hidden="true">
-            CSV
-          </span>
-          <span className="up-file-name">{uploaded}</span>
-          <div className="up-file-actions">
-            <Button variation="secondary" icon="FileUpload" label="Re-upload" onClick={browse} />
-            {file && (
-              <Button
-                variation="secondary"
-                icon="FileDownload"
-                label="Download"
-                onClick={() => {
-                  const url = URL.createObjectURL(file);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = file.name;
-                  a.click();
-                  URL.revokeObjectURL(url);
-                }}
-              />
-            )}
-          </div>
-          <button
-            type="button"
-            className="up-file-x"
-            aria-label={`Remove ${uploaded}`}
-            onClick={() => {
-              setFile(null);
-              onRows([], '');
-            }}
-          >
-            <Icon name="Close" size={18} />
-          </button>
-        </div>
-      )}
-      <p className="ux-visually-hidden" role="status">
-        {uploaded ? `${uploaded} uploaded. Check the places below.` : ''}
-      </p>
     </section>
   );
 }

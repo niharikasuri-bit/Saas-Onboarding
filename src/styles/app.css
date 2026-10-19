@@ -978,29 +978,19 @@ p { margin: 0; line-height: 1.5; }
 .lv-remove:hover:not(:disabled) { color: var(--digitv2-lightTheme-alert-error); background: var(--digitv2-lightTheme-generic-background); }
 .lv-remove:disabled { opacity: 0.3; cursor: default; }
 .lv-remove:focus-visible { outline: none; box-shadow: var(--focus); }
-.lv-add { display: inline-flex; align-items: center; gap: 6px; margin: var(--s3) 0 0 40px; padding: 8px 12px 8px 8px; border: 0; border-radius: 8px; background: #fff; cursor: pointer; font: inherit; font-weight: 500; color: var(--digitv2-lightTheme-primary-2); }
-.lv-add:hover { background: var(--digitv2-lightTheme-generic-background); }
-.lv-add:focus-visible { outline: none; box-shadow: var(--focus); }
 
 /* Upload document */
 .up { padding: 24px; border: 1px solid #E3E3E3; border-radius: 14px; background: #FAFAFA; display: flex; flex-direction: column; gap: var(--s4); }
 .up-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--s3); }
 .up-head h2 { font-size: 1.25rem; font-weight: 700; color: var(--digitv2-lightTheme-primary-2); }
 .up-hint { margin-top: 2px; font-size: 0.9375rem; color: var(--c-text-2); }
-.up-head > button, .up-file-actions > button { height: 40px; padding: 0 16px; background: #fff; }
-.up-head > button .digit-button-label, .up-file-actions > button .digit-button-label { font-size: 0.9375rem; font-weight: 500; }
+.up-head > button { height: 40px; padding: 0 16px; background: #fff; }
+.up-head > button .digit-button-label { font-size: 0.9375rem; font-weight: 500; }
 .up-drop { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--s3); min-height: 180px; padding: 32px; border: 2px dashed #CFCFCF; border-radius: 12px; background: #fff; color: #9A9A9A; text-align: center; transition: border-color 0.15s ease, background 0.15s ease; }
 .up-drop.is-over { border-color: var(--c-primary); background: #FFFAF7; }
 .up-drop p { color: var(--c-text-2); }
 .up-browse { padding: 0; border: 0; background: none; cursor: pointer; font: inherit; font-weight: 500; color: var(--c-primary); text-decoration: underline; text-underline-offset: 2px; }
 .up-browse:focus-visible { outline: none; border-radius: 2px; box-shadow: var(--focus); }
-.up-file { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s4); padding: 16px 48px 16px 18px; border: 1px solid #E3E3E3; border-radius: 12px; background: #fff; }
-.up-file-icon { width: 36px; height: 44px; display: grid; place-items: end center; padding-bottom: 6px; border-radius: 4px 12px 4px 4px; font-size: 0.6875rem; font-weight: 700; color: #fff; background: #1E7B3A; }
-.up-file-name { flex: 1; min-width: 160px; font-weight: 700; color: var(--c-text-2); word-break: break-all; }
-.up-file-actions { display: flex; flex-wrap: wrap; gap: var(--s2); }
-.up-file-x { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; display: grid; place-items: center; border: 0; border-radius: 6px; background: none; cursor: pointer; color: var(--digitv2-lightTheme-primary-2); }
-.up-file-x:hover { background: var(--digitv2-lightTheme-generic-background); }
-.up-file-x:focus-visible { outline: none; box-shadow: var(--focus); }
 @media (prefers-reduced-motion: reduce) { .up-drop { transition: none; } }
 @media (max-width: 720px) {
   .lv-row { grid-template-columns: 28px 1fr 36px; }
@@ -1009,9 +999,30 @@ p { margin: 0; line-height: 1.5; }
   .lv-remove { grid-column: 3; grid-row: 1 / span 2; }
   .lv-handle { grid-row: 1 / span 2; }
   .lv-add { margin-left: 0; }
+  .lv { padding: 16px; }
 }
 
 /* How: the same square tiles as "What will you use DIGIT for?" */
 .cg-tiles .qz-tile-row { grid-template-columns: repeat(3, 180px); justify-content: start; }
 .cg-tile-icon { color: var(--c-primary); }
 @media (max-width: 720px) { .cg-tiles .qz-tile-row { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); } }
+
+/* Country name: label on the left, field on the right */
+.cg-split > .fld { display: grid; grid-template-columns: minmax(160px, 240px) 1fr; align-items: center; column-gap: 32px; row-gap: 6px; }
+.cg-split > .fld > label { grid-column: 1; grid-row: 1 / span 3; align-self: center; font-size: 1rem; }
+.cg-split > .fld > :not(label) { grid-column: 2; }
+.cg-split > .fld input { height: 48px; padding: 0 16px; border-radius: 10px; font-size: 1.0625rem; }
+@media (max-width: 720px) {
+  .cg-split > .fld { grid-template-columns: 1fr; }
+  .cg-split > .fld > label, .cg-split > .fld > :not(label) { grid-column: 1; grid-row: auto; }
+}
+
+/* Boundary levels sit in a #FAFAFA box; inputs turn white on it */
+.lv { padding: 24px; border: 1px solid #E3E3E3; border-radius: 14px; background: #FAFAFA; }
+.lv .lv-field input { background: #fff; }
+.lv-add { margin: var(--s4) 0 0 40px; }
+.lv-add > button { height: 40px; padding: 0 16px; background: #fff; }
+.lv-add > button .digit-button-label { font-size: 0.9375rem; font-weight: 500; }
+
+.up-done { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); margin-bottom: var(--s4); padding: 12px 16px; border-radius: 10px; background: var(--digitv2-lightTheme-alert-successbg); color: var(--c-text); }
+.up-done .ux-icon { color: var(--c-success); }
