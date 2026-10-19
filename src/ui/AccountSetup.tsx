@@ -6,7 +6,7 @@ import { todoDone, todoResult, todosFor, type PageId, type TodoId } from '../lib
 /**
  * The account to-do, leading Home until it's done. Full width. Each step has
  * an icon, its title with the action on the right, what to do, an info note
- * on why it matters, and a time tag. Only the next step gets a filled button.
+ * on why it matters, and a time tag. Every open step gets a primary button; the next one is highlighted.
  */
 
 const TASK: Record<
@@ -20,7 +20,7 @@ const TASK: Record<
     minutes: 5,
     icon: 'Public',
     page: 'geographies',
-    action: 'Add areas',
+    action: 'Add geographies',
   },
   sender: {
     title: 'Set up notification channels',
@@ -61,7 +61,7 @@ export function AccountSetup() {
         <div className="as-panel-head">
           <h2 id="as-panel-h">What you need to do</h2>
           <p className="as-count">
-            {done} of {todos.length} done
+            <strong>{done}</strong> of {todos.length} done
           </p>
         </div>
         <div
@@ -83,7 +83,7 @@ export function AccountSetup() {
             return (
               <li key={t.id} className={`as-row${isDone ? ' is-done' : ''}${isNext ? ' is-next' : ''}`}>
                 <span className="as-icon" aria-hidden="true">
-                  <Icon name={isDone ? 'Check' : task.icon} size={20} />
+                  <Icon name={isDone ? 'Check' : task.icon} size={24} />
                 </span>
                 <div className="as-body">
                   <div className="as-top">
@@ -92,15 +92,12 @@ export function AccountSetup() {
                       <span className="ux-visually-hidden">{isDone ? ' (done)' : ' (to do)'}</span>
                     </h3>
                     <div className="as-cta">
-                      {isNext ? (
-                        <Button variation="primary" label={task.action} onClick={() => go(task.page)} />
-                      ) : (
-                        <button type="button" className="as-link" onClick={() => go(task.page)}>
-                          {isDone ? 'View' : task.action}
-                          <span aria-hidden="true"> →</span>
-                          <span className="ux-visually-hidden">: {task.title}</span>
-                        </button>
-                      )}
+                      <Button
+                        variation={isDone ? 'secondary' : 'primary'}
+                        label={isDone ? 'View' : task.action}
+                        title={isDone ? `View: ${task.title}` : undefined}
+                        onClick={() => go(task.page)}
+                      />
                     </div>
                   </div>
                   {isDone ? (
