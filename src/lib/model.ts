@@ -575,10 +575,9 @@ export type TodoId = 'geography' | 'users' | 'sender';
 export const TODOS: { id: TodoId; label: string; unlocks: string }[] = [
   { id: 'geography', label: 'Add geographies', unlocks: 'This unlocks opening any product.' },
   { id: 'sender', label: 'Set up notification channels', unlocks: 'This unlocks messages.' },
-  { id: 'users', label: 'Invite users', unlocks: 'This unlocks assigning people.' },
 ];
 
-/** Every account sets up all three: geographies, notification channels and its team. */
+/** Every account sets up both: geographies and notification channels. The team is added from the Team page. */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const todosFor = (_a: Account) => TODOS;
 

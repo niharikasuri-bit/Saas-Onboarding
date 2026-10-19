@@ -7,7 +7,7 @@ import { AccountSetup, HomeHeader } from './AccountSetup';
 
 /**
  * Home, in three parts:
- * 1. The account setup checklist (geographies unlock the products; channels and team are needed to go live) under an
+ * 1. The account setup checklist (geographies unlock the products; channels are needed to go live) under an
  *    orange header, or just the header once it's all done.
  * 2. Your products. Locked until the account has geographies; when they
  *    arrive the lock opens once, then each card leads to the product.
