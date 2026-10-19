@@ -36,19 +36,19 @@ export const PRODUCTS: Record<Product, { name: string; icon: string; about: stri
   hcm: {
     name: 'Health Campaigns',
     icon: 'Public',
-    about: 'Plan, deliver and track health campaigns in the field.',
+    about: 'Plan, run and track health campaigns, from registering beneficiaries to monitoring field delivery.',
     data: 'Campaign data',
   },
   cms: {
     name: 'Complaints',
     icon: 'Feedback',
-    about: 'Take complaints from citizens and send each one to the right team.',
+    about: 'Receive citizen complaints, route each one to the right team, and track it through to resolution.',
     data: 'Complaints data',
   },
   lnp: {
     name: 'Licences and Permits',
     icon: 'Assignment',
-    about: 'Take applications, collect fees and issue licences.',
+    about: 'Manage the full lifecycle of licences and permits, from application to fee collection and beyond.',
     data: 'Licence data',
   },
 };
