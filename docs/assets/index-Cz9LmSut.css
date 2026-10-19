@@ -591,7 +591,7 @@ p { margin: 0; line-height: 1.5; }
 .as-wrap { max-width: 920px; margin: 0 auto; }
 .as-head {
   /* Continues the strip above it across the full width: a warm tint fading into the page */
-  margin: calc(-1 * var(--s8)) calc(-1 * clamp(24px, 4vw, 56px)) var(--s6);
+  margin: calc(-1 * var(--s8)) calc(-1 * clamp(24px, 4vw, 56px)) 0;
   padding: var(--s6) clamp(24px, 4vw, 56px) 40px;
   background: linear-gradient(180deg, var(--c-primary-bg) 0%, rgb(251 238 232 / 0.5) 60%, rgb(251 238 232 / 0) 100%);
 }
@@ -599,16 +599,16 @@ p { margin: 0; line-height: 1.5; }
 .as-eyebrow { margin-bottom: var(--s2); font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--digitv2-lightTheme-primary-2); }
 .as h1 { font-size: 2.75rem; font-weight: 400; line-height: 1.15; letter-spacing: -0.02em; color: var(--digitv2-lightTheme-primary-2); margin-bottom: var(--s3); }
 .as h1 em { font-style: normal; font-weight: 700; color: var(--c-primary); }
-.as-lead { margin-bottom: var(--s8); font-size: 1.125rem; line-height: 1.5; color: #505A5F; }
+.as-lead { margin-bottom: 40px; font-size: 1.125rem; line-height: 1.5; color: #505A5F; }
 
 .as-progress { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s4); margin-bottom: var(--s2); }
-.as-progress > p:first-child { font-size: 0.9375rem; font-weight: 700; color: var(--c-text); }
+.as-progress > p:first-child { font-size: 0.9375rem; font-weight: 700; color: var(--digitv2-lightTheme-primary-2); }
 .as-count { font-size: 0.875rem; color: #505A5F; white-space: nowrap; }
 .as-count strong { margin-right: 2px; font-size: 1.25rem; font-weight: 700; color: var(--c-text); }
 .as-bar { height: 14px; margin-bottom: 0; border-radius: 7px; background: #E4E4E4; overflow: hidden; }
 .as-bar span { display: block; height: 100%; border-radius: 7px; background: var(--c-success); transition: width 0.5s ease; }
 
-.as-list { list-style: none; margin: var(--s8) 0 0; padding: 0; display: grid; grid-auto-rows: 1fr; gap: var(--s4); }
+.as-list { list-style: none; margin: 0; padding: 0; display: grid; grid-auto-rows: 1fr; gap: var(--s4); }
 .as-list > li { display: flex; }
 .as-card.digit-card-component {
   display: flex; flex-direction: column; gap: 0; width: 100%; margin: 0; padding: 24px 28px;
