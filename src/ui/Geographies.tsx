@@ -502,12 +502,17 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
 
       {creating === null && adding && hits.length > 0 && (
         <p className="geo-foot">
-          {hits.length} of {all.length} {all.length === 1 ? 'geography' : 'geographies'}
-          <span aria-hidden="true"> · </span>
-          Can’t find yours?{' '}
-          <button type="button" className="geo-foot-cta" onClick={() => setCreating(q.trim())}>
-            Create a new geography
-          </button>
+          <span>
+            {hits.length} of {all.length} {all.length === 1 ? 'geography' : 'geographies'}
+          </span>
+          <span className="geo-foot-div" aria-hidden="true" />
+          <span className="ux-visually-hidden">. </span>
+          <span>
+            Didn’t find your geography?{' '}
+            <button type="button" className="geo-foot-cta" onClick={() => setCreating(q.trim())}>
+              Create one
+            </button>
+          </span>
         </p>
       )}
     </div>
