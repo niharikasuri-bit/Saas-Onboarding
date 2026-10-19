@@ -650,6 +650,10 @@ p { margin: 0; line-height: 1.5; }
 /* Geographies page: definition, one search, cards or a list (like a file browser), empty state */
 .geo { max-width: 1320px; margin: 0 auto; }
 .geo-head { display: flex; flex-direction: column; align-items: center; gap: var(--s3); margin-bottom: var(--s8); text-align: center; }
+/* Once added: everything left-aligned */
+.geo.is-overview .geo-head { align-items: flex-start; text-align: left; }
+.geo.is-overview .geo-bar { justify-content: flex-start; }
+.geo.is-overview .geo-cards { justify-content: start; }
 .geo-head > button { margin-top: var(--s2); height: 40px; padding: 0 20px; }
 .geo-head > button .digit-button-label { font-size: 1rem; font-weight: 500; }
 .geo-head h1 { font-size: 2.25rem; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; color: var(--digitv2-lightTheme-primary-2); }

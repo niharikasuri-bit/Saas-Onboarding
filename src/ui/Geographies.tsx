@@ -84,7 +84,6 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
   const all = adding ? catalogue : catalogue.filter((s) => added.has(s.id));
   const status = (s: GeoSet) => (added.has(s.id) ? 'Active' : 'Inactive');
   const term = adding ? q.trim().toLowerCase() : '';
-  const shown = adding ? view : 'cards';
   const hits = all.filter(
     (s) =>
       !term ||
@@ -106,7 +105,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
   };
 
   return (
-    <div className="geo">
+    <div className={`geo${adding ? '' : ' is-overview'}`}>
       {adding ? (
         <header className="geo-head">
           <h1 ref={heading} tabIndex={-1}>
@@ -125,7 +124,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
       ) : (
         <header className="geo-head">
           <h1 ref={heading} tabIndex={-1}>
-            Geographies
+            Your geographies
           </h1>
           <p className="geo-lead">
             Geographies are the places your organisation serves, from the largest area down to the smallest. Every
@@ -135,8 +134,8 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
         </header>
       )}
 
-      {adding && (
-        <div className="geo-bar">
+      <div className="geo-bar">
+        {adding && (
           <div className="geo-search">
             <label htmlFor={`${uid}-q`} className="ux-visually-hidden">
               Search geographies
@@ -145,7 +144,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
             <input
               id={`${uid}-q`}
               type="search"
-              placeholder={adding ? 'Search by name, country, level or status' : 'Search your geographies'}
+              placeholder="Search by name, country, level or status"
               value={q}
               onChange={(e) => {
                 setQ(e.target.value);
@@ -154,18 +153,18 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
               }}
             />
           </div>
-          <div className="geo-view" role="group" aria-label="View as">
-            <button type="button" aria-pressed={view === 'cards'} onClick={() => setView('cards')}>
-              <Icon name="GridView" size={18} />
-              Cards
-            </button>
-            <button type="button" aria-pressed={view === 'list'} onClick={() => setView('list')}>
-              <Icon name="List" size={18} />
-              List
-            </button>
-          </div>
+        )}
+        <div className="geo-view" role="group" aria-label="View as">
+          <button type="button" aria-pressed={view === 'cards'} onClick={() => setView('cards')}>
+            <Icon name="GridView" size={18} />
+            Cards
+          </button>
+          <button type="button" aria-pressed={view === 'list'} onClick={() => setView('list')}>
+            <Icon name="List" size={18} />
+            List
+          </button>
         </div>
-      )}
+      </div>
 
       <p className={adding ? 'geo-count' : 'ux-visually-hidden'} role="status">
         {msg ||
@@ -202,7 +201,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
             </>
           )}
         </div>
-      ) : shown === 'cards' ? (
+      ) : view === 'cards' ? (
         <ul className="geo-cards">
           {hits.map((s) => (
             <li key={s.id} className="geo-card">
