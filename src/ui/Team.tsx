@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { Button, Toast } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
 import { useAccount } from '../lib/store';
@@ -13,6 +13,8 @@ import { Crumbs } from './Crumbs';
  */
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** A toast to show when the Team page opens, after adding from somewhere else (Home). */
+let flash = '';
 type Person = { key: string; name: string; email: string; role: string; products: Product[] };
 
 /** A small CSV reader: commas, quoted cells, doubled quotes. */
@@ -60,7 +62,11 @@ export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => 
   const [editing, setEditing] = useState<string | null>(null);
   const [view, setView] = useState<'cards' | 'list'>('cards');
   const [q, setQ] = useState('');
-  const [toast, setToast] = useState('');
+  const [toast, setToast] = useState(() => {
+    const t = flash;
+    flash = '';
+    return t;
+  });
   const heading = useRef<HTMLHeadingElement>(null);
   const first = useRef(true);
   useEffect(() => {
@@ -96,9 +102,14 @@ export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => 
               ...a,
               users: [...a.users, ...people.map((p) => ({ id: newId(), name: p.name.trim(), email: p.email.trim(), role: p.role, products: p.products }))],
             }));
-            if (embedded) return onDone?.();
+            const msg = `${people.length} ${people.length === 1 ? 'member' : 'members'} added. Invites sent.`;
+            // After adding, go to Your team, from Home too.
+            if (embedded) {
+              flash = msg;
+              return go('team');
+            }
             setAdding(false);
-            setToast(`${people.length} ${people.length === 1 ? 'invite' : 'invites'} sent`);
+            setToast(msg);
           }}
         />
       </div>
@@ -263,7 +274,10 @@ export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => 
   );
 }
 
-/** One person's fields, labels on top and errors under each field so the inputs line up. */
+/**
+ * One person's fields as a form list, like the sender details: each field on
+ * its own row, label on the left, control on the right, error under it.
+ */
 function PersonFields({
   uid,
   p,
@@ -279,61 +293,245 @@ function PersonFields({
 }) {
   const id = (k: string) => `${uid}-${p.key}-${k}`;
   const err = (k: string) => errors[`${p.key}-${k}`];
-  const field = (k: 'name' | 'email', label: string, type = 'text') => (
-    <div className={`tm-fld${err(k) ? ' has-error' : ''}`}>
+  const row = (k: string, label: string, control: ReactNode) => (
+    <div className={`tm-line${err(k) ? ' has-error' : ''}`}>
       <label htmlFor={id(k)}>{label}</label>
-      <input
-        id={id(k)}
-        type={type}
-        value={p[k]}
-        autoComplete="off"
-        aria-invalid={!!err(k) || undefined}
-        aria-describedby={err(k) ? `${id(k)}-err` : undefined}
-        onChange={(e) => onChange({ ...p, [k]: e.target.value })}
-      />
-      {err(k) && (
-        <p className="fld-error" id={`${id(k)}-err`}>
-          <span className="ux-visually-hidden">Error: </span>
-          {err(k)}
-        </p>
-      )}
+      <div className="tm-line-ctl">
+        {control}
+        {err(k) && (
+          <p className="fld-error" id={`${id(k)}-err`}>
+            <span className="ux-visually-hidden">Error: </span>
+            {err(k)}
+          </p>
+        )}
+      </div>
     </div>
   );
+  const text = (k: 'name' | 'email', type = 'text') => (
+    <input
+      id={id(k)}
+      type={type}
+      value={p[k]}
+      autoComplete="off"
+      aria-invalid={!!err(k) || undefined}
+      aria-describedby={err(k) ? `${id(k)}-err` : undefined}
+      onChange={(e) => onChange({ ...p, [k]: e.target.value })}
+    />
+  );
   return (
-    <>
-      {field('name', 'Name')}
-      {field('email', 'Work email', 'email')}
-      <div className="tm-fld">
-        <label htmlFor={id('role')}>Role</label>
+    <div className="tm-lines">
+      {row('name', 'Name', text('name'))}
+      {row('email', 'Work email', text('email', 'email'))}
+      {row(
+        'role',
+        'Role',
         <select id={id('role')} value={p.role} onChange={(e) => onChange({ ...p, role: e.target.value })}>
           {ROLES.map((r) => (
             <option key={r}>{r}</option>
           ))}
-        </select>
-      </div>
-      <fieldset className={`tm-fld tm-access${err('products') ? ' has-error' : ''}`} aria-describedby={err('products') ? `${id('products')}-err` : undefined}>
-        <legend>Product access</legend>
-        <div className="tm-checks">
-          {products.map((pr) => (
-            <label key={pr} className="tm-check">
+        </select>,
+      )}
+      {row(
+        'products',
+        'Product access',
+        <MultiSelect
+          id={id('products')}
+          options={products.map((pr) => ({ value: pr, label: PRODUCTS[pr].name }))}
+          value={p.products}
+          invalid={!!err('products')}
+          describedBy={err('products') ? `${id('products')}-err` : undefined}
+          onChange={(v) => onChange({ ...p, products: v as Product[] })}
+        />,
+      )}
+    </div>
+  );
+}
+
+/**
+ * A dropdown that holds checkboxes: the button shows what's chosen and
+ * opens the list; Escape or clicking outside closes it.
+ */
+function MultiSelect({
+  id,
+  label,
+  options,
+  value,
+  invalid,
+  describedBy,
+  onChange,
+}: {
+  id: string;
+  /** Name for the button when there's no <label> pointing at it. */
+  label?: string;
+  options: { value: string; label: string }[];
+  value: string[];
+  invalid?: boolean;
+  describedBy?: string;
+  onChange: (v: string[]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const wrap = useRef<HTMLDivElement>(null);
+  const button = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const away = (e: MouseEvent) => !wrap.current?.contains(e.target as Node) && setOpen(false);
+    document.addEventListener('mousedown', away);
+    requestAnimationFrame(() => wrap.current?.querySelector<HTMLInputElement>('.msel-panel input')?.focus());
+    return () => document.removeEventListener('mousedown', away);
+  }, [open]);
+  const chosen = options.filter((o) => value.includes(o.value)).map((o) => o.label);
+  return (
+    <div
+      ref={wrap}
+      className={`msel${invalid ? ' has-error' : ''}`}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape' && open) {
+          e.stopPropagation();
+          setOpen(false);
+          button.current?.focus();
+        }
+      }}
+    >
+      <button
+        ref={button}
+        id={id}
+        type="button"
+        className="msel-btn"
+        aria-expanded={open}
+        aria-controls={`${id}-panel`}
+        aria-label={label ? `${label}: ${chosen.length ? chosen.join(', ') : 'none chosen'}` : undefined}
+        aria-describedby={describedBy}
+        aria-invalid={invalid || undefined}
+        onClick={() => setOpen(!open)}
+      >
+        <span className={chosen.length ? '' : 'msel-placeholder'}>{chosen.length ? chosen.join(', ') : 'Choose products'}</span>
+        <Icon name={open ? 'ArrowDropUp' : 'ArrowDropDown'} size={22} />
+      </button>
+      {open && (
+        <div className="msel-panel" id={`${id}-panel`} role="group" aria-label="Products">
+          {options.map((o) => (
+            <label key={o.value} className="msel-opt">
               <input
                 type="checkbox"
-                id={pr === products[0] ? id('products') : undefined}
-                checked={p.products.includes(pr)}
-                onChange={() => onChange({ ...p, products: p.products.includes(pr) ? p.products.filter((x) => x !== pr) : [...p.products, pr] })}
+                checked={value.includes(o.value)}
+                onChange={() => onChange(value.includes(o.value) ? value.filter((x) => x !== o.value) : [...value, o.value])}
               />
-              {PRODUCTS[pr].name}
+              {o.label}
             </label>
           ))}
         </div>
-        {err('products') && (
-          <p className="fld-error" id={`${id('products')}-err`}>
-            <span className="ux-visually-hidden">Error: </span>
-            {err('products')}
-          </p>
-        )}
-      </fieldset>
-    </>
+      )}
+    </div>
+  );
+}
+
+/** The uploaded people as an editable table: one row each, every cell editable, errors in the cell. */
+function PeopleTable({
+  uid,
+  people,
+  products,
+  errors,
+  onChange,
+  onAdd,
+}: {
+  uid: string;
+  people: Person[];
+  products: Product[];
+  errors: Record<string, string>;
+  onChange: (p: Person[]) => void;
+  onAdd: () => void;
+}) {
+  const set = (key: string, n: Partial<Person>) => onChange(people.map((x) => (x.key === key ? { ...x, ...n } : x)));
+  const cellErr = (p: Person, k: string) =>
+    errors[`${p.key}-${k}`] && (
+      <p className="fld-error tm-cell-err" id={`${uid}-${p.key}-${k}-err`}>
+        <span className="ux-visually-hidden">Error: </span>
+        {errors[`${p.key}-${k}`]}
+      </p>
+    );
+  const desc = (p: Person, k: string) => (errors[`${p.key}-${k}`] ? `${uid}-${p.key}-${k}-err` : undefined);
+  return (
+    <div className="cg-grid-wrap">
+      <table className="cg-grid tm-grid">
+        <thead>
+          <tr>
+            <th scope="col" className="cg-grid-n">
+              <span className="ux-visually-hidden">Row</span>
+            </th>
+            <th scope="col">Name</th>
+            <th scope="col">Work email</th>
+            <th scope="col">Role</th>
+            <th scope="col">Product access</th>
+            <th scope="col" className="cg-grid-x">
+              <span className="ux-visually-hidden">Remove</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {people.map((p, i) => (
+            <tr key={p.key} className={['name', 'email', 'products'].some((k) => errors[`${p.key}-${k}`]) ? 'has-error' : undefined}>
+              <td className="cg-grid-n">{i + 1}</td>
+              <td>
+                <input
+                  id={`${uid}-${p.key}-name`}
+                  value={p.name}
+                  aria-label={`Name, row ${i + 1}`}
+                  aria-invalid={!!errors[`${p.key}-name`] || undefined}
+                  aria-describedby={desc(p, 'name')}
+                  onChange={(e) => set(p.key, { name: e.target.value })}
+                />
+                {cellErr(p, 'name')}
+              </td>
+              <td>
+                <input
+                  id={`${uid}-${p.key}-email`}
+                  type="email"
+                  value={p.email}
+                  aria-label={`Work email, row ${i + 1}`}
+                  aria-invalid={!!errors[`${p.key}-email`] || undefined}
+                  aria-describedby={desc(p, 'email')}
+                  onChange={(e) => set(p.key, { email: e.target.value })}
+                />
+                {cellErr(p, 'email')}
+              </td>
+              <td>
+                <select aria-label={`Role, row ${i + 1}`} value={p.role} onChange={(e) => set(p.key, { role: e.target.value })}>
+                  {ROLES.map((r) => (
+                    <option key={r}>{r}</option>
+                  ))}
+                </select>
+              </td>
+              <td>
+                <MultiSelect
+                  id={`${uid}-${p.key}-products`}
+                  label={`Product access, row ${i + 1}`}
+                  options={products.map((pr) => ({ value: pr, label: PRODUCTS[pr].name }))}
+                  value={p.products}
+                  invalid={!!errors[`${p.key}-products`]}
+                  describedBy={desc(p, 'products')}
+                  onChange={(v) => set(p.key, { products: v as Product[] })}
+                />
+                {cellErr(p, 'products')}
+              </td>
+              <td className="cg-grid-x">
+                <button
+                  type="button"
+                  className="cg-icon-btn"
+                  aria-label={`Remove row ${i + 1}${p.name ? `, ${p.name}` : ''}`}
+                  disabled={people.length === 1}
+                  onClick={() => onChange(people.filter((x) => x.key !== p.key))}
+                >
+                  <Icon name="Close" size={16} />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="lv-add">
+        <Button variation="secondary" icon="Add" label="Add a row" onClick={onAdd} />
+      </div>
+    </div>
   );
 }
 
@@ -418,8 +616,9 @@ function AddTeam({
     if (step === 0) {
       if (!method) e.method = 'Choose how you’d like to add your team';
     } else if (showRows) {
-      const filled = people.filter((p) => p.name.trim() || p.email.trim());
-      if (!filled.length) e[`${people[0].key}-name`] = 'Add at least one person';
+      // Adding by hand is one person: check every field. Uploaded rows skip blank lines.
+      const filled = method === 'manual' ? people : people.filter((p) => p.name.trim() || p.email.trim());
+      if (!filled.length) e[`${people[0].key}-name`] = 'Enter their name';
       const seen = new Set<string>();
       for (const p of filled) checkPerson(p, taken, seen, e);
     } else e.file = 'Upload the filled-in template first';
@@ -432,15 +631,20 @@ function AddTeam({
     onSent(people.filter((p) => p.name.trim() || p.email.trim()));
   };
 
-  const title = step === 0 ? 'How would you like to add your team?' : method === 'upload' ? (uploaded ? 'Review team members' : 'Upload team data') : 'Add team members';
+  const title = step === 0 ? 'How would you like to add your team?' : method === 'upload' ? (uploaded ? 'Review team members' : 'Upload team data') : 'Add a team member';
 
   return (
     <div className={`cg-page${step === 1 ? ' is-wide' : ''}`}>
       <Crumbs items={[...trail, { label: 'Add team members' }]} />
       <section className="cg" aria-labelledby={`${uid}-h`}>
-        <h1 id={`${uid}-h`} ref={heading} tabIndex={-1}>
-          {title}
-        </h1>
+        <div className="cg-title-row">
+          <h1 id={`${uid}-h`} ref={heading} tabIndex={-1}>
+            {title}
+          </h1>
+          {step === 1 && method === 'upload' && !uploaded && (
+            <Button variation="secondary" icon="FileDownload" label="Download template" onClick={downloadTemplate} />
+          )}
+        </div>
         {step === 0 ? (
           <div className="cg-sub">
             <p>Upload a file using the template to add many people at once, or add them one at a time. Everyone you add gets an email invite.</p>
@@ -494,9 +698,6 @@ function AddTeam({
 
           {step === 1 && method === 'upload' && !uploaded && (
             <>
-              <div className="up-top">
-                <Button variation="secondary" icon="FileDownload" label="Download template" onClick={downloadTemplate} />
-              </div>
               <div className="up" role="group" aria-label="Upload a file">
                 <input
                   ref={input}
@@ -535,39 +736,27 @@ function AddTeam({
             </>
           )}
 
-          {step === 1 && showRows && (
-            <div className="tm-rows">
-              <ol className="lv-list">
-                {people.map((p, i) => (
-                  <li key={p.key} className="tm-row">
-                    <div className="tm-row-head">
-                      <span className="lv-n">Member {i + 1}</span>
-                      <button
-                        type="button"
-                        className="lv-remove"
-                        aria-label={`Remove member ${i + 1}${p.name ? `, ${p.name}` : ''}`}
-                        disabled={people.length === 1}
-                        onClick={() => setPeople(people.filter((x) => x.key !== p.key))}
-                      >
-                        <Icon name="Close" size={18} />
-                      </button>
-                    </div>
-                    <div className="tm-row-fields">
-                      <PersonFields
-                        uid={uid}
-                        p={p}
-                        products={products}
-                        errors={errors}
-                        onChange={(n) => setPeople(people.map((x) => (x.key === p.key ? n : x)))}
-                      />
-                    </div>
-                  </li>
-                ))}
-              </ol>
-              <div className="lv-add">
-                <Button variation="secondary" icon="Add" label="Add member" onClick={() => setPeople([...people, blank()])} />
-              </div>
+          {step === 1 && method === 'manual' && (
+            <div className="tm-row ch-sec">
+              <PersonFields
+                uid={uid}
+                p={people[0]}
+                products={products}
+                errors={errors}
+                onChange={(n) => setPeople([n])}
+              />
             </div>
+          )}
+
+          {step === 1 && method === 'upload' && !!uploaded && (
+            <PeopleTable
+              uid={uid}
+              people={people}
+              products={products}
+              errors={errors}
+              onChange={setPeople}
+              onAdd={() => setPeople([...people, blank()])}
+            />
           )}
           <button type="submit" className="ux-visually-hidden" tabIndex={-1} aria-hidden="true" />
         </form>
@@ -641,8 +830,8 @@ function EditMember({
             save();
           }}
         >
-          <div className="tm-row is-edit">
-            <div className="tm-row-fields">
+          <div className="tm-row ch-sec is-edit">
+            <div>
               <PersonFields uid={uid} p={p} products={products} errors={errors} onChange={setP} />
             </div>
           </div>

@@ -221,9 +221,14 @@ export function CreateGeography({
     <div className={`cg-page${step === 'places' ? ' is-wide' : ''}`}>
       <Crumbs items={[...trail, { label: 'Create a geography' }]} />
     <section className="cg" aria-labelledby={`${uid}-h`}>
-      <h1 id={`${uid}-h`} ref={heading} tabIndex={-1}>
-        {TITLES[step]}
-      </h1>
+      <div className="cg-title-row">
+        <h1 id={`${uid}-h`} ref={heading} tabIndex={-1}>
+          {TITLES[step]}
+        </h1>
+        {step === 'places' && method === 'upload' && !uploaded && (
+          <Button variation="secondary" icon="FileDownload" label="Download template" onClick={() => downloadTemplate(country.trim(), cleanLevels)} />
+        )}
+      </div>
       {LEADS[step] ? (
         <div className="cg-sub">
           {LEADS[step].split('\n').map((line) => (
@@ -300,7 +305,6 @@ export function CreateGeography({
               <Upload
                 uid={uid}
                 levels={cleanLevels}
-                country={country.trim()}
                 uploaded={uploaded}
                 onRows={(r, file) => {
                   setRows(r.length ? r.map((p) => fit(p, cleanLevels.length)) : [blankRow(cleanLevels.length)]);
@@ -587,13 +591,11 @@ function LevelsEditor({
 function Upload({
   uid,
   levels,
-  country,
   uploaded,
   onRows,
 }: {
   uid: string;
   levels: string[];
-  country: string;
   uploaded: string;
   onRows: (rows: Path[], file: string) => void;
 }) {
@@ -616,9 +618,6 @@ function Upload({
   if (uploaded) return null;
   return (
     <>
-    <div className="up-top">
-        <Button variation="secondary" icon="FileDownload" label="Download template" onClick={() => downloadTemplate(country, levels)} />
-    </div>
     <div className="up" role="group" aria-label="Upload a file">
       <input
         ref={input}
