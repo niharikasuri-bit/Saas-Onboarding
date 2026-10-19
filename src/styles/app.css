@@ -1026,3 +1026,16 @@ p { margin: 0; line-height: 1.5; }
 
 .up-done { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); margin-bottom: var(--s4); padding: 12px 16px; border-radius: 10px; background: var(--digitv2-lightTheme-alert-successbg); color: var(--c-text); }
 .up-done .ux-icon { color: var(--c-success); }
+
+/* Full width, no boxed column: the create flow sits straight on the page */
+.cg-page, .cg-page.is-wide { max-width: none; }
+.cg { padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
+.cg-sub { max-width: none; }
+.cg-split > .fld { grid-template-columns: minmax(160px, 280px) minmax(0, 720px); }
+.geo:not(.is-overview), .geo.is-detail { max-width: none; }
+.geo:not(.is-overview) .geo-head { margin-left: auto; margin-right: auto; }
+
+/* Each level is its own #FAFAFA box; the list itself has none */
+.lv { padding: 0; border: 0; border-radius: 0; background: none; }
+.lv-row { padding: 12px 12px 12px 8px; border: 1px solid #E3E3E3; border-radius: 12px; background: #FAFAFA; }
+.lv-add { margin-left: 0; }
