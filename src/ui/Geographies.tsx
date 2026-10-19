@@ -239,7 +239,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
             editable ? (
               <SheetIntro action="Save" tree={v === 'tree'} />
             ) : !isAdded ? (
-              <InfoNote icon="NotListedLocation" title="Can’t find a boundary?" grey>
+              <InfoNote title="Can’t find a boundary?" grey>
                 Add the geography to your account, then edit it manually to include any missing boundaries.
               </InfoNote>
             ) : null

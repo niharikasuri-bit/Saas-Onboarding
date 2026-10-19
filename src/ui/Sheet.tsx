@@ -56,11 +56,11 @@ export function UploadSteps({ thing }: { thing: string }) {
 }
 
 /** A note above a table or tree: an icon, a short title, one line of help. Light blue, or `grey` (#FAFAFA). */
-export function InfoNote({ icon, title, grey, children }: { icon: string; title: string; grey?: boolean; children: React.ReactNode }) {
+export function InfoNote({ icon, title, grey, children }: { icon?: string; title: string; grey?: boolean; children: React.ReactNode }) {
   return (
     <div className="sh-intro">
       <p className={`sh-note${grey ? ' is-grey' : ''}`}>
-        <Icon name={icon} size={18} />
+        {icon && <Icon name={icon} size={18} />}
         <span>
           <strong>{title}</strong>
           <span>{children}</span>

@@ -452,6 +452,20 @@ function PeopleTable({
     );
   const desc = (p: Person, k: string) => (errors[`${p.key}-${k}`] ? `${uid}-${p.key}-${k}-err` : undefined);
   return (
+    <div className="tm-sheet">
+    <div className="cg-places-bar">
+      <Button
+        variation="secondary"
+        icon="Add"
+        label="Add team member"
+        onClick={() => {
+          onAdd();
+          // Straight into the new row's first cell.
+          requestAnimationFrame(() => (document.querySelector('.tm-grid tbody tr:last-child input') as HTMLInputElement | null)?.focus());
+        }}
+      />
+    </div>
+    <div className="pt-panel tm-panel">
     <div className="cg-grid-wrap">
       <SheetIntro action="Send invites" />
       <table className="cg-grid tm-grid is-sheet">
@@ -545,9 +559,8 @@ function PeopleTable({
           ))}
         </tbody>
       </table>
-      <div className="lv-add">
-        <Button variation="secondary" icon="Add" label="Add a row" onClick={onAdd} />
-      </div>
+    </div>
+    </div>
     </div>
   );
 }
@@ -579,8 +592,6 @@ function AddTeam({
   const blank = (): Person => ({ key: newId(), name: '', email: '', role: 'Staff', products: [...products] });
   const [step, setStep] = useState(0);
   const [method, setMethod] = useState<'manual' | 'upload' | ''>('');
-  // Adding by hand: one person in a form, or several in a sheet.
-  const [mode, setMode] = useState<'form' | 'sheet'>('form');
   const [people, setPeople] = useState<Person[]>(() => [blank()]);
   const [uploaded, setUploaded] = useState('');
   const [fileError, setFileError] = useState('');
@@ -636,7 +647,7 @@ function AddTeam({
       if (!method) e.method = 'Choose how you’d like to add your team';
     } else if (showRows) {
       // Adding by hand is one person: check every field. Uploaded rows skip blank lines.
-      const filled = method === 'manual' && mode === 'form' ? people.slice(0, 1) : people.filter((p) => p.name.trim() || p.email.trim());
+      const filled = method === 'manual' ? people.slice(0, 1) : people.filter((p) => p.name.trim() || p.email.trim());
       if (!filled.length) filled.push(people[0]);
       if (!filled.length) e[`${people[0].key}-name`] = 'Enter their name';
       const seen = new Set<string>();
@@ -648,10 +659,10 @@ function AddTeam({
       return;
     }
     if (step === 0) return setStep(1);
-    onSent(method === 'manual' && mode === 'form' ? people.slice(0, 1) : people.filter((p) => p.name.trim() || p.email.trim()));
+    onSent(method === 'manual' ? people.slice(0, 1) : people.filter((p) => p.name.trim() || p.email.trim()));
   };
 
-  const title = step === 0 ? 'How would you like to add your team?' : method === 'upload' ? (uploaded ? 'View and edit uploaded team data' : 'Upload team data') : mode === 'sheet' ? 'Add team members' : 'Add a team member';
+  const title = step === 0 ? 'How would you like to add your team?' : method === 'upload' ? (uploaded ? 'View and edit uploaded team data' : 'Upload team data') : 'Add a team member';
 
   return (
     <div className={`cg-page${step === 1 ? ' is-wide' : ''}`}>
@@ -672,6 +683,10 @@ function AddTeam({
         ) : method === 'upload' && uploaded ? (
           <div className="cg-sub">
             <p>Review the team members from your file and edit any row before you add them.</p>
+          </div>
+        ) : method === 'manual' ? (
+          <div className="cg-sub">
+            <p>Add details about the team member you are about to add.</p>
           </div>
         ) : (
           <div className="cg-gap" />
@@ -762,35 +777,8 @@ function AddTeam({
           )}
 
           {step === 1 && method === 'manual' && (
-            <div className="pt">
-              <div className="pt-bar">
-                <div className="pt-tabs" role="group" aria-label="Add as">
-                  <button type="button" aria-pressed={mode === 'form'} onClick={() => setMode('form')}>
-                    <Icon name="Edit" size={18} />
-                    Form
-                  </button>
-                  <button type="button" aria-pressed={mode === 'sheet'} onClick={() => setMode('sheet')}>
-                    <Icon name="TableView" size={18} />
-                    Sheet
-                  </button>
-                </div>
-              </div>
-              <div className="pt-panel">
-                {mode === 'form' ? (
-                  <div className="tm-row ch-sec">
-                    <PersonFields uid={uid} p={people[0]} products={products} errors={errors} onChange={(n) => setPeople([n, ...people.slice(1)])} />
-                  </div>
-                ) : (
-                  <PeopleTable
-                    uid={uid}
-                    people={people}
-                    products={products}
-                    errors={errors}
-                    onChange={setPeople}
-                    onAdd={() => setPeople([...people, blank()])}
-                  />
-                )}
-              </div>
+            <div className="tm-row ch-sec">
+              <PersonFields uid={uid} p={people[0]} products={products} errors={errors} onChange={(n) => setPeople([n, ...people.slice(1)])} />
             </div>
           )}
 
