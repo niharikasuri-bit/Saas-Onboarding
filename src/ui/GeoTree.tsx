@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
+import { Button } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
 import { newId, type GeoRow } from '../lib/model';
 
@@ -80,8 +82,7 @@ export function GeoTree({
     else n.add(k);
     setClosed(n);
   };
-  const add = (parent: string, level: number, name: string) =>
-    onChange?.([...rows, { key: newId(), name, level, parent }]);
+  const [adding, setAdding] = useState<{ level: number; parent: string; parentName: string } | null>(null);
 
   const branch = (parent: string, level: number): ReactNode => (
     <ul className="gt-list">
@@ -114,11 +115,15 @@ export function GeoTree({
       })}
       {onChange && level < levels.length && (
         <li className="gt-add-li">
-          <AddPlace
-            what={levels[level]}
-            where={parent ? rows.find((x) => x.key === parent)?.name : root}
-            onAdd={(name) => add(parent, level, name)}
-          />
+          <button
+            type="button"
+            className="gt-add"
+            onClick={() => setAdding({ level, parent, parentName: parent ? rows.find((x) => x.key === parent)?.name ?? root : root })}
+          >
+            <Icon name="AddBox" size={18} />
+            Add {levels[level]}
+            <span className="ux-visually-hidden"> in {parent ? rows.find((x) => x.key === parent)?.name : root}</span>
+          </button>
         </li>
       )}
     </ul>
@@ -126,6 +131,9 @@ export function GeoTree({
 
   return (
     <div className="gt">
+      {adding && onChange && (
+        <AddGeographyDialog levels={levels} rows={rows} fixed={adding} onAdd={(r) => onChange([...rows, r])} onClose={() => setAdding(null)} />
+      )}
       <div className="gt-card is-root">
         <span className="gt-name">{root}</span>
         <span className="geo-tag">Country</span>
@@ -203,69 +211,10 @@ function PlaceCard({
   );
 }
 
-/** "+ Add District" that opens a one-line input in place. */
-function AddPlace({ what, where, onAdd }: { what: string; where?: string; onAdd: (name: string) => void }) {
-  const [open, setOpen] = useState(false);
-  const [v, setV] = useState('');
-  const input = useRef<HTMLInputElement>(null);
-  const button = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
-    if (open) input.current?.focus();
-  }, [open]);
-  const close = () => {
-    setV('');
-    setOpen(false);
-    requestAnimationFrame(() => button.current?.focus());
-  };
-  if (!open)
-    return (
-      <button ref={button} type="button" className="gt-add" onClick={() => setOpen(true)}>
-        <Icon name="AddBox" size={18} />
-        Add {what}
-        {where && <span className="ux-visually-hidden"> in {where}</span>}
-      </button>
-    );
-  return (
-    <span className="gt-add-line">
-      <input
-        ref={input}
-        className="gt-input"
-        value={v}
-        aria-label={`${what} name${where ? `, in ${where}` : ''}`}
-        onChange={(e) => setV(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            if (v.trim()) onAdd(v.trim());
-            setV('');
-          }
-          if (e.key === 'Escape') close();
-        }}
-      />
-      <button
-        type="button"
-        className="gt-add"
-        onClick={() => {
-          if (v.trim()) onAdd(v.trim());
-          close();
-        }}
-      >
-        Add
-      </button>
-      <button type="button" className="gt-add is-quiet" onClick={close}>
-        Cancel
-      </button>
-    </span>
-  );
-}
-
 /** One row per place. Editable: rename in place, remove, and add a place with its level and parent. */
 function PlacesTable({ levels, rows, onChange }: { levels: string[]; rows: GeoRow[]; onChange?: (rows: GeoRow[]) => void }) {
   const nameOf = new Map(rows.map((r) => [r.key, r.name]));
-  const [f, setF] = useState({ name: '', level: '0', parent: '' });
-  const [error, setError] = useState('');
-  const level = Number(f.level);
-  const parents = level ? rows.filter((r) => r.level === level - 1) : [];
+  const [adding, setAdding] = useState(false);
   return (
     <div className="cg-grid-wrap">
       <table className={`cg-grid${onChange ? '' : ' is-read'}`}>
@@ -323,59 +272,272 @@ function PlacesTable({ levels, rows, onChange }: { levels: string[]; rows: GeoRo
         </tbody>
       </table>
       {onChange && (
-        <form
-          className="pt-add"
-          noValidate
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (!f.name.trim()) return setError('Enter the place’s name');
-            if (level && !f.parent) return setError(`Choose the ${levels[level - 1]} it sits inside`);
-            onChange([...rows, { key: newId(), name: f.name.trim(), level, parent: level ? f.parent : '' }]);
-            setF({ ...f, name: '' });
-            setError('');
-          }}
-        >
-          <p className="pt-add-h">Add a place</p>
-          {error && (
-            <p className="fld-error" role="alert">
-              {error}
-            </p>
-          )}
-          <div className="pt-add-row">
-            <label>
-              <span>Name</span>
-              <input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
-            </label>
-            <label>
-              <span>Level</span>
-              <select value={f.level} onChange={(e) => setF({ ...f, level: e.target.value, parent: '' })}>
-                {levels.map((l, i) => (
-                  <option key={l} value={i}>
-                    {l}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {level > 0 && (
-              <label>
-                <span>Sits inside</span>
-                <select value={f.parent} onChange={(e) => setF({ ...f, parent: e.target.value })}>
-                  <option value="">Choose</option>
-                  {parents.map((p) => (
-                    <option key={p.key} value={p.key}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
-            <button type="submit" className="gt-add">
-              <Icon name="AddBox" size={18} />
-              Add
-            </button>
-          </div>
-        </form>
+        <div className="pt-add-btn">
+          <Button variation="secondary" icon="Add" label="Add geography" onClick={() => setAdding(true)} />
+        </div>
+      )}
+      {adding && onChange && (
+        <AddGeographyDialog levels={levels} rows={rows} onAdd={(r) => onChange([...rows, r])} onClose={() => setAdding(false)} />
       )}
     </div>
+  );
+}
+
+/**
+ * Add a geography, in a pop-up: its level, name, where it sits (when that
+ * isn't already known), and optional lat / long, code and shape file.
+ */
+export function AddGeographyDialog({
+  levels,
+  rows,
+  fixed,
+  onAdd,
+  onClose,
+}: {
+  levels: string[];
+  rows: GeoRow[];
+  /** Set when adding from the tree: the level and parent are known. */
+  fixed?: { level: number; parent: string; parentName: string };
+  onAdd: (row: GeoRow) => void;
+  onClose: () => void;
+}) {
+  const ref = useRef<HTMLDialogElement>(null);
+  const head = useRef<HTMLHeadingElement>(null);
+  const opener = useRef<HTMLElement | null>(null);
+  const shapeInput = useRef<HTMLInputElement>(null);
+  const uid = useId();
+  const [f, setF] = useState({ level: fixed ? String(fixed.level) : '', name: '', parent: fixed?.parent ?? '', latlong: '', code: '' });
+  const [shape, setShape] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  useEffect(() => {
+    opener.current = document.activeElement as HTMLElement;
+    ref.current?.showModal();
+    requestAnimationFrame(() => head.current?.focus());
+  }, []);
+  const close = () => {
+    ref.current?.close();
+    onClose();
+    requestAnimationFrame(() => opener.current?.isConnected && opener.current.focus());
+  };
+  const level = f.level === '' ? -1 : Number(f.level);
+  const parents = level > 0 ? rows.filter((r) => r.level === level - 1) : [];
+  const needsParent = !fixed && level > 0;
+
+  const save = () => {
+    const e: Record<string, string> = {};
+    if (level < 0) e.level = 'Select the geography level';
+    if (!f.name.trim()) e.name = 'Enter the name of the geography';
+    if (needsParent && !f.parent) e.parent = `Choose the ${levels[level - 1]} it sits inside`;
+    if (f.latlong.trim() && !/^\s*-?\d{1,2}(\.\d+)?\s*,\s*-?\d{1,3}(\.\d+)?\s*$/.test(f.latlong))
+      e.latlong = 'Enter latitude and longitude separated by a comma, for example 12.9716, 77.5946';
+    setErrors(e);
+    if (Object.keys(e).length) {
+      document.getElementById(`${uid}-${Object.keys(e)[0]}`)?.focus();
+      return;
+    }
+    onAdd({
+      key: newId(),
+      name: f.name.trim(),
+      level,
+      parent: fixed ? fixed.parent : level > 0 ? f.parent : '',
+      latlong: f.latlong.trim() || undefined,
+      code: f.code.trim() || undefined,
+      shape: shape || undefined,
+    });
+    close();
+  };
+
+  const field = (key: string, label: string, required: boolean, control: ReactNode, hint?: string) => (
+    <div className={`ag-fld${errors[key] ? ' has-error' : ''}`}>
+      <label htmlFor={`${uid}-${key}`}>
+        {label}
+        {required ? (
+          <span className="ag-req" aria-hidden="true">
+            {' '}
+            *
+          </span>
+        ) : (
+          <span className="ag-opt"> (Optional)</span>
+        )}
+      </label>
+      {hint && (
+        <p className="ag-hint" id={`${uid}-${key}-hint`}>
+          {hint}
+        </p>
+      )}
+      {errors[key] && (
+        <p className="fld-error" id={`${uid}-${key}-err`}>
+          <span className="ux-visually-hidden">Error: </span>
+          {errors[key]}
+        </p>
+      )}
+      {control}
+    </div>
+  );
+  const described = (key: string, hint?: boolean) =>
+    [errors[key] ? `${uid}-${key}-err` : '', hint ? `${uid}-${key}-hint` : ''].filter(Boolean).join(' ') || undefined;
+
+  // Rendered on <body>: this can open inside another form (the create steps).
+  return createPortal(
+    <dialog
+      ref={ref}
+      className="ag"
+      aria-labelledby={`${uid}-h`}
+      onCancel={(e) => {
+        e.preventDefault();
+        close();
+      }}
+    >
+      <form
+        noValidate
+        onSubmit={(e) => {
+          e.preventDefault();
+          // React events still bubble to the form it was opened from; stop them here.
+          e.stopPropagation();
+          save();
+        }}
+      >
+        <div className="ag-top">
+          <h2 id={`${uid}-h`} ref={head} tabIndex={-1}>
+            Add a geography
+          </h2>
+          <button type="button" className="ag-x" aria-label="Close" onClick={close}>
+            <Icon name="Close" size={22} />
+          </button>
+        </div>
+        {fixed && (
+          <p className="ag-where">
+            Inside <strong>{fixed.parentName}</strong>
+          </p>
+        )}
+        <div className="ag-body">
+          {field(
+            'level',
+            'Select geography level',
+            true,
+            <select
+              id={`${uid}-level`}
+              value={f.level}
+              disabled={!!fixed}
+              aria-required="true"
+              aria-invalid={!!errors.level || undefined}
+              aria-describedby={described('level')}
+              onChange={(e) => setF({ ...f, level: e.target.value, parent: '' })}
+            >
+              <option value="">Select</option>
+              {levels.map((l, i) => (
+                <option key={l} value={i}>
+                  {l}
+                </option>
+              ))}
+            </select>,
+          )}
+          {needsParent &&
+            field(
+              'parent',
+              `Sits inside (${levels[level - 1]})`,
+              true,
+              <select
+                id={`${uid}-parent`}
+                value={f.parent}
+                aria-required="true"
+                aria-invalid={!!errors.parent || undefined}
+                aria-describedby={described('parent')}
+                onChange={(e) => setF({ ...f, parent: e.target.value })}
+              >
+                <option value="">Select</option>
+                {parents.map((p) => (
+                  <option key={p.key} value={p.key}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>,
+            )}
+          {field(
+            'name',
+            'Name of the geography',
+            true,
+            <input
+              id={`${uid}-name`}
+              value={f.name}
+              aria-required="true"
+              aria-invalid={!!errors.name || undefined}
+              aria-describedby={described('name')}
+              onChange={(e) => setF({ ...f, name: e.target.value })}
+            />,
+          )}
+          {field(
+            'latlong',
+            'Lat / Long',
+            false,
+            <input
+              id={`${uid}-latlong`}
+              value={f.latlong}
+              placeholder="12.9716, 77.5946"
+              inputMode="decimal"
+              aria-invalid={!!errors.latlong || undefined}
+              aria-describedby={described('latlong')}
+              onChange={(e) => setF({ ...f, latlong: e.target.value })}
+            />,
+          )}
+          {field(
+            'code',
+            'Geography code',
+            false,
+            <input
+              id={`${uid}-code`}
+              value={f.code}
+              placeholder="GEO123456"
+              aria-describedby={described('code')}
+              onChange={(e) => setF({ ...f, code: e.target.value })}
+            />,
+          )}
+          <div className="ag-fld">
+            <p className="ag-label" id={`${uid}-shape-l`}>
+              Upload shape file <span className="ag-opt">(Optional)</span>
+            </p>
+            <p className="ag-hint" id={`${uid}-shape-hint`}>
+              A .zip, .shp or .geojson file with this geography’s outline.
+            </p>
+            <input
+              ref={shapeInput}
+              className="ux-visually-hidden"
+              type="file"
+              accept=".zip,.shp,.geojson,.json"
+              tabIndex={-1}
+              aria-hidden="true"
+              onChange={(e) => {
+                setShape(e.target.files?.[0]?.name ?? shape);
+                e.target.value = '';
+              }}
+            />
+            <div className="ag-shape">
+              <span className="ag-shape-count">{shape ? '1 uploaded' : 'No file uploaded'}</span>
+              <Button
+                variation="secondary"
+                icon="FileUpload"
+                label="Upload"
+                title="Upload shape file"
+                onClick={() => shapeInput.current?.click()}
+              />
+            </div>
+            {shape && (
+              <p className="ag-shape-file">
+                <Icon name="Description" size={18} />
+                <span>{shape}</span>
+                <button type="button" className="ag-x is-sm" aria-label={`Remove ${shape}`} onClick={() => setShape('')}>
+                  <Icon name="Close" size={16} />
+                </button>
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="ag-foot">
+          <Button variation="secondary" label="Cancel" onClick={close} />
+          <Button variation="primary" label="Add geography" submit onClick={() => {}} />
+        </div>
+      </form>
+    </dialog>,
+    document.body,
   );
 }

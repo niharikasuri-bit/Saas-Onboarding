@@ -18,6 +18,16 @@ export function Icon({ name, size = 20 }: { name: string; size?: number }) {
       </span>
     );
   }
+  // Nor a plus in a circle.
+  if (name === 'AddCircle') {
+    return (
+      <span className="ux-icon" aria-hidden="true">
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2Z" />
+        </svg>
+      </span>
+    );
+  }
   // Nor a plain plus.
   if (name === 'Add') {
     return (

@@ -480,7 +480,7 @@ export const REFERENCE_AREAS: { name: string; parent: string; level: number }[] 
  * levels, largest first, and how many geographies it contains in all.
  */
 /** One place inside a geography: key is unique within it, parent is the key above (or ''). */
-export type GeoRow = { key: string; name: string; level: number; parent: string };
+export type GeoRow = { key: string; name: string; level: number; parent: string; latlong?: string; code?: string; shape?: string };
 export type GeoSet = {
   id: string;
   name: string;

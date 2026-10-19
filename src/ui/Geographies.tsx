@@ -5,6 +5,7 @@ import { useAccount } from '../lib/store';
 import { GEO_SETS, REFERENCE_AREAS, newId, type Account, type Area, type GeoRow, type GeoSet } from '../lib/model';
 import { CreateGeography } from './CreateGeography';
 import { PlacesTabs } from './GeoTree';
+import { Crumbs } from './Crumbs';
 
 /**
  * The Geographies page, in two states, both centred at the top:
@@ -81,7 +82,7 @@ function download(set: GeoSet, rows: GeoRow[]) {
 
 /** embedded: shown inside Home's account setup; always adding, and onDone goes back. */
 export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?: () => void } = {}) {
-  const { account, update } = useAccount();
+  const { account, update, go } = useAccount();
   const uid = useId();
   const [q, setQ] = useState('');
   const [view, setView] = useState<'cards' | 'list'>('cards');
@@ -109,6 +110,10 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
   const catalogue = [...GEO_SETS, ...(account.geography.custom ?? [])];
   const countOf = (s: GeoSet) => rowsFor(account, s).length;
   const viewing = catalogue.find((s) => s.id === viewingId) ?? null;
+  // Breadcrumbs: Home, then Geographies once they have some, then Add geographies while adding.
+  const homeCrumb = { label: 'Home', onClick: embedded ? () => onDone?.() : () => go('home') };
+  const geoCrumb = !embedded && added.size ? [{ label: 'Geographies', onClick: () => done('') }] : [];
+  const addTrail = [homeCrumb, ...geoCrumb, { label: 'Add geographies', onClick: () => setCreating(null) }];
   // Adding shows only what isn't in the account yet; the overview shows only what is.
   const all = catalogue.filter((s) => (adding ? !added.has(s.id) : added.has(s.id)));
   // A geography in the account turns active once a product using it is live.
@@ -146,10 +151,13 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
     const rows = rowsFor(account, viewing);
     return (
       <div className="geo is-detail">
-        <button type="button" className="geo-back" onClick={() => setViewing(null)}>
-          <Icon name="ArrowBack" size={20} />
-          Back<span className="ux-visually-hidden">{isAdded ? ' to your geographies' : ' to add your geographies'}</span>
-        </button>
+        <Crumbs
+          items={[
+            homeCrumb,
+            ...(isAdded ? [{ label: 'Geographies', onClick: () => setViewing(null) }] : [...geoCrumb, { label: 'Add geographies', onClick: () => setViewing(null) }]),
+            { label: viewing.name },
+          ]}
+        />
         <header className="geo-detail-head">
           <div>
             <h1 ref={heading} tabIndex={-1}>
@@ -202,13 +210,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
 
   return (
     <div className={`geo${adding ? '' : ' is-overview'}${creating !== null ? ' is-creating' : ''}`}>
-      {creating === null && adding && (embedded || !!added.size) && (
-        <button type="button" className="geo-back" onClick={() => (embedded ? onDone?.() : done(''))}>
-          <Icon name="ArrowBack" size={20} />
-          Back
-          <span className="ux-visually-hidden">{embedded ? ' to account setup' : ' to your geographies'}</span>
-        </button>
-      )}
+      {creating === null && adding && <Crumbs items={[homeCrumb, ...geoCrumb, { label: 'Add geographies' }]} />}
       {creating !== null ? null : adding ? (
         <header className="geo-head">
           <h1 ref={heading} tabIndex={-1}>
@@ -285,6 +287,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
 
       {creating !== null ? (
         <CreateGeography
+          trail={addTrail}
           initial={creating}
           taken={catalogue}
           onCancel={() => setCreating(null)}
@@ -346,7 +349,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                   <Button variation="primary" icon="Add" label="Add geographies to account" onClick={() => add(s)} />
                 )}
                 {adding ? (
-                  <Button variation="secondary" icon="Visibility" label="View" title={`View ${s.name}`} onClick={() => open(s.id, false)} />
+                  <Button variation="secondary" icon="Visibility" label="View geography data" title={`View ${s.name} geography data`} onClick={() => open(s.id, false)} />
                 ) : (
                   <div className="geo-pair">
                     <Button variation="secondary" icon="Visibility" label="View" title={`View ${s.name}`} onClick={() => open(s.id, false)} />
@@ -390,8 +393,8 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                         variation="secondary"
                         size="small"
                         icon="Visibility"
-                        label="View"
-                        title={`View ${s.name}`}
+                        label={adding ? 'View geography data' : 'View'}
+                        title={`View ${s.name}${adding ? ' geography data' : ''}`}
                         onClick={() => open(s.id, false)}
                       />
                       {!adding && (

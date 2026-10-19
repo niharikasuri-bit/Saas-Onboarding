@@ -4,6 +4,7 @@ import { Icon } from '../components/Icon';
 import { newId, type GeoRow, type GeoSet } from '../lib/model';
 import { Field, describedBy } from './StepFrame';
 import { GeoTree } from './GeoTree';
+import { Crumbs } from './Crumbs';
 
 /**
  * Create a geography, one step at a time:
@@ -102,11 +103,14 @@ function downloadTemplate(country: string, levels: string[]) {
 }
 
 export function CreateGeography({
+  trail,
   initial,
   taken,
   onCancel,
   onCreate,
 }: {
+  /** Breadcrumbs before "Create a geography". */
+  trail: { label: string; onClick?: () => void }[];
   initial: string;
   taken: GeoSet[];
   onCancel: () => void;
@@ -201,30 +205,34 @@ export function CreateGeography({
     country: 'Which country is it?',
     levels: `How is ${country.trim() || 'it'} divided?`,
     method: 'How would you like to create your geographies?',
-    places: method === 'upload' ? (uploaded ? 'Check the places you uploaded' : 'Upload your places') : method === 'osm' ? 'Check the places we fetched' : 'Add your places',
+    places: method === 'upload' ? 'Upload geography data' : method === 'osm' ? 'Check the places we fetched' : 'Add geography data',
   };
 
   const LEADS: Record<Step, string> = {
-    method: 'Pick one. You can change the places afterwards.',
+    method:
+      'Would you like to import geography details in bulk to save time, or create geographies manually from scratch?\nChoosing to import will allow you to quickly add multiple geographies at once, while creating manually gives you full control over each geography’s configuration.',
     country: 'Your geography starts here. Everything you add sits inside it.',
     levels: 'List the boundary levels from largest to smallest — for example Country, Region, District.',
-    places:
-      method === 'upload'
-        ? uploaded
-          ? 'Fix anything that’s wrong, then create the geography.'
-          : 'Download the template, fill it in, and upload it. You can check every place before you save.'
-        : method === 'osm'
-          ? 'Check the places, and fix any before you create the geography.'
-          : 'Add one row per place, from the largest level down. Switch to the tree to see how they fit.',
+    // No description on the upload and add pages for now.
+    places: method === 'osm' ? 'Check the places, and fix any before you create the geography.' : '',
   };
 
   return (
     <div className={`cg-page${step === 'places' ? ' is-wide' : ''}`}>
+      <Crumbs items={[...trail, { label: 'Create a geography' }]} />
     <section className="cg" aria-labelledby={`${uid}-h`}>
       <h1 id={`${uid}-h`} ref={heading} tabIndex={-1}>
         {TITLES[step]}
       </h1>
-      <p className="cg-sub">{LEADS[step]}</p>
+      {LEADS[step] ? (
+        <div className="cg-sub">
+          {LEADS[step].split('\n').map((line) => (
+            <p key={line}>{line}</p>
+          ))}
+        </div>
+      ) : (
+        <div className="cg-gap" />
+      )}
 
       <form
         noValidate
@@ -262,8 +270,8 @@ export function CreateGeography({
             <div className="qz-tile-row">
               {(
                 [
-                  ['manual', 'Edit', 'Add manually'],
-                  ['upload', 'FileUpload', 'Bulk upload geography data'],
+                  ['manual', 'AddCircle', 'Add Geographies Manually'],
+                  ['upload', 'FileUpload', 'Bulk Upload Geography Data'],
                   ['osm', 'Public', 'Fetch from OpenStreetMap'],
                 ] as const
               ).map(([value, icon, title], i) => (
@@ -277,14 +285,9 @@ export function CreateGeography({
                     onChange={() => setMethod(value)}
                   />
                   <span className="cg-tile-icon" aria-hidden="true">
-                    <Icon name={icon} size={36} />
+                    <Icon name={icon} size={28} />
                   </span>
                   <span className="qz-tile-label">{title}</span>
-                  {method === value && (
-                    <span className="qz-tile-tick" aria-hidden="true">
-                      <Icon name="Check" size={12} />
-                    </span>
-                  )}
                 </label>
               ))}
             </div>
@@ -375,7 +378,13 @@ export function CreateGeography({
           title={n === 1 ? 'Back to add your geographies' : 'Back to the previous step'}
           onClick={back}
         />
-        <Button variation="primary" label={step === 'places' ? 'Create geography' : 'Continue'} onClick={next} />
+        <Button
+          variation="primary"
+          label={step === 'places' ? 'Create geography' : 'Next'}
+          icon={step === 'places' ? undefined : 'ArrowForward'}
+          isSuffix
+          onClick={next}
+        />
       </footer>
     </div>
   );

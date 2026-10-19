@@ -1063,6 +1063,87 @@ p { margin: 0; line-height: 1.5; }
 
 .cg-toast:empty { display: none; }
 .cg-toast { position: fixed; left: 50%; bottom: 96px; z-index: 30; transform: translateX(-50%); }
+
+/* Breadcrumb above the create steps */
+.cg-crumbs { margin-bottom: var(--s4); }
+.cg-crumbs ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.875rem; }
+.cg-crumbs li + li::before { content: '/'; margin-right: 6px; color: var(--c-text-2); }
+.cg-crumbs button { padding: 0; border: 0; background: none; cursor: pointer; font: inherit; color: var(--c-primary); }
+.cg-crumbs button:hover { text-decoration: underline; }
+.cg-crumbs button:focus-visible { outline: none; border-radius: 2px; box-shadow: var(--focus); }
+.cg-crumbs li[aria-current='page'] { color: var(--c-text); }
+.cg-sub p + p { margin-top: 2px; }
+.cg-sub { font-size: 0.9375rem; }
+
+/* How: wide tiles, centred, orange icon and title */
+.cg-tiles .qz-tile-row { grid-template-columns: repeat(3, minmax(0, 280px)); justify-content: center; gap: var(--s5, 20px); }
+.cg-tiles .qz-tile { aspect-ratio: auto; min-height: 112px; padding: 20px; border: 1px solid var(--c-primary); border-radius: 8px; gap: 10px; }
+.cg-tiles .qz-tile .qz-tile-label { font-size: 1.125rem; font-weight: 700; color: var(--c-primary); }
+.cg-tiles .qz-tile.is-on { box-shadow: 0 4px 14px rgb(16 24 40 / 0.18), inset 0 0 0 1px var(--c-primary); background: #fff; }
+.cg-tiles .qz-tile:hover { background: #fff; box-shadow: 0 4px 14px rgb(16 24 40 / 0.14); }
+
+/* Toast: solid green, just above the footer */
+.cg-toast { position: fixed; left: 50%; bottom: 84px; z-index: 30; transform: translateX(-50%); }
+.cg-toast .digit-toast-success { position: static; display: flex; align-items: center; gap: 10px; min-width: 420px; max-width: 90vw; padding: 12px 16px; border-radius: 2px; color: #fff; background: #00703C; box-shadow: 0 4px 16px rgb(16 24 40 / 0.2); transform: none; }
+.cg-toast .toast-label { color: #fff; font-weight: 500; }
+.cg-toast .digit-toast-close-btn { margin-left: auto; }
+
+.cg-gap { height: var(--s6); }
+
+/* Add a geography pop-up */
+.ag { width: min(640px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 0; border: 0; border-radius: 16px; background: #fff; box-shadow: 0 24px 64px rgb(16 24 40 / 0.24); }
+.ag::backdrop { background: rgb(11 12 12 / 0.5); }
+.ag form { display: flex; flex-direction: column; max-height: calc(100vh - 48px); }
+.ag-top { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); padding: 24px 28px 8px; }
+.ag-top h2 { font-size: 1.5rem; font-weight: 700; color: var(--digitv2-lightTheme-primary-2); }
+.ag-top h2:focus { outline: none; }
+.ag-where { padding: 0 28px; color: var(--c-text-2); }
+.ag-body { display: flex; flex-direction: column; gap: 20px; padding: 20px 28px 8px; overflow-y: auto; }
+.ag-fld { display: flex; flex-direction: column; gap: 6px; }
+.ag-fld > label, .ag-label { font-weight: 700; color: var(--c-text); }
+.ag-req { color: var(--digitv2-lightTheme-alert-error); }
+.ag-opt { font-weight: 400; color: var(--c-text-2); }
+.ag-hint { font-size: 0.875rem; color: var(--c-text-2); }
+.ag-fld input, .ag-fld select { height: 44px; padding: 0 14px; border: 1px solid var(--digitv2-lightTheme-text-secondary); border-radius: 6px; background: #fff; font: inherit; font-size: 1rem; color: var(--c-text); }
+.ag-fld select:disabled { background: #F3F3F3; color: var(--c-text); opacity: 1; }
+.ag-fld input:focus, .ag-fld select:focus { outline: none; border-color: var(--digitv2-lightTheme-primary-2); box-shadow: var(--focus); }
+.ag-fld.has-error input, .ag-fld.has-error select { border: 2px solid var(--digitv2-lightTheme-alert-error); }
+.ag-shape { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); padding: 6px 6px 6px 14px; border: 1px solid var(--digitv2-lightTheme-text-secondary); border-radius: 6px; }
+.ag-shape-count { color: var(--c-text-2); }
+.ag-shape > button { height: 36px; padding: 0 14px; }
+.ag-shape > button .digit-button-label { font-size: 0.9375rem; font-weight: 500; }
+.ag-shape-file { display: flex; align-items: center; gap: var(--s2); padding: 8px 6px 8px 12px; border-radius: 6px; background: #FAFAFA; color: var(--digitv2-lightTheme-primary-2); }
+.ag-shape-file span { flex: 1; font-weight: 500; color: var(--c-text); word-break: break-all; }
+.ag-x { width: 40px; height: 40px; display: grid; place-items: center; border: 0; border-radius: 8px; background: none; cursor: pointer; color: var(--digitv2-lightTheme-primary-2); }
+.ag-x.is-sm { width: 32px; height: 32px; }
+.ag-x:hover { background: var(--digitv2-lightTheme-generic-background); }
+.ag-x:focus-visible { outline: none; box-shadow: var(--focus); }
+.ag-foot { display: flex; justify-content: flex-end; gap: var(--s3); padding: 16px 28px 24px; border-top: 1px solid var(--c-divider); margin-top: 16px; }
+.ag-foot > button { height: 44px; padding: 0 22px; }
+.ag-foot > button .digit-button-label { font-size: 1rem; font-weight: 500; }
+.pt-add-btn { margin-top: var(--s3); }
+.pt-add-btn > button { height: 40px; padding: 0 16px; }
+.pt-add-btn > button .digit-button-label { font-size: 0.9375rem; font-weight: 500; }
+
+/* Footer pinned to the bottom of the screen, across the page beside the side nav */
+.cg-bar { position: fixed; left: 240px; right: 0; bottom: 0; margin: 0; }
+.cg-page { padding-bottom: 88px; }
+@media (max-width: 720px) { .cg-bar { left: 0; } }
+/* Breadcrumb links: blue, underlined (orange is under 4.5:1 on the page grey) */
+.cg-crumbs button { color: var(--digitv2-lightTheme-primary-2); text-decoration: underline; text-underline-offset: 2px; }
+/* Card buttons stay on one line */
+.geo-cards { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.geo-actions > button .digit-button-label { white-space: nowrap; }
+
+/* Selected tile: orange tint and stroke, no tick. Labels are 20px bold (large text), so orange on the tint passes 3:1. */
+.cg-tiles .qz-tile .qz-tile-label { font-size: 1.25rem; }
+.cg-tiles .qz-tile.is-on, .cg-tiles .qz-tile.is-on:hover { background: var(--c-primary-bg); box-shadow: inset 0 0 0 1px var(--c-primary); }
+
+/* Breadcrumb links in orange; a shade deeper than #C84C0E so they pass 4.5:1 on the page grey */
+.cg-crumbs button { color: #B8460C; text-decoration: none; }
+.cg-crumbs button:hover { text-decoration: underline; }
+.cg-tiles .qz-tile-row { grid-template-columns: repeat(3, minmax(0, 340px)); }
+@media (max-width: 1200px) { .cg-tiles .qz-tile-row { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); } }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */
