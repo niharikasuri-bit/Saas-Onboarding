@@ -413,7 +413,6 @@ export function Questions({
   onNext: (patch?: Partial<Answers>) => void;
 }) {
   const group = GROUPS[q];
-  const last = q === GROUPS.length - 1;
   const uid = useId();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const nameRef = useRef<HTMLInputElement>(null);
@@ -434,6 +433,12 @@ export function Questions({
       setErrors(next);
       if (next.org) return orgRef.current?.focus();
       if (next.link) return requestAnimationFrame(() => document.getElementById('al-input')?.focus());
+    }
+    // Finish needs at least one email; "Skip for now" is the way through without one.
+    if (group.key === 'team' && !splitEmails(a.invites).length) {
+      setErrors({ empty: 'Add at least one email, or choose Skip for now.' });
+      requestAnimationFrame(() => (document.querySelector('.qz-row-input') as HTMLInputElement | null)?.focus());
+      return;
     }
     if (group.key === 'team' && badEmails(a.invites).length) {
       setErrors({ team: 'check' });
@@ -679,17 +684,26 @@ export function Questions({
               )}
 
               {group.key === 'team' && (
-                <InviteRows value={a.invites} onChange={(v) => update({ invites: v })} check={!!errors.team} />
+                <>
+                  {errors.empty && <ErrorText id={`${uid}-empty`}>{errors.empty}</ErrorText>}
+                  <InviteRows
+                    value={a.invites}
+                    onChange={(v) => {
+                      update({ invites: v });
+                      if (errors.empty) setErrors({});
+                    }}
+                    check={!!errors.team}
+                  />
+                </>
               )}
 
               {/* The main action stays pinned to the bottom of the form. */}
               <div className="qz-actions">
                 <Button variation="primary" label={primary} submit onClick={() => {}} />
-                {/* On the team step, Finish already skips when nobody is added. */}
-                {group.optional && (group.key !== 'team' || !!a.invites.trim()) && (
+                {group.optional && (
                   <Button
                     variation="link"
-                    label={last ? 'Skip and Finish' : 'Skip for Now'}
+                    label="Skip for Now"
                     onClick={() => {
                       if (group.key === 'team') {
                         update({ invites: '' });
