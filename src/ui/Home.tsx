@@ -57,7 +57,8 @@ export function Home() {
   const started = todosFor(account).some((t) => todoDone(t.id, account));
 
   return (
-    <div className="geo is-overview hm-v5">
+    // First landing keeps the original centred setup page; the band layout starts once they've set something up.
+    <div className={`geo is-overview${started ? ' hm-v5' : ' hm-first'}`}>
       {done ? <Hero name={firstName(answers)} admin={admin} /> : <AccountSetup onFlow={setFlow} />}
 
       {/* Always mounted, so the unlock is announced even when the products first appear unlocked */}
