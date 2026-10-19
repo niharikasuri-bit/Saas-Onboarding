@@ -1804,6 +1804,24 @@ p { margin: 0; line-height: 1.5; }
 .pk-row > button { align-self: center; }
 .pk-text { gap: 6px; }
 .pk-what { line-height: 1.5; max-width: 860px; }
+
+/* Home after the first step: the step left sits in the orange header as one white strip
+   (no separate panel, no grey box) */
+.pk-head p { margin-bottom: 0; }
+.pk-next { margin-top: var(--s6); padding: 18px 24px 20px; border: 1px solid #F1D9CD; border-radius: 14px; background: #fff; box-shadow: 0 2px 6px rgb(200 76 14 / 0.06), 0 12px 28px rgb(16 24 40 / 0.06); }
+.pk-eyebrow { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #8A3A00; }
+.pk-left { padding: 2px 8px; border-radius: 999px; background: var(--c-primary-bg); font-size: 0.75rem; letter-spacing: 0.02em; color: #8A3A00; }
+.pk-next-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.pk-next-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: 20px; }
+.pk-next-row + .pk-next-row { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--c-divider); }
+.pk-next-row > .pk-icon { align-self: start; width: 48px; height: 48px; border-radius: 12px; background: var(--c-primary-bg); border: 0; }
+.pk-next-row .pk-title { font-size: 1.125rem; }
+.pk-next-row > button { height: 44px; padding: 0 20px; }
+.pk-next-row > button .digit-button-label { font-size: 1rem; font-weight: 500; white-space: nowrap; }
+@media (max-width: 760px) {
+  .pk-next-row { grid-template-columns: auto minmax(0, 1fr); row-gap: 14px; }
+  .pk-next-row > button { grid-column: 1 / -1; width: 100%; }
+}
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */

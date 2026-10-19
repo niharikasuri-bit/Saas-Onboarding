@@ -56,7 +56,7 @@ const TASK: Record<
  * The orange header on Home once they're past the first landing. The same words whatever's
  * done, so it reads as their account's starting point rather than a setup step.
  */
-export function HomeHeader({ ref }: { ref?: React.Ref<HTMLHeadingElement> }) {
+export function HomeHeader({ ref, children }: { ref?: React.Ref<HTMLHeadingElement>; children?: React.ReactNode }) {
   const { answers } = useAccount();
   const org = answers.org.trim() || 'your organisation';
   return (
@@ -65,6 +65,7 @@ export function HomeHeader({ ref }: { ref?: React.Ref<HTMLHeadingElement> }) {
         Hi <em>{firstName(answers)}</em>
       </h1>
       <p>Your one stop to access your products for {org}, manage your account and its settings.</p>
+      {children}
     </header>
   );
 }
@@ -99,44 +100,44 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
 
   const start = (id: TodoId) => (id === 'geography' ? setAddingGeo(true) : id === 'sender' ? setAddingSender(true) : setAddingTeam(true));
 
-  // After the first step: an orange header greets them; what's left sits below as rows in one white panel.
+  // After the first step: the orange header greets them and holds what's left, as one white strip.
   if (started) {
     return (
       <div className="pk">
         {toastEl}
-        <HomeHeader ref={heading} />
-        <section className="hm-sec pk-panel" aria-labelledby="pk-h">
-          <div className="geo-bar">
-            <h2 id="pk-h" className="geo-section-h">
-              Finish setting up your account <span className="geo-section-n">{open.length} left</span>
+        {/* What's left sits right in the orange header, as one white strip: the next step and its button */}
+        <HomeHeader ref={heading}>
+          <section className="pk-next" aria-labelledby="pk-h">
+            <h2 id="pk-h" className="pk-eyebrow">
+              Finish setting up your account <span className="pk-left">{open.length} left</span>
             </h2>
-          </div>
-          <ul className="pk-list">
-            {open.map((t) => {
-              const task = TASK[t.id];
-              return (
-                <li key={t.id} className="pk-row">
-                  <span className="pk-icon" aria-hidden="true">
-                    <Icon name={task.icon} size={20} />
-                  </span>
-                  <span className="pk-text">
-                    <span className="pk-title-row">
-                      <strong className="pk-title">{task.title}</strong>
-                      <span className="pk-time">
-                        <Icon name="Schedule" size={14} />
-                        {task.minutes} min
+            <ul className="pk-next-list">
+              {open.map((t) => {
+                const task = TASK[t.id];
+                return (
+                  <li key={t.id} className="pk-next-row">
+                    <span className="pk-icon" aria-hidden="true">
+                      <Icon name={task.icon} size={22} />
+                    </span>
+                    <span className="pk-text">
+                      <span className="pk-title-row">
+                        <strong className="pk-title">{task.title}</strong>
+                        <span className="pk-time">
+                          <Icon name="Schedule" size={14} />
+                          {task.minutes} min
+                        </span>
+                      </span>
+                      <span className="pk-what">
+                        {task.what} {task.why}
                       </span>
                     </span>
-                    <span className="pk-what">
-                      {task.what} {task.why}
-                    </span>
-                  </span>
-                  <Button variation="primary" label={task.action} icon="ArrowForward" isSuffix onClick={() => start(t.id)} />
-                </li>
-              );
-            })}
-          </ul>
-        </section>
+                    <Button variation="primary" label={task.action} icon="ArrowForward" isSuffix onClick={() => start(t.id)} />
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        </HomeHeader>
       </div>
     );
   }
