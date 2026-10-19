@@ -15,7 +15,7 @@ const TASK: Record<
 > = {
   geography: {
     title: 'Add your geographies',
-    what: 'Find the places where you work, or add any that are missing.',
+    what: 'Add the places where you work, from the largest area down to the smallest.',
     why: 'Every product uses your geographies to know where things happen.',
     minutes: 5,
     icon: 'Public',
