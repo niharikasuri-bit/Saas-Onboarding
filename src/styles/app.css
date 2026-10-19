@@ -1123,7 +1123,7 @@ p { margin: 0; line-height: 1.5; }
 /* Breadcrumb links: blue, underlined (orange is under 4.5:1 on the page grey) */
 .cg-crumbs button { color: var(--digitv2-lightTheme-primary-2); text-decoration: underline; text-underline-offset: 2px; }
 /* Card buttons stay on one line */
-.geo-cards { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.geo-cards { grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); }
 .geo-actions > button .digit-button-label { white-space: nowrap; }
 
 /* Selected tile: orange tint and stroke, no tick. Labels are 20px bold (large text), so orange on the tint passes 3:1. */
@@ -1135,3 +1135,35 @@ p { margin: 0; line-height: 1.5; }
 .cg-crumbs button:hover { text-decoration: underline; }
 .cg-tiles .qz-tile-row { grid-template-columns: repeat(3, minmax(0, 340px)); }
 @media (max-width: 1200px) { .cg-tiles .qz-tile-row { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); } }
+
+/* Add your geographies: header in a white container, left-aligned, like the create steps */
+.geo:not(.is-overview):not(.is-creating) > .geo-head {
+  align-items: flex-start; text-align: left; margin: 0 0 var(--s6); padding: 32px 36px; max-width: none;
+  border: 1px solid #EAEAEA; border-radius: 20px; background: #fff; box-shadow: 0 1px 2px rgb(16 24 40 / 0.04), 0 12px 32px rgb(16 24 40 / 0.06);
+}
+.geo:not(.is-overview):not(.is-creating) .geo-bar { justify-content: flex-start; }
+.geo:not(.is-overview):not(.is-creating) .geo-tools { justify-content: flex-start; }
+
+/* Channel tiles: a checkbox in the corner, since more than one can be chosen */
+.qz-tile .ch-box { position: absolute; top: 12px; left: 12px; width: 20px; height: 20px; display: grid; place-items: center; border: 2px solid #505A5F; border-radius: 4px; background: #fff; color: #fff; }
+.qz-tile .ch-box.is-on { border-color: var(--c-primary); background: var(--c-primary); }
+.cg-tiles .qz-tile { position: relative; }
+.ch-form { display: flex; flex-direction: column; gap: 20px; }
+.ch-note { margin-top: 4px; font-size: 0.875rem; color: var(--c-text-2); }
+.ch-fields { margin: var(--s3) 0 0; display: flex; flex-direction: column; gap: 6px; }
+.ch-fields > div { display: flex; justify-content: space-between; gap: var(--s3); font-size: 0.875rem; }
+.ch-fields dt { color: var(--c-text-2); }
+.ch-fields dd { margin: 0; font-weight: 500; text-align: right; word-break: break-all; }
+
+/* Add sender details: a #FAFAFA section per channel */
+.ch-form { gap: var(--s5, 20px); }
+.ch-sec { padding: 24px; border: 1px solid #E3E3E3; border-radius: 14px; background: #FAFAFA; display: flex; flex-direction: column; gap: var(--s4); }
+.ch-sec-head { display: flex; align-items: flex-start; gap: var(--s3); }
+.ch-sec-title { flex: 1; }
+.ch-sec-title h2 { font-size: 1.25rem; font-weight: 700; color: var(--digitv2-lightTheme-primary-2); }
+.ch-sec-title p { margin-top: 2px; color: var(--c-text-2); }
+.ch-why { display: flex; align-items: flex-start; gap: var(--s2); padding: 10px 14px; border-radius: 8px; background: var(--c-info-bg); color: var(--c-text); }
+.ch-why .ux-icon { flex-shrink: 0; margin-top: 2px; color: var(--digitv2-lightTheme-alert-info); }
+.ch-fields-form { display: flex; flex-direction: column; gap: var(--s3); }
+.ch-sec .cg-split > .fld input, .ch-sec .cg-split > .fld select { width: 100%; height: 48px; padding: 0 16px; border: 1px solid var(--digitv2-lightTheme-text-secondary); border-radius: 10px; background: #fff; font: inherit; font-size: 1rem; }
+.ch-sec .cg-split > .fld select:focus, .ch-sec .cg-split > .fld input:focus { outline: none; border-color: var(--digitv2-lightTheme-primary-2); box-shadow: var(--focus); }

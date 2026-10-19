@@ -517,32 +517,45 @@ export const BRAND_COLOURS = [
 export const CHANNELS: {
   id: Channel;
   label: string;
+  /** One line on what the channel is for. */
   note: string;
-  fields: { key: string; label: string; hint?: string }[];
+  /** Why it needs these details. */
+  why: string;
+  fields: { key: string; label: string; hint?: string; placeholder?: string; secret?: boolean; options?: string[] }[];
 }[] = [
   {
-    id: 'sms',
-    label: 'SMS sender ID',
-    note: 'Telecom approval usually takes 3 to 5 working days.',
+    id: 'email',
+    label: 'Email',
+    note: 'Updates and receipts by email.',
+    why: 'We send through your own mail server, so messages come from your domain.',
     fields: [
-      { key: 'senderId', label: 'Sender ID', hint: 'Up to 11 letters, for example NAIROBICC.' },
-      { key: 'purpose', label: 'What the messages are for', hint: 'Regulators ask for this.' },
+      { key: 'from', label: 'From address', placeholder: 'complaints@county.go.ke' },
+      { key: 'name', label: 'Sender name', placeholder: 'Nairobi County' },
+      { key: 'username', label: 'Username', placeholder: 'complaints@county.go.ke' },
+      { key: 'password', label: 'Password', secret: true },
     ],
   },
   {
-    id: 'email',
-    label: 'Email sender',
-    note: 'We verify the domain. Usually within a day.',
+    id: 'sms',
+    label: 'SMS',
+    note: 'Short text updates to any phone.',
+    why: 'Texts go out through your SMS provider, under your own sender ID.',
     fields: [
-      { key: 'from', label: 'Send from (email address)' },
-      { key: 'name', label: 'Sender name' },
+      { key: 'provider', label: 'Provider', options: ['Africa’s Talking', 'Twilio', 'Infobip', 'Vonage', 'Other'] },
+      { key: 'senderId', label: 'Sender ID', placeholder: 'COUNTY' },
+      { key: 'apiKey', label: 'API key', secret: true },
     ],
   },
   {
     id: 'whatsapp',
-    label: 'WhatsApp Business',
-    note: 'Meta reviews the number. Usually 2 to 7 days.',
-    fields: [{ key: 'number', label: 'WhatsApp Business number' }],
+    label: 'WhatsApp',
+    note: 'Conversational updates and replies.',
+    why: 'Replies come back into your workspace, so this needs a Business account.',
+    fields: [
+      { key: 'number', label: 'Business number', placeholder: '+254 700 000000' },
+      { key: 'accountId', label: 'Business account ID', placeholder: '1234567890' },
+      { key: 'token', label: 'Access token', secret: true },
+    ],
   },
 ];
 
@@ -579,7 +592,7 @@ export function todoResult(id: TodoId, a: Account) {
   }
   if (id === 'users') return `${a.users.length} ${a.users.length === 1 ? 'user' : 'users'} invited`;
   const n = Object.values(a.sender).filter((c) => c.state !== 'none').length;
-  return `${n} ${n === 1 ? 'channel' : 'channels'} activated`;
+  return `${n} ${n === 1 ? 'channel' : 'channels'} connected`;
 }
 
 /* ---------------------------------------------------------------- */

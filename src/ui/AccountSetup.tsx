@@ -3,6 +3,7 @@ import { Button, Card } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
 import { useAccount } from '../lib/store';
 import { Geographies } from './Geographies';
+import { Channels } from './Channels';
 import { todoDone, todoResult, todosFor, type PageId, type TodoId } from '../lib/model';
 
 /**
@@ -58,14 +59,16 @@ export function AccountSetup() {
   const ordered = [...todos.filter((t) => !todoDone(t.id, account)), ...todos.filter((t) => todoDone(t.id, account))];
   // Adding geographies happens right here on Home, not on the Geographies page.
   const [addingGeo, setAddingGeo] = useState(false);
+  const [addingSender, setAddingSender] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const wasAdding = useRef(false);
   useEffect(() => {
-    if (wasAdding.current && !addingGeo) heading.current?.focus();
-    wasAdding.current = addingGeo;
-  }, [addingGeo]);
+    if (wasAdding.current && !addingGeo && !addingSender) heading.current?.focus();
+    wasAdding.current = addingGeo || addingSender;
+  }, [addingGeo, addingSender]);
 
   if (addingGeo) return <Geographies embedded onDone={() => setAddingGeo(false)} />;
+  if (addingSender) return <Channels embedded onDone={() => setAddingSender(false)} />;
 
   return (
     <div className="as">
@@ -130,7 +133,7 @@ export function AccountSetup() {
                         label={isDone ? task.view : task.action}
                         icon="ArrowForward"
                         isSuffix
-                        onClick={() => (t.id === 'geography' && !isDone ? setAddingGeo(true) : go(task.page))}
+                        onClick={() => (isDone ? go(task.page) : t.id === 'geography' ? setAddingGeo(true) : t.id === 'sender' ? setAddingSender(true) : go(task.page))}
                       />
                     </div>
                   </div>

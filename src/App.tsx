@@ -10,7 +10,7 @@ import { Branding } from './ui/Branding';
 import { ProductPage } from './ui/ProductPage';
 import { GoLive } from './ui/GoLive';
 import { Geographies } from './ui/Geographies';
-import { SenderBody } from './ui/Sender';
+import { Channels } from './ui/Channels';
 import { UsersBody } from './ui/Users';
 import { Page } from './ui/StepFrame';
 
@@ -46,16 +46,7 @@ function Pages() {
     case 'geographies':
       return <Geographies />;
     case 'sender':
-      return (
-        <Page
-          title="Notification channels"
-          lead="Who your messages come from. Submit early: approvals take days, and messages can be turned on once one is submitted."
-        >
-          <div className="sm-body is-page">
-            <SenderBody />
-          </div>
-        </Page>
-      );
+      return <Channels />;
     case 'team':
       return (
         <Page title="Team" lead="Everyone in your account. Assign them inside each product.">
