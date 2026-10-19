@@ -13,6 +13,7 @@ import { Widget } from './Widget';
 import { Modals } from './Modals';
 import { HelpButton } from './HelpButton';
 import { HelpPanel } from './HelpPanel';
+import { LOGO } from '../logo';
 
 /** The account's own pages. The side nav shows where things live, not their status. */
 const ACCOUNT_NAV: { id: PageId; label: string; icon: string }[] = [
@@ -58,7 +59,7 @@ export function Shell({ children }: { children: ReactNode }) {
           <span className="sh-org-name">{b.name}</span>
         </div>
         <div className="sh-top-end">
-          <img className="sh-digit" src="/digit-logo.png" alt="DIGIT" width={528} height={124} />
+          <img className="sh-digit" src={LOGO} alt="DIGIT" width={528} height={124} />
         </div>
       </header>
 
@@ -120,7 +121,7 @@ export function Shell({ children }: { children: ReactNode }) {
               Restart
             </button>
             <p className="sh-powered">
-              Powered by <img src="/digit-logo.png" alt="DIGIT" width={528} height={124} />
+              Powered by <img src={LOGO} alt="DIGIT" width={528} height={124} />
             </p>
           </div>
         </nav>

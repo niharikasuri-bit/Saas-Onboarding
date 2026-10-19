@@ -15,6 +15,7 @@ import { GROUPS, Questions } from './Questions';
 import { Building } from './Building';
 import { Language } from './Language';
 import '../styles/setup.css';
+import { LOGO } from '../logo';
 
 type Props = { onDone: (a: Answers) => void };
 type Stage = 'blank' | 'welcome' | 'signup' | 'login' | 'language' | 'questions' | 'building';
@@ -69,7 +70,7 @@ export function SetupFlow({ onDone }: Props) {
         <main className="wl-grid">
           <div className="wl-copy">
             <h1 className="wl-title sf-rise">
-              Welcome to <img src="/digit-logo.png" alt="DIGIT" width={528} height={124} />
+              Welcome to <img src={LOGO} alt="DIGIT" width={528} height={124} />
             </h1>
             <p className="sf-lead wl-lead sf-rise sf-d2">
               Public services work better when the people who run them have the right tools.
@@ -155,7 +156,7 @@ function AuthFrame({
     <div className="sf su">
       <Backdrop />
       <header className="su-top">
-        <img className="sf-logo" src="/digit-logo.png" alt="DIGIT" width={528} height={124} />
+        <img className="sf-logo" src={LOGO} alt="DIGIT" width={528} height={124} />
       </header>
       <main className="su-main">
         <div className="su-stack">

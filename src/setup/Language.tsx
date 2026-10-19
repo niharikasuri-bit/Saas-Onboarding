@@ -3,6 +3,7 @@ import { Button, Dropdown } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
 import { Backdrop } from './Backdrop';
 import { LANGUAGES, type Answers } from './steps';
+import { LOGO } from '../logo';
 
 /**
  * Before the five steps: which language they're most comfortable with, from
@@ -34,7 +35,7 @@ export function Language({
     <div className="sf su qz">
       <Backdrop />
       <header className="su-top">
-        <img className="sf-logo" src="/digit-logo.png" alt="DIGIT" width={528} height={124} />
+        <img className="sf-logo" src={LOGO} alt="DIGIT" width={528} height={124} />
       </header>
       <main className="qz-main is-centred">
         <div className="qz-card is-single">

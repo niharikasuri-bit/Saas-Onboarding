@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { DEVICE, Figure, GREY, GREY_2, INK, type FigureProps } from './Figure';
+import { LOGO } from '../logo';
 
 /**
  * Welcome illustration, in the unDraw manner (flat, one accent colour, dark
@@ -145,7 +146,7 @@ function Hub({ lit, pulse, breathing }: { lit: number[]; pulse: number; breathin
       <circle cx={x} cy={y} r={92} fill={ORANGE_BG} opacity={0.7} />
       <circle cx={x} cy={y} r={66} fill="#FFFFFF" opacity={0.85} />
       <rect x={x - 78} y={y - 50} width={156} height={100} rx={18} fill="#FFFFFF" stroke="#D6D5D4" strokeWidth={2} />
-      <image href="/digit-logo.png" x={x - 46} y={y - 36} width={92} height={21.6} />
+      <image href={LOGO} x={x - 46} y={y - 36} width={92} height={21.6} />
       <HubMark kind="lnp" cx={x - 36} cy={y + 20} on={lit.includes(0)} />
       <HubMark kind="cms" cx={x} cy={y + 20} on={lit.includes(1)} />
       <HubMark kind="hcm" cx={x + 36} cy={y + 20} on={lit.includes(2)} />

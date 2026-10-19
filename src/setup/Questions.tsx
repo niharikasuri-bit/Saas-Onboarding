@@ -8,6 +8,7 @@ import { Backdrop } from './Backdrop';
 import { AccountLink } from './AccountLink';
 import { DOMAIN, accountSub, checkSub } from './link';
 import { DEVICE, Figure, GREY, GREY_2, INK } from './Figure';
+import { LOGO } from '../logo';
 
 /**
  * After sign-up or log-in: a few questions, grouped into four short steps on
@@ -495,7 +496,7 @@ export function Questions({
     <div className="sf su qz">
       <Backdrop />
       <header className="su-top">
-        <img className="sf-logo" src="/digit-logo.png" alt="DIGIT" width={528} height={124} />
+        <img className="sf-logo" src={LOGO} alt="DIGIT" width={528} height={124} />
       </header>
       <main className="qz-main">
         <div className="qz-card">

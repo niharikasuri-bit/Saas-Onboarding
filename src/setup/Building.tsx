@@ -6,6 +6,7 @@ import { BRAND_COLOURS, PRODUCTS } from '../lib/model';
 import { Backdrop } from './Backdrop';
 import { DOMAIN, accountSub } from './link';
 import type { Answers } from './steps';
+import { LOGO } from '../logo';
 
 /**
  * After the last question: the loader, where each part of the account ticks
@@ -161,7 +162,7 @@ export function Building({
       <div className="sf su qz">
         <Backdrop />
         <header className="su-top">
-          <img className="sf-logo" src="/digit-logo.png" alt="DIGIT" width={528} height={124} />
+          <img className="sf-logo" src={LOGO} alt="DIGIT" width={528} height={124} />
         </header>
         <main className="qz-main">
           <div className="qz-card">
@@ -228,7 +229,7 @@ export function Building({
     <div className="sf su qz">
       <Backdrop />
       <header className="su-top">
-        <img className="sf-logo" src="/digit-logo.png" alt="DIGIT" width={528} height={124} />
+        <img className="sf-logo" src={LOGO} alt="DIGIT" width={528} height={124} />
       </header>
       <main className="bl-main">
         <div className="bl-card" aria-busy="true">
