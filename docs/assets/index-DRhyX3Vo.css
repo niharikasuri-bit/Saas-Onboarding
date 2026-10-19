@@ -1347,6 +1347,11 @@ p { margin: 0; line-height: 1.5; }
 /* Upload guide: no container of its own; the heading and three step cards stand apart from the upload box */
 .us { padding: 0; border: 0; border-radius: 0; background: none; margin-bottom: var(--s6); }
 .us-step { background: #fff; }
+
+/* No required / optional key, so no coloured header stripes either */
+.cg-grid.is-sheet thead th.is-req, .cg-grid.is-sheet thead th.is-opt { background: #FAFAFA; border-top: 0; }
+/* Team manual: Form / Sheet tabs */
+.tm-mode { margin-bottom: 0; }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */

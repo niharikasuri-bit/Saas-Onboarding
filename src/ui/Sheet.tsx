@@ -55,7 +55,7 @@ export function UploadSteps({ thing }: { thing: string }) {
   );
 }
 
-/** Above an editable sheet: what you can do here, and what the column colours mean. */
+/** Above an editable sheet: what you can do here. */
 export function SheetIntro() {
   return (
     <div className="sh-intro">
@@ -66,16 +66,6 @@ export function SheetIntro() {
           <span>Click any cell to change it. Nothing is saved until you finish.</span>
         </span>
       </p>
-      <ul className="sh-legend" aria-label="Column key">
-        <li>
-          <span className="sh-key is-req" aria-hidden="true" />
-          Required
-        </li>
-        <li>
-          <span className="sh-key is-opt" aria-hidden="true" />
-          Optional
-        </li>
-      </ul>
     </div>
   );
 }
