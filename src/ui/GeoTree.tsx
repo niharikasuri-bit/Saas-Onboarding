@@ -44,13 +44,13 @@ export function PlacesTabs({
     <div className="pt">
       <div className="pt-bar">
         <div className="pt-tabs" role="group" aria-label="View as">
-          <button type="button" aria-pressed={view === 'table'} onClick={() => setView('table')}>
-            <Icon name="TableView" size={18} />
-            Table
-          </button>
           <button type="button" aria-pressed={view === 'tree'} onClick={() => setView('tree')}>
             <Icon name="AccountTree" size={18} />
             Tree
+          </button>
+          <button type="button" aria-pressed={view === 'table'} onClick={() => setView('table')}>
+            <Icon name="TableView" size={18} />
+            Table
           </button>
         </div>
         {aside}

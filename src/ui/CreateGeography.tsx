@@ -125,7 +125,7 @@ export function CreateGeography({
   const [country, setCountry] = useState(initial);
   const [levels, setLevels] = useState<string[]>(['', '']);
   const [method, setMethod] = useState<Method | ''>('');
-  const [view, setView] = useState<'table' | 'tree'>('table');
+  const [view, setView] = useState<'table' | 'tree'>('tree');
   const [addingPlace, setAddingPlace] = useState(false);
   const [rows, setRows] = useState<Path[]>([blankRow(2), blankRow(2)]);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -348,13 +348,13 @@ export function CreateGeography({
               <>
                 <div className="cg-places-bar">
                   <div className="pt-tabs" role="group" aria-label="View as">
-                    <button type="button" aria-pressed={view === 'table'} onClick={() => setView('table')}>
-                      <Icon name="TableView" size={18} />
-                      Table
-                    </button>
                     <button type="button" aria-pressed={view === 'tree'} onClick={() => setView('tree')}>
                       <Icon name="AccountTree" size={18} />
                       Tree
+                    </button>
+                    <button type="button" aria-pressed={view === 'table'} onClick={() => setView('table')}>
+                      <Icon name="TableView" size={18} />
+                      Table
                     </button>
                   </div>
                 </div>
@@ -494,13 +494,24 @@ function Grid({
                   aria-label={`Remove row ${i + 1}`}
                   onClick={() => onChange(rows.length > 1 ? rows.filter((_, a) => a !== i) : [blankRow(levels.length)])}
                 >
-                  <Icon name="Close" size={16} />
+                  <Icon name="Delete" size={18} />
                 </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      <div className="sh-add-row">
+        <Button
+          variation="secondary"
+          icon="Add"
+          label="Add row"
+          onClick={() => {
+            onChange([...rows, blankRow(levels.length)]);
+            requestAnimationFrame(() => (document.querySelector('.cg-grid.is-sheet tbody tr:last-child input') as HTMLInputElement | null)?.focus());
+          }}
+        />
+      </div>
       {problems.some(Boolean) && (
         <ul className="cg-grid-problems">
           {problems.map((p, i) => (p ? <li key={i}>Row {i + 1}: {p}</li> : null))}
@@ -607,7 +618,7 @@ function LevelsEditor({
                 disabled={levels.length === 1}
                 onClick={() => onChange(levels.filter((_, j) => j !== i))}
               >
-                <Icon name="Close" size={18} />
+                <Icon name="Delete" size={18} />
               </button>
             </li>
           );

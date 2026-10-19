@@ -537,13 +537,24 @@ function PeopleTable({
                   disabled={people.length === 1}
                   onClick={() => onChange(people.filter((x) => x.key !== p.key))}
                 >
-                  <Icon name="Close" size={16} />
+                  <Icon name="Delete" size={18} />
                 </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      <div className="sh-add-row">
+        <Button
+          variation="secondary"
+          icon="Add"
+          label="Add row"
+          onClick={() => {
+            onChange([...people, { key: newId(), name: '', email: '', role: 'Staff', products: [...products] }]);
+            requestAnimationFrame(() => (document.querySelector('.tm-grid tbody tr:last-child input') as HTMLInputElement | null)?.focus());
+          }}
+        />
+      </div>
     </div>
     </div>
   );

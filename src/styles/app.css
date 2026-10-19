@@ -1609,3 +1609,12 @@ p { margin: 0; line-height: 1.5; }
 .rv-head > div { flex: 1 1 0; min-width: 0; }
 .ag-desc { margin-top: 4px; font-size: 0.9375rem; color: var(--c-text-2); }
 .ag-top { align-items: flex-start; }
+
+/* Row remove buttons in every table: the orange dustbin */
+.cg-icon-btn { color: var(--c-primary); }
+.cg-icon-btn:hover:not(:disabled) { color: var(--c-primary); }
+.lv-remove { color: var(--c-primary); }
+/* Add row: under every editable sheet */
+.sh-add-row { margin-top: var(--s3); }
+.sh-add-row > button { height: 40px; padding: 0 16px; }
+.sh-add-row > button .digit-button-label { font-size: 0.9375rem; font-weight: 500; }
