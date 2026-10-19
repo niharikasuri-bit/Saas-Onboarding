@@ -1411,3 +1411,8 @@ p { margin: 0; line-height: 1.5; }
 .pt-card .pt-actions > button { width: auto; min-width: 200px; }
 /* No progress bar: the lead line closes the header */
 .hm-v5 .as.is-band .as-lead { margin-bottom: 0; }
+/* Product cards keep the width they'd have three to a row; the button fills the card */
+.pt-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 1100px) { .pt-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 720px) { .pt-list { grid-template-columns: 1fr; } }
+.pt-card .pt-actions > button { width: 100%; min-width: 0; }
