@@ -11,7 +11,8 @@ import { Crumbs } from './Crumbs';
  * Create a geography, one step at a time:
  * 1. How: by hand, by uploading a file, or by fetching from OpenStreetMap.
  * 2. The country's name.
- * 3. Its boundary levels, largest first (filled in when fetched).
+ * 3. Its levels, largest first.
+ * Fetching from OpenStreetMap skips the levels: search a place, fetch, then check.
  * 4. The places, as a table (one column per level, like a spreadsheet) or a tree.
  *
  * Places are kept as rows of names, one cell per level: a row is one path from
@@ -22,6 +23,8 @@ type Path = string[];
 type Step = 'country' | 'levels' | 'method' | 'places';
 type Method = 'manual' | 'upload' | 'osm';
 const STEPS: Step[] = ['method', 'country', 'levels', 'places'];
+/** OpenStreetMap: search and fetch, then check. No levels step. */
+const OSM_STEPS: Step[] = ['method', 'country', 'places'];
 /** Prototype: the levels and places OpenStreetMap "returns". */
 const OSM_LEVELS = ['Region', 'District', 'Sub-district'];
 const osmPaths = (): Path[] =>
@@ -126,7 +129,6 @@ export function CreateGeography({
   const [rows, setRows] = useState<Path[]>([blankRow(2), blankRow(2)]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploaded, setUploaded] = useState('');
-  const [fetched, setFetched] = useState(false);
   const [toast, setToast] = useState('');
   useEffect(() => {
     if (!toast) return;
@@ -137,17 +139,9 @@ export function CreateGeography({
   useEffect(() => {
     heading.current?.focus();
   }, [step]);
-  // Fetching from OpenStreetMap takes a moment; then the places can be checked like any others.
-  useEffect(() => {
-    if (step !== 'places' || method !== 'osm' || fetched) return;
-    const t = setTimeout(() => {
-      setRows(osmPaths().map((p) => fit(p, levels.length)));
-      setFetched(true);
-    }, 900);
-    return () => clearTimeout(t);
-  }, [step, method, fetched, levels.length]);
 
-  const n = STEPS.indexOf(step) + 1;
+  const steps = method === 'osm' ? OSM_STEPS : STEPS;
+  const n = steps.indexOf(step) + 1;
   const go = (s: Step) => {
     setErrors({});
     setStep(s);
@@ -159,7 +153,7 @@ export function CreateGeography({
       setRows([blankRow(levels.length)]);
     }
     if (n === 1) onCancel();
-    else go(STEPS[n - 2]);
+    else go(steps[n - 2]);
   };
 
   const cleanLevels = levels.map((l) => l.trim());
@@ -171,7 +165,7 @@ export function CreateGeography({
     const e: Record<string, string> = {};
     if (step === 'country') {
       const name = country.trim();
-      if (!name) e.country = 'Enter the country’s name';
+      if (!name) e.country = method === 'osm' ? 'Enter a place to search for' : 'Enter the country’s name';
       else if (taken.some((s) => s.name.toLowerCase() === name.toLowerCase()))
         e.country = `${name} is already here. Search for it instead.`;
     }
@@ -192,30 +186,48 @@ export function CreateGeography({
       document.getElementById(`${uid}-${firstKey}`)?.focus();
       return;
     }
-    if (step === 'country' && method === 'osm' && levels.every((l) => !l.trim())) setLevels(OSM_LEVELS);
+    // Fetch straight away: the levels and geographies come back with the search.
+    if (step === 'country' && method === 'osm') {
+      setLevels(OSM_LEVELS);
+      setRows(osmPaths());
+    }
     if (step === 'levels') setRows((r) => r.map((p) => fit(p, cleanLevels.length)));
     if (step === 'places') {
       const name = country.trim();
       onCreate({ id: newId(), name, country: name, levels: cleanLevels, count: places.length, custom: true, rows: places });
       return;
     }
-    go(STEPS[n]);
+    go(steps[n]);
   };
 
   const TITLES: Record<Step, string> = {
-    country: 'Which country is it?',
+    country: method === 'osm' ? 'Search OpenStreetMap' : 'Which country is it?',
     levels: `How is ${country.trim() || 'it'} divided?`,
     method: 'How would you like to create your geographies?',
-    places: method === 'upload' ? (uploaded ? 'View and Edit Uploaded Geography Data' : 'Upload geography data') : method === 'osm' ? 'Check the geographies we fetched' : 'Add geography data',
+    places:
+      method === 'upload'
+        ? uploaded
+          ? 'View and edit uploaded geography data'
+          : 'Upload geography data'
+        : method === 'osm'
+          ? 'View and edit fetched geography data'
+          : 'Add geography data',
   };
 
   const LEADS: Record<Step, string> = {
     method:
       'Choose how to set up your geography data. Upload a file using the template for bulk setup, add geographies manually one at a time, or open the map to select them visually.',
-    country: 'Your geography starts here. Everything you add sits inside it.',
+    country:
+      method === 'osm'
+        ? 'Search for the country or place you serve, then fetch its geographies.'
+        : 'Your geography starts here. Everything you add sits inside it.',
     levels: 'List the geography levels from largest to smallest — for example Country, Region, District.',
-    // No description on the upload and add pages for now.
-    places: method === 'osm' ? 'Check the geographies, and fix any before you create the geography.' : '',
+    places:
+      method === 'osm'
+        ? 'Review the fetched geographies and edit any row before you create them.'
+        : method === 'upload' && uploaded
+          ? 'Review the geographies from your file and edit any row before you create them.'
+          : '',
   };
 
   return (
@@ -249,10 +261,12 @@ export function CreateGeography({
       >
         {step === 'country' && (
           <div className="cg-split">
-          <Field id={`${uid}-country`} label="Country name" error={errors.country}>
+          <Field id={`${uid}-country`} label={method === 'osm' ? 'Country or place' : 'Country name'} error={errors.country}>
             <input
               id={`${uid}-country`}
+              type={method === 'osm' ? 'search' : 'text'}
               value={country}
+              placeholder={method === 'osm' ? 'For example Rwanda' : undefined}
               autoComplete="country-name"
               aria-invalid={!!errors.country || undefined}
               aria-describedby={describedBy(`${uid}-country`, undefined, errors.country)}
@@ -315,19 +329,7 @@ export function CreateGeography({
                 }}
               />
             )}
-            {method === 'osm' && !fetched && (
-              <p className="cg-fetching" role="status">
-                <span className="cg-spinner" aria-hidden="true" />
-                Fetching the geographies for {country.trim()} from OpenStreetMap…
-              </p>
-            )}
-            {method === 'osm' && fetched && (
-              <p className="cg-uploaded" role="status">
-                <Icon name="CheckCircle" size={18} />
-                Fetched from OpenStreetMap.
-              </p>
-            )}
-            {(method === 'manual' || uploaded || (method === 'osm' && fetched)) && (
+            {(method === 'manual' || uploaded || method === 'osm') && (
               <>
                 <div className="cg-places-bar">
                   <div className="pt-tabs" role="group" aria-label="View as">
@@ -389,7 +391,7 @@ export function CreateGeography({
         />
         <Button
           variation="primary"
-          label={step === 'places' ? 'Create geography' : 'Next'}
+          label={step === 'places' ? 'Create geography' : step === 'country' && method === 'osm' ? 'Fetch' : 'Next'}
           icon={step === 'places' ? undefined : 'ArrowForward'}
           isSuffix
           onClick={next}

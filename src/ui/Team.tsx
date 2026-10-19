@@ -648,7 +648,7 @@ function AddTeam({
     onSent(people.filter((p) => p.name.trim() || p.email.trim()));
   };
 
-  const title = step === 0 ? 'How would you like to add your team?' : method === 'upload' ? (uploaded ? 'View and Edit Uploaded Team Data' : 'Upload team data') : 'Add a team member';
+  const title = step === 0 ? 'How would you like to add your team?' : method === 'upload' ? (uploaded ? 'View and edit uploaded team data' : 'Upload team data') : 'Add a team member';
 
   return (
     <div className={`cg-page${step === 1 ? ' is-wide' : ''}`}>
@@ -665,6 +665,10 @@ function AddTeam({
         {step === 0 ? (
           <div className="cg-sub">
             <p>Upload a file using the template to add many people at once, or add them one at a time. Everyone you add gets an email invite.</p>
+          </div>
+        ) : method === 'upload' && uploaded ? (
+          <div className="cg-sub">
+            <p>Review the team members from your file and edit any row before you add them.</p>
           </div>
         ) : (
           <div className="cg-gap" />

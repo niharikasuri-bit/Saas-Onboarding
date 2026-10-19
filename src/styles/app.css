@@ -1335,3 +1335,6 @@ p { margin: 0; line-height: 1.5; }
 
 /* Add a geography pop-up: everything after the level sits in a #FAFAFA box */
 .ag-box { display: flex; flex-direction: column; gap: 20px; padding: 20px; border: 1px solid #E3E3E3; border-radius: 12px; background: #FAFAFA; }
+/* Upload guide: no container of its own; the heading and three step cards stand apart from the upload box */
+.us { padding: 0; border: 0; border-radius: 0; background: none; margin-bottom: var(--s6); }
+.us-step { background: #fff; }
