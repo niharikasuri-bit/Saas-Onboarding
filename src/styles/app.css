@@ -649,8 +649,13 @@ p { margin: 0; line-height: 1.5; }
 
 /* Geographies page: definition, one search, cards or a list (like a file browser), empty state */
 .geo { max-width: 1320px; }
-.geo-head h1 { font-size: 2.25rem; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; color: var(--digitv2-lightTheme-primary-2); margin-bottom: var(--s2); }
-.geo-lead { max-width: 720px; margin-bottom: var(--s6); font-size: 1.0625rem; line-height: 1.55; color: var(--c-text-2); }
+.geo-head { display: flex; flex-direction: column; align-items: center; gap: var(--s3); margin-bottom: var(--s8); text-align: center; }
+.geo-head > button { margin-top: var(--s2); height: 40px; padding: 0 20px; }
+.geo-head > button .digit-button-label { font-size: 1rem; font-weight: 500; }
+.geo-time { display: inline-flex; align-items: center; gap: 6px; font-size: 0.875rem; font-weight: 500; color: var(--c-text-2); }
+.geo-time .ux-icon { color: var(--digitv2-lightTheme-primary-2); }
+.geo-head h1 { font-size: 2.25rem; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; color: var(--digitv2-lightTheme-primary-2); }
+.geo-lead { max-width: 720px; font-size: 1.0625rem; line-height: 1.55; color: var(--c-text-2); }
 .geo-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s4); margin-bottom: var(--s2); }
 .geo-search {
   flex: 1 1 360px; display: flex; align-items: center; gap: var(--s2); height: 48px; padding: 0 var(--s4);

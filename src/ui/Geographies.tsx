@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Button } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
 import { useAccount } from '../lib/store';
@@ -6,10 +6,13 @@ import { GEO_SETS, REFERENCE_AREAS, newId, type Account, type Area, type GeoSet 
 import { Field, describedBy } from './StepFrame';
 
 /**
- * The Geographies page: what geographies are, one search (by name, country,
- * level or status), and the results as cards or a list, like a file browser.
- * Each geography can be added to the account or downloaded. When nothing
- * matches, an empty state offers to create it.
+ * The Geographies page, in two states, both centred at the top:
+ * - Adding (first visit, or after "Add geographies"): "Add your geographies",
+ *   then one search over everything DIGIT holds, as cards or a list. Each can
+ *   be added or downloaded; when nothing matches, an empty state offers to
+ *   create it. Adding one goes back to the account's geographies.
+ * - Added: "Geographies" and what they are, an "Add geographies" button, and
+ *   the account's own geographies.
  */
 
 type Row = { name: string; level: number; parent: string };
@@ -64,9 +67,18 @@ export function Geographies() {
   const [view, setView] = useState<'cards' | 'list'>('cards');
   const [creating, setCreating] = useState<string | null>(null);
   const [msg, setMsg] = useState('');
-
   const added = new Set(account.geography.sets ?? []);
-  const all = [...GEO_SETS, ...(account.geography.custom ?? [])];
+  const [addingChosen, setAdding] = useState(!added.size);
+  const adding = addingChosen || !added.size;
+  const heading = useRef<HTMLHeadingElement>(null);
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) first.current = false;
+    else heading.current?.focus();
+  }, [adding]);
+
+  const catalogue = [...GEO_SETS, ...(account.geography.custom ?? [])];
+  const all = adding ? catalogue : catalogue.filter((s) => added.has(s.id));
   const status = (s: GeoSet) => (added.has(s.id) ? 'Active' : 'Inactive');
   const term = q.trim().toLowerCase();
   const hits = all.filter(
@@ -76,20 +88,48 @@ export function Geographies() {
       status(s).toLowerCase().startsWith(term),
   );
 
+  /** After adding, go back to the account's geographies. */
+  const done = (m: string) => {
+    setAdding(false);
+    setQ('');
+    setCreating(null);
+    setMsg(m);
+  };
   const add = (s: GeoSet) => {
     update((a) => addSet(a, s));
-    setMsg(`${s.name} added to your account.`);
+    done(`${s.name} added to your account.`);
   };
 
   return (
     <div className="geo">
-      <header className="geo-head">
-        <h1 tabIndex={-1}>Geographies</h1>
-        <p className="geo-lead">
-          Geographies are the places your organisation serves, from the largest area down to the smallest. Every
-          product uses them to know where things happen, so work reaches the right place.
-        </p>
-      </header>
+      {adding ? (
+        <header className="geo-head">
+          <h1 ref={heading} tabIndex={-1}>
+            Add your geographies
+          </h1>
+          <p className="geo-lead">
+            Add the places you’ll serve, wherever your team sits. Every product uses your geographies to know where
+            things happen, so work reaches the right place.
+          </p>
+          <p className="geo-time">
+            <Icon name="Schedule" size={16} />5 min
+          </p>
+          {!!added.size && (
+            <Button variation="link" label="Back to your geographies" onClick={() => done('')} />
+          )}
+        </header>
+      ) : (
+        <header className="geo-head">
+          <h1 ref={heading} tabIndex={-1}>
+            Geographies
+          </h1>
+          <p className="geo-lead">
+            Geographies are the places your organisation serves, from the largest area down to the smallest. Every
+            product uses them to know where things happen, so work reaches the right place.
+          </p>
+          <Button variation="primary" icon="Add" label="Add geographies" onClick={() => setAdding(true)} />
+        </header>
+      )}
 
       <div className="geo-bar">
         <div className="geo-search">
@@ -100,7 +140,7 @@ export function Geographies() {
           <input
             id={`${uid}-q`}
             type="search"
-            placeholder="Search by name, country, level or status"
+            placeholder={adding ? 'Search by name, country, level or status' : 'Search your geographies'}
             value={q}
             onChange={(e) => {
               setQ(e.target.value);
@@ -122,7 +162,12 @@ export function Geographies() {
       </div>
 
       <p className="geo-count" role="status">
-        {msg || (term ? `${hits.length} ${hits.length === 1 ? 'geography' : 'geographies'} found` : `${all.length} geographies`)}
+        {msg ||
+          (term
+            ? `${hits.length} ${hits.length === 1 ? 'geography' : 'geographies'} found`
+            : adding
+              ? `${all.length} geographies`
+              : `${all.length} ${all.length === 1 ? 'geography' : 'geographies'} in your account`)}
       </p>
 
       {creating !== null ? (
@@ -132,19 +177,24 @@ export function Geographies() {
           onCancel={() => setCreating(null)}
           onCreate={(s) => {
             update((a) => addSet({ ...a, geography: { ...a.geography, custom: [...(a.geography.custom ?? []), s] } }, s));
-            setCreating(null);
-            setQ(s.name);
-            setMsg(`${s.name} created and added to your account.`);
+            done(`${s.name} created and added to your account.`);
           }}
         />
       ) : !hits.length ? (
         <div className="geo-empty">
           <EmptyGlobe />
           <h2>No geographies found</h2>
-          <p>
-            Nothing matches “{q.trim()}”. Try another search, or create this geography yourself.
-          </p>
-          <Button variation="primary" icon="Add" label={`Create “${q.trim()}”`} onClick={() => setCreating(q.trim())} />
+          {adding ? (
+            <>
+              <p>Nothing matches “{q.trim()}”. Try another search, or create this geography yourself.</p>
+              <Button variation="primary" icon="Add" label={`Create “${q.trim()}”`} onClick={() => setCreating(q.trim())} />
+            </>
+          ) : (
+            <>
+              <p>None of your geographies match “{q.trim()}”. Try another search, or add more geographies.</p>
+              <Button variation="primary" icon="Add" label="Add geographies" onClick={() => setAdding(true)} />
+            </>
+          )}
         </div>
       ) : view === 'cards' ? (
         <ul className="geo-cards">
@@ -169,7 +219,7 @@ export function Geographies() {
                 <span className="geo-tag">{s.levels.join(' › ')}</span>
               </p>
               <div className="geo-actions">
-                {added.has(s.id) ? (
+                {!adding ? null : added.has(s.id) ? (
                   <p className="geo-added">
                     <Icon name="CheckCircle" size={18} />
                     Added to your account
@@ -219,7 +269,7 @@ export function Geographies() {
                         title={`Download ${s.name} data`}
                         onClick={() => download(s)}
                       />
-                      {added.has(s.id) ? (
+                      {!adding ? null : added.has(s.id) ? (
                         <p className="geo-added">
                           <Icon name="CheckCircle" size={16} />
                           Added
