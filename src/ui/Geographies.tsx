@@ -224,8 +224,8 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
             editable ? (
               <SheetIntro action="Save" tree={v === 'tree'} />
             ) : !isAdded ? (
-              <InfoNote icon="Info" title="Missed some boundaries?">
-                If we have missed some boundaries, you can add this geography to your account and edit it.
+              <InfoNote icon="Info" title="Can’t find a boundary?" grey>
+                If a boundary is missing, add it to your account and edit it as needed.
               </InfoNote>
             ) : null
           }

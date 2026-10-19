@@ -1590,6 +1590,7 @@ p { margin: 0; line-height: 1.5; }
 
 /* Home header: the soft orange gradient of the first-landing page, fading into the page */
 .pk-head { background: linear-gradient(180deg, var(--c-primary-bg) 0%, rgb(251 238 232 / 0.6) 55%, rgb(251 238 232 / 0) 100%); }
+.sh-note.is-grey { border: 1px solid #E3E3E3; background: #FAFAFA; }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */
