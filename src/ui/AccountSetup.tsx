@@ -109,7 +109,7 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
         <HomeHeader ref={heading}>
           <section className="pk-next" aria-labelledby="pk-h">
             <h2 id="pk-h" className="pk-eyebrow">
-              Finish setting up your account <span className="pk-left">{open.length} left</span>
+              Finish setting up your account <span className="geo-section-n">{open.length} left</span>
             </h2>
             <ul className="pk-next-list">
               {open.map((t) => {
