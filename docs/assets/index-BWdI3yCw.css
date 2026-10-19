@@ -1687,6 +1687,21 @@ p { margin: 0; line-height: 1.5; }
 .osm-pin span::after { content: ''; position: absolute; left: 7px; top: 7px; width: 10px; height: 10px; border-radius: 50%; background: #fff; }
 .leaflet-container { font: inherit; }
 .leaflet-control-zoom a:focus-visible { outline: none; box-shadow: var(--focus); }
+
+/* OpenStreetMap step, v2: one toolbar (search left, pin controls right) above a map that fills
+   the rest of the screen, so nothing needs scrolling */
+.cg-page.is-wide .osm-map { display: flex; flex-direction: column; gap: 10px; }
+.osm-map .osm-bar { margin: 0; align-items: flex-start; }
+.osm-search { flex: 1 1 320px; max-width: 480px; }
+.osm-fld .geo-search { width: 100%; height: 44px; box-sizing: border-box; }
+.osm-fld .fld-error { margin-top: 6px; }
+.osm-fld.has-error .geo-search { border-color: var(--digitv2-lightTheme-alert-error); }
+.osm-pinbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--s2) var(--s3); min-height: 44px; }
+.osm-canvas { height: max(320px, calc(100vh - 470px)); min-height: 320px; }
+.cg .osm-fld { display: block; margin: 0; }
+.cg .osm-fld .geo-search { flex: none; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border-radius: 8px; }
+.cg .osm-fld .geo-search input { flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; outline: none; font-size: 1rem; }
+.cg form .osm-fld .geo-search input[type='search'] { height: 100% !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; background: none !important; }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */

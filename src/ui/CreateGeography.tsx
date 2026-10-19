@@ -4,7 +4,7 @@ import { Icon } from '../components/Icon';
 import { newId, type GeoRow, type GeoSet } from '../lib/model';
 import { Field, describedBy } from './StepFrame';
 import { AddGeographyDialog, GeoTree } from './GeoTree';
-import { OsmMap, type Pin } from './OsmMap';
+import { OsmMap, countryAt, type Pin } from './OsmMap';
 import { SheetIntro, UploadSteps, colLetter } from './Sheet';
 import { Crumbs } from './Crumbs';
 
@@ -168,11 +168,15 @@ export function CreateGeography({
   const next = () => {
     const e: Record<string, string> = {};
     if (step === 'country') {
-      const name = country.trim();
-      if (!name) e.country = method === 'osm' ? 'Enter the country to search for' : 'Enter the country’s name';
+      let name = country.trim();
+      // A pin alone is enough: name it after the country it falls in, or as the pinned location.
+      if (!name && method === 'osm' && pin) {
+        name = countryAt(pin) ?? 'Pinned location';
+        setCountry(name);
+      }
+      if (!name) e.country = method === 'osm' ? 'Search for your country or pin your location on the map' : 'Enter the country’s name';
       else if (taken.some((s) => s.name.toLowerCase() === name.toLowerCase()))
         e.country = `${name} is already here. Search for it instead.`;
-      if (method === 'osm' && !pin) e.pin = 'Pin your location on the map';
     }
     if (step === 'levels') {
       cleanLevels.forEach((l, i) => {
@@ -224,7 +228,7 @@ export function CreateGeography({
       'Choose how to set up your geography data. Upload a file using the template for bulk setup, or open the map to select them visually.',
     country:
       method === 'osm'
-        ? 'Search for the country you serve, then pin your location on the map.'
+        ? 'Search for the country you serve, or pin your location on the map.'
         : 'Your geography starts here. Everything you add sits inside it.',
     levels: 'List the geography levels from largest to smallest, for example Country, Region, District. This will help us customize your template for bulk upload.',
     places:
@@ -279,45 +283,62 @@ export function CreateGeography({
           next();
         }}
       >
-        {step === 'country' && (
-          <div className={`cg-split${method === 'osm' ? ' is-stacked' : ''}`}>
-          <Field id={`${uid}-country`} label={method === 'osm' ? 'Search by country' : 'Country name'} error={errors.country}>
-            {(() => {
-              const input = (
-                <input
-                  id={`${uid}-country`}
-                  type={method === 'osm' ? 'search' : 'text'}
-                  value={country}
-                  placeholder={method === 'osm' ? 'For example Rwanda' : undefined}
-                  autoComplete="country-name"
-                  aria-invalid={!!errors.country || undefined}
-                  aria-describedby={describedBy(`${uid}-country`, undefined, errors.country)}
-                  onChange={(e) => setCountry(e.target.value)}
-                />
-              );
-              // OpenStreetMap: a search box, like every other search here (icon inside, 8px corners).
-              return method === 'osm' ? (
-                <div className="geo-search cg-osm-search">
+        {step === 'country' && method === 'osm' && (
+          // OpenStreetMap: search for the country or pin a location; either is enough.
+          <OsmMap
+            id={`${uid}-pin`}
+            query={country}
+            pin={pin}
+            onPin={(p) => {
+              setPin(p);
+              // Pinning without searching fills in the country the pin falls in.
+              if (p && !country.trim()) {
+                const c = countryAt(p);
+                if (c) setCountry(c);
+              }
+              if (p && errors.country) setErrors(({ country: _gone, ...rest }) => rest);
+            }}
+            search={
+              <div className={`fld osm-fld${errors.country ? ' has-error' : ''}`}>
+                <label htmlFor={`${uid}-country`} className="ux-visually-hidden">
+                  Search by country
+                </label>
+                <div className="geo-search">
                   <Icon name="Search" size={20} />
-                  {input}
+                  <input
+                    id={`${uid}-country`}
+                    type="search"
+                    value={country}
+                    placeholder="Search by country"
+                    autoComplete="country-name"
+                    aria-invalid={!!errors.country || undefined}
+                    aria-describedby={errors.country ? `${uid}-country-err` : undefined}
+                    onChange={(e) => setCountry(e.target.value)}
+                  />
                 </div>
-              ) : (
-                input
-              );
-            })()}
-          </Field>
-          {method === 'osm' && (
-            <OsmMap
-              id={`${uid}-pin`}
-              query={country}
-              pin={pin}
-              onPin={(p) => {
-                setPin(p);
-                if (p && errors.pin) setErrors(({ pin: _gone, ...rest }) => rest);
-              }}
-              error={errors.pin}
+                {errors.country && (
+                  <p className="fld-error" id={`${uid}-country-err`}>
+                    <span className="ux-visually-hidden">Error: </span>
+                    {errors.country}
+                  </p>
+                )}
+              </div>
+            }
+          />
+        )}
+        {step === 'country' && method !== 'osm' && (
+          <div className="cg-split">
+          <Field id={`${uid}-country`} label="Country name" error={errors.country}>
+            <input
+              id={`${uid}-country`}
+              type="text"
+              value={country}
+              autoComplete="country-name"
+              aria-invalid={!!errors.country || undefined}
+              aria-describedby={describedBy(`${uid}-country`, undefined, errors.country)}
+              onChange={(e) => setCountry(e.target.value)}
             />
-          )}
+          </Field>
           </div>
         )}
 

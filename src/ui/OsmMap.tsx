@@ -4,10 +4,11 @@ import 'leaflet/dist/leaflet.css';
 import { Icon } from '../components/Icon';
 
 /**
- * An interactive OpenStreetMap under the country search. It follows what they
- * type (once the name matches a country it knows, the map moves there), and they
- * pin their location by clicking the map. Keyboard: the map takes focus, the
- * arrow keys pan and + / - zoom, and "Pin map centre" drops the pin.
+ * An interactive OpenStreetMap that fills the step. A toolbar on top holds the
+ * search (passed in) and the pin controls, so nothing needs scrolling. Either is
+ * enough: the map follows the country they type, or they pin their location by
+ * clicking the map. Keyboard: the map takes focus, the arrow keys pan and + / -
+ * zoom, and "Pin map centre" drops the pin.
  * Prototype: a short list of country outlines (west, south, east, north), not a geocoder.
  */
 const BOXES: Record<string, [number, number, number, number]> = {
@@ -44,6 +45,13 @@ const BOXES: Record<string, [number, number, number, number]> = {
   Zimbabwe: [25.2, -22.4, 33.1, -15.6],
 };
 
+/** The country (of the ones it knows) a pin falls in, smallest outline first. */
+export function countryAt(p: { lat: number; lng: number }) {
+  const hits = Object.entries(BOXES).filter(([, [w, s, e, n]]) => p.lng >= w && p.lng <= e && p.lat >= s && p.lat <= n);
+  hits.sort((a, b) => (a[1][2] - a[1][0]) * (a[1][3] - a[1][1]) - (b[1][2] - b[1][0]) * (b[1][3] - b[1][1]));
+  return hits[0]?.[0] ?? null;
+}
+
 function find(q: string) {
   const t = q.trim().toLowerCase();
   if (t.length < 3) return null;
@@ -60,13 +68,14 @@ export function OsmMap({
   query,
   pin,
   onPin,
-  error,
+  search,
 }: {
   id: string;
   query: string;
   pin: Pin | null;
   onPin: (p: Pin | null) => void;
-  error?: string;
+  /** The search box, shown at the left of the toolbar. */
+  search: React.ReactNode;
 }) {
   const box = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
@@ -122,35 +131,20 @@ export function OsmMap({
 
   const fmt = (n: number) => n.toFixed(4);
   return (
-    <div className={`osm-map${error ? ' has-error' : ''}`}>
-      {error && (
-        <p className="fld-error" id={`${id}-err`}>
-          <span className="ux-visually-hidden">Error: </span>
-          {error}
-        </p>
-      )}
-      <div
-        ref={box}
-        id={id}
-        className="osm-canvas"
-        role="application"
-        aria-label={`Map${shown ? ` of ${shown}` : ''}. Click to pin your location, or use the arrow keys to move and Pin map centre.`}
-        aria-describedby={error ? `${id}-err` : undefined}
-      />
+    <div className="osm-map">
       <div className="osm-bar">
-        <p className="osm-status" role="status">
-          {pin ? (
-            <>
-              <Icon name="LocationOn" size={18} />
-              Pinned at {fmt(pin.lat)}, {fmt(pin.lng)}
-            </>
-          ) : shown ? (
-            `Showing ${shown}. Click the map to pin your location.`
-          ) : (
-            'Search for your country, then click the map to pin your location.'
-          )}
-        </p>
-        <div className="osm-actions">
+        <div className="osm-search">{search}</div>
+        <div className="osm-pinbar">
+          <p className="osm-status" role="status">
+            {pin ? (
+              <>
+                <Icon name="LocationOn" size={18} />
+                Pinned at {fmt(pin.lat)}, {fmt(pin.lng)}
+              </>
+            ) : (
+              'Or click the map to pin your location.'
+            )}
+          </p>
           <button
             type="button"
             className="osm-btn"
@@ -169,6 +163,13 @@ export function OsmMap({
           )}
         </div>
       </div>
+      <div
+        ref={box}
+        id={id}
+        className="osm-canvas"
+        role="application"
+        aria-label={`Map${shown ? ` of ${shown}` : ''}. Click to pin your location, or use the arrow keys to move and Pin map centre.`}
+      />
     </div>
   );
 }
