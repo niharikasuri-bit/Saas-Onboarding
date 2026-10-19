@@ -16,10 +16,10 @@ import { AccountSetup } from './AccountSetup';
  */
 
 /** Prototype numbers for each product's card. */
-const CARD: Record<Product, { tag: string; tagIcon: string; stats: [string, string][] }> = {
-  cms: { tag: 'Most popular', tagIcon: 'Star', stats: [['6', 'Templates'], ['5', 'Modules'], ['14', 'Features']] },
-  hcm: { tag: 'Recently launched', tagIcon: 'Campaign', stats: [['4+', 'Templates'], ['8', 'Modules'], ['12', 'Features']] },
-  lnp: { tag: 'New', tagIcon: 'CheckCircle', stats: [['3', 'Templates'], ['6', 'Modules'], ['10', 'Features']] },
+const CARD: Record<Product, { stats: [string, string][] }> = {
+  cms: { stats: [['6', 'Templates'], ['5', 'Modules'], ['14', 'Features']] },
+  hcm: { stats: [['4+', 'Templates'], ['8', 'Modules'], ['12', 'Features']] },
+  lnp: { stats: [['3', 'Templates'], ['6', 'Modules'], ['10', 'Features']] },
 };
 
 export function Home() {
@@ -128,9 +128,8 @@ function ProductTile({ p, locked, opening }: { p: Product; locked: boolean; open
   const meta = PRODUCTS[p];
   return (
     <li className={`pt-card${locked ? ' is-locked' : ''}${opening ? ' is-opening' : ''}`}>
-      <span className="pt-tag">
-        <Icon name={CARD[p].tagIcon} size={16} />
-        {CARD[p].tag}
+      <span className="pt-icon" aria-hidden="true">
+        <Icon name={meta.icon} size={26} />
       </span>
       <h3>{meta.name}</h3>
       <p className="pt-about">{meta.about}</p>
@@ -142,7 +141,7 @@ function ProductTile({ p, locked, opening }: { p: Product; locked: boolean; open
             Locked until you add geographies
           </p>
         ) : (
-          <Button variation="secondary" label="View product" title={`View ${meta.name}`} onClick={() => openProduct(p)} />
+          <Button variation="primary" label="View product" title={`View ${meta.name}`} onClick={() => openProduct(p)} />
         )}
       </div>
       {(locked || opening) && (
@@ -165,10 +164,12 @@ function OffTile({ p, admin }: { p: Product; admin: boolean }) {
   const meta = PRODUCTS[p];
   return (
     <li className="pt-card is-off">
-      <span className="pt-tag is-off">
-        <Icon name="AddCircle" size={16} />
-        Not in your plan
-      </span>
+      <div className="pt-head">
+        <span className="pt-icon" aria-hidden="true">
+          <Icon name={meta.icon} size={26} />
+        </span>
+        <span className="pt-tag is-off">Not in your plan</span>
+      </div>
       <h3>{meta.name}</h3>
       <p className="pt-about">{meta.about}</p>
       <Stats p={p} />

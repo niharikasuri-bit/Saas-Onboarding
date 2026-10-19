@@ -123,7 +123,6 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
                         <Icon name={isDone ? 'Check' : task.icon} size={18} />
                       </span>
                       {task.title}
-                      <span className={`as-need${t.id === 'geography' ? ' is-req' : ''}`}>{t.id === 'geography' ? 'Required' : 'Optional'}</span>
                     </h2>
                     {isDone ? (
                       <p className="as-result">{todoResult(t.id, account)}</p>
