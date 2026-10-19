@@ -62,7 +62,7 @@ export function HomeHeader({ ref }: { ref?: React.Ref<HTMLHeadingElement> }) {
   return (
     <header className="pk-head">
       <h1 ref={ref} tabIndex={-1}>
-        Hi <em>{firstName(answers)}</em>
+        Hi {firstName(answers)}
       </h1>
       <p>Your one stop to access your products for {org}, manage your account and its settings.</p>
     </header>
