@@ -1355,6 +1355,62 @@ p { margin: 0; line-height: 1.5; }
 
 /* Pages without the footer bar (Home, overviews, detail) keep the toast at the bottom edge */
 .as .cg-toast, .geo.is-detail .cg-toast, .geo:not(.is-creating) .cg-toast { bottom: 24px; }
+
+/* Home v5: the checklist sits in the orange band; products follow */
+.hm-v5 .as.is-band { margin: calc(-1 * var(--s8)) calc(-1 * clamp(24px, 4vw, 56px)) var(--s8); padding: 0 clamp(24px, 4vw, 56px) var(--s8); background: var(--c-primary-bg); }
+.hm-v5 .as.is-band .as-head { margin: 0 0 var(--s6); padding: var(--s6) 0 0; background: none; }
+.hm-v5 .as.is-band .as-wrap { max-width: none; }
+.hm-v5 .as-list { grid-auto-rows: auto; }
+.as-need { margin-left: 10px; padding: 2px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--c-text-2); background: var(--digitv2-lightTheme-generic-background); }
+.as-need.is-req { color: #8A3A00; background: #FFE9D6; }
+.hm-sec { margin-bottom: var(--s8); }
+.hm-sub { margin: calc(-1 * var(--s2)) 0 var(--s4); color: var(--c-text-2); }
+.hm-locked-note { display: inline-flex; align-items: center; gap: 8px; margin-bottom: var(--s4); padding: 10px 14px; border-radius: 8px; background: var(--c-info-bg); font-weight: 500; }
+.hm-locked-note .ux-icon { color: var(--digitv2-lightTheme-primary-2); }
+
+/* Product cards (like the reference): tag, name, about, three stat tiles, action */
+.pt-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr)); gap: var(--s5, 20px); }
+.pt-card { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 12px; padding: 24px 28px; border: 1px solid #EAEAEA; border-radius: 14px; background: #fff; box-shadow: 0 1px 2px rgb(16 24 40 / 0.04), 0 6px 18px rgb(16 24 40 / 0.05); }
+.pt-tag { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; font-size: 0.875rem; font-weight: 500; color: #8A3A00; background: #FFE9D6; }
+.pt-card:nth-child(2n) .pt-tag:not(.is-off) { color: #5B2A86; background: #EFE4FA; }
+.pt-tag.is-off { color: var(--c-text-2); background: #EEEEEE; }
+.pt-card h3 { font-size: 1.5rem; font-weight: 700; line-height: 1.25; color: var(--digitv2-lightTheme-primary-2); }
+.pt-about { color: var(--c-text-2); line-height: 1.5; }
+.pt-stats { margin: 4px 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.pt-stats > div { display: flex; flex-direction: column; align-items: center; padding: 12px 8px; border-radius: 8px; background: #FFF8EE; }
+.pt-stats dd { margin: 0; font-size: 1.125rem; font-weight: 700; color: var(--digitv2-lightTheme-primary-2); }
+.pt-stats dt { font-size: 0.9375rem; color: var(--c-text-2); }
+.pt-actions { margin-top: auto; padding-top: 4px; }
+.pt-actions > button { width: 100%; height: 44px; }
+.pt-actions > button .digit-button-label { font-size: 1rem; font-weight: 500; }
+.pt-lock-cta { display: flex; align-items: center; justify-content: center; gap: 8px; height: 44px; border-radius: 6px; background: #F3F3F3; color: var(--c-text-2); font-weight: 500; }
+
+/* Locked: muted card with a lock in the middle */
+.pt-card.is-locked > :not(.pt-lock) { filter: grayscale(1); }
+.pt-card.is-locked { background: #F7F7F7; }
+.pt-card.is-locked .pt-actions { filter: none; }
+.pt-lock { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; color: var(--digitv2-lightTheme-primary-2); }
+.pt-lock svg { padding: 14px; border-radius: 50%; background: rgb(255 255 255 / 0.92); box-sizing: content-box; filter: drop-shadow(0 6px 14px rgb(16 24 40 / 0.18)); }
+.pt-shackle { transform-origin: 33px 22px; }
+/* Unlocking: the shackle swings open, the lock lifts and fades, the card comes back to colour */
+.pt-card.is-opening > :not(.pt-lock) { animation: pt-colour 1.2s ease 0.5s both; }
+.pt-card.is-opening .pt-shackle { animation: pt-swing 0.5s ease-out both; }
+.pt-card.is-opening .pt-lock { animation: pt-lift 0.7s ease-in 0.55s both; }
+@keyframes pt-swing { to { transform: translateY(-4px) rotate(-35deg); } }
+@keyframes pt-lift { to { opacity: 0; transform: translateY(-24px) scale(1.15); } }
+@keyframes pt-colour { from { filter: grayscale(1); } to { filter: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .pt-card.is-opening .pt-lock { display: none; }
+  .pt-card.is-opening > :not(.pt-lock), .pt-card.is-opening .pt-shackle { animation: none; }
+}
+
+/* Not in their plan: lighter and dashed */
+.pt-card.is-off { background: #FAFAFA; border-style: dashed; box-shadow: none; }
+.pt-card.is-off .pt-stats > div { background: #F0F0F0; }
+.pt-card.is-off .pt-actions > button { background: #fff; }
+/* The lock sits in the card's top-right corner, clear of the content */
+.pt-lock { inset: 18px 18px auto auto; display: block; }
+.pt-lock svg { width: 30px; height: 30px; padding: 10px; }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */

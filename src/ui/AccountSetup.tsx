@@ -51,9 +51,8 @@ const TASK: Record<
   },
 };
 
-const COUNT = ['no', 'one', 'two', 'three', 'four', 'five'];
-
-export function AccountSetup() {
+/** onFlow: tells Home when a setup flow takes over the page, so it can hide the products. */
+export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = {}) {
   const { account, go } = useAccount();
   const todos = todosFor(account);
   const done = todos.filter((t) => todoDone(t.id, account)).length;
@@ -69,7 +68,8 @@ export function AccountSetup() {
   useEffect(() => {
     if (wasAdding.current && !addingGeo && !addingSender && !addingTeam) heading.current?.focus();
     wasAdding.current = addingGeo || addingSender || addingTeam;
-  }, [addingGeo, addingSender, addingTeam]);
+    onFlow?.(addingGeo || addingSender || addingTeam);
+  }, [addingGeo, addingSender, addingTeam, onFlow]);
 
   const back = (set: (v: boolean) => void) => (message?: string) => {
     set(false);
@@ -80,7 +80,7 @@ export function AccountSetup() {
   if (addingTeam) return <Team embedded onDone={() => setAddingTeam(false)} />;
 
   return (
-    <div className="as">
+    <div className="as is-band">
       {toastEl}
       <header className="as-head">
         <div className="as-wrap">
@@ -88,7 +88,7 @@ export function AccountSetup() {
           <h1 ref={heading} tabIndex={-1}>
             Let’s complete <em>account setup</em>
           </h1>
-          <p className="as-lead">Finish these {COUNT[todos.length] ?? todos.length} things to unlock your products.</p>
+          <p className="as-lead">Add your geographies to unlock your products. Notification channels and your team are optional for now.</p>
           <div className="as-progress">
             <p id="as-progress-l">Your account setup</p>
             <p className="as-count">
@@ -123,6 +123,7 @@ export function AccountSetup() {
                         <Icon name={isDone ? 'Check' : task.icon} size={18} />
                       </span>
                       {task.title}
+                      <span className={`as-need${t.id === 'geography' ? ' is-req' : ''}`}>{t.id === 'geography' ? 'Required' : 'Optional'}</span>
                     </h2>
                     {isDone ? (
                       <p className="as-result">{todoResult(t.id, account)}</p>

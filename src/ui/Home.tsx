@@ -1,75 +1,102 @@
-import { useId } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Button } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
 import { useAccount } from '../lib/store';
-import {
-  PRODUCTS,
-  PRODUCT_ORDER,
-  cardState,
-  nextRow,
-  percent,
-  type Product,
-} from '../lib/model';
+import { PRODUCTS, PRODUCT_ORDER, hasGeography, setupDone, type Product } from '../lib/model';
 import { firstName } from '../setup/steps';
-import { setupDone } from '../lib/model';
 import { AccountSetup } from './AccountSetup';
 
 /**
- * Home: a Primary 1 bg hero with the admin's account to-do, then a card for
- * each product. Members don't see the to-do.
+ * Home, in three parts:
+ * 1. An orange band: the account setup checklist (only geographies are
+ *    required), or a greeting once it's done.
+ * 2. Your products. Locked until the account has geographies; when they
+ *    arrive the lock opens once, then each card leads to the product.
+ * 3. Other products, not in their plan yet, to add.
  */
+
+/** Prototype numbers for each product's card. */
+const CARD: Record<Product, { tag: string; tagIcon: string; stats: [string, string][] }> = {
+  cms: { tag: 'Most popular', tagIcon: 'Star', stats: [['6', 'Templates'], ['5', 'Modules'], ['14', 'Features']] },
+  hcm: { tag: 'Recently launched', tagIcon: 'Campaign', stats: [['4+', 'Templates'], ['8', 'Modules'], ['12', 'Features']] },
+  lnp: { tag: 'New', tagIcon: 'CheckCircle', stats: [['3', 'Templates'], ['6', 'Modules'], ['10', 'Features']] },
+};
+
 export function Home() {
   const { account, answers } = useAccount();
   const uid = useId();
   const admin = account.ui.viewAs === 'admin';
   const on = PRODUCT_ORDER.filter((p) => account.products[p].enabled);
   const off = PRODUCT_ORDER.filter((p) => !account.products[p].enabled);
+  // A setup flow (adding geographies, channels or the team) takes over the page while it's open.
+  const [flow, setFlow] = useState(false);
 
-  // Until the account to-do is done it leads Home; the products sit below it.
-  const setup = !setupDone(account);
+  const unlocked = hasGeography(account);
+  // Open the lock once, when geographies arrive while they're here.
+  const wasUnlocked = useRef(unlocked);
+  const [opening, setOpening] = useState(false);
+  useEffect(() => {
+    if (unlocked && !wasUnlocked.current) {
+      setOpening(true);
+      const t = setTimeout(() => setOpening(false), 1800);
+      wasUnlocked.current = true;
+      return () => clearTimeout(t);
+    }
+    wasUnlocked.current = unlocked;
+  }, [unlocked]);
 
-  if (setup)
-    return (
-      <div className="hm is-setup">
-        <AccountSetup />
-      </div>
-    );
+  const done = setupDone(account);
 
-  // Set up: the same band as the other pages, then their products, then the rest to enable.
   return (
-    <div className="geo is-overview hm-done">
-      <Hero name={firstName(answers)} admin={admin} />
-      <section aria-labelledby={`${uid}-p`} className="hm-sec">
-        <div className="geo-bar">
-          <h2 id={`${uid}-p`} className="geo-section-h">
-            Your products <span className="geo-section-n">{on.length}</span>
-          </h2>
-        </div>
-        <ul className="pc-list hm-row">
-          {on.map((p) => (
-            <ProductCard key={p} p={p} />
-          ))}
-        </ul>
-      </section>
-      {off.length > 0 && (
-        <section aria-labelledby={`${uid}-o`} className="hm-sec">
-          <div className="geo-bar">
-            <h2 id={`${uid}-o`} className="geo-section-h">
-              Other products
-            </h2>
-          </div>
-          <ul className="pc-list hm-row">
-            {off.map((p) => (
-              <OffCard key={p} p={p} />
-            ))}
-          </ul>
-        </section>
+    <div className="geo is-overview hm-v5">
+      {done ? <Hero name={firstName(answers)} admin={admin} /> : <AccountSetup onFlow={setFlow} />}
+
+      {!flow && (
+        <>
+          <section aria-labelledby={`${uid}-p`} className="hm-sec">
+            <div className="geo-bar">
+              <h2 id={`${uid}-p`} className="geo-section-h">
+                Your products <span className="geo-section-n">{on.length}</span>
+              </h2>
+            </div>
+            <p className="ux-visually-hidden" role="status">
+              {opening ? 'Your products are unlocked.' : ''}
+            </p>
+            {!unlocked && (
+              <p className="hm-locked-note">
+                <Icon name="Lock" size={18} />
+                To start using your products, add your geographies.
+              </p>
+            )}
+            <ul className="pt-list">
+              {on.map((p) => (
+                <ProductTile key={p} p={p} locked={!unlocked} opening={opening} />
+              ))}
+            </ul>
+          </section>
+
+          {off.length > 0 && (
+            <section aria-labelledby={`${uid}-o`} className="hm-sec">
+              <div className="geo-bar">
+                <h2 id={`${uid}-o`} className="geo-section-h">
+                  Other products
+                </h2>
+              </div>
+              <p className="hm-sub">Not in your plan yet. Add one when you need it.</p>
+              <ul className="pt-list">
+                {off.map((p) => (
+                  <OffTile key={p} p={p} admin={admin} />
+                ))}
+              </ul>
+            </section>
+          )}
+        </>
       )}
     </div>
   );
 }
 
-/** Once the account is set up, Home just greets them; the products follow. */
+/** Once the account is set up, the band just greets them. */
 function Hero({ name, admin }: { name: string; admin: boolean }) {
   return (
     <header className="geo-head geo-band">
@@ -83,122 +110,79 @@ function Hero({ name, admin }: { name: string; admin: boolean }) {
   );
 }
 
-function ProductCard({ p }: { p: Product }) {
-  const { account, openProduct, openModal } = useAccount();
-  const st = account.products[p];
-  const meta = PRODUCTS[p];
-  const state = cardState(p, account);
-  const admin = account.ui.viewAs === 'admin';
-  const pct = percent(p, account);
-  const next = nextRow(p, account);
-
+function Stats({ p }: { p: Product }) {
   return (
-    <li className={`pc is-${state}`}>
-      <div className="pc-head">
-        <span className="pc-icon" aria-hidden="true">
-          <Icon name={meta.icon} size={26} />
-        </span>
-        <h3>{meta.name}</h3>
-        <span className={`tag ${st.live ? 'is-completed' : 'is-not-started'}`}>{st.live ? 'Live' : 'Not live'}</span>
-      </div>
+    <dl className="pt-stats">
+      {CARD[p].stats.map(([n, label]) => (
+        <div key={label}>
+          <dd>{n}</dd>
+          <dt>{label}</dt>
+        </div>
+      ))}
+    </dl>
+  );
+}
 
-      {state === 'nogeo' && (
-        <>
-          <p className="pc-about">{meta.about}</p>
-          <p className="pc-note">
+function ProductTile({ p, locked, opening }: { p: Product; locked: boolean; opening: boolean }) {
+  const { openProduct } = useAccount();
+  const meta = PRODUCTS[p];
+  return (
+    <li className={`pt-card${locked ? ' is-locked' : ''}${opening ? ' is-opening' : ''}`}>
+      <span className="pt-tag">
+        <Icon name={CARD[p].tagIcon} size={16} />
+        {CARD[p].tag}
+      </span>
+      <h3>{meta.name}</h3>
+      <p className="pt-about">{meta.about}</p>
+      <Stats p={p} />
+      <div className="pt-actions">
+        {locked ? (
+          <p className="pt-lock-cta">
             <Icon name="Lock" size={16} />
-            {admin ? 'Opens once you add the areas you work in' : 'Waiting for an admin to add areas'}
+            Locked until you add geographies
           </p>
-          {/* while the account to-do is open, adding areas happens there, not here */}
-          {admin && setupDone(account) && (
-            <div className="pc-actions">
-              <Button variation="primary" label="Define Geography" onClick={() => openModal({ kind: 'gate', product: p })} />
-            </div>
-          )}
-        </>
-      )}
-
-      {state === 'setting' && (
-        <>
-          <p className="pc-about">{meta.about}</p>
-          <div className="pc-progress">
-            <span className="pc-bar" aria-hidden="true">
-              <span style={{ width: `${pct}%` }} />
-            </span>
-            <span>{st.templateId ? `${pct}% set up` : 'Not started'}</span>
-          </div>
-          {st.templateId && next && (
-            <p className="pc-next">
-              Next: <strong>{next.label}</strong>
-            </p>
-          )}
-          <div className="pc-actions">
-            <Button
-              variation="primary"
-              label={admin ? (st.templateId ? 'Continue Setup' : 'Start Setup') : 'Open'}
-              onClick={() => openProduct(p)}
-            />
-          </div>
-        </>
-      )}
-
-      {state === 'live' && (
-        <>
-          <p className="pc-health">
-            <span className="dot is-ok" aria-hidden="true" />
-            Healthy
-          </p>
-          <ul className="pc-metrics">
-            {liveMetrics(p).map(([k, v]) => (
-              <li key={k}>
-                <strong>{v}</strong>
-                <span>{k}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="pc-actions">
-            <Button variation="secondary" label="Open" onClick={() => openProduct(p)} />
-          </div>
-        </>
+        ) : (
+          <Button variation="secondary" label="View product" title={`View ${meta.name}`} onClick={() => openProduct(p)} />
+        )}
+      </div>
+      {(locked || opening) && (
+        <span className="pt-lock" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="56" height="56">
+            <path className="pt-shackle" d="M15 22v-6a9 9 0 0 1 18 0v6" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+            <rect x="9" y="21" width="30" height="22" rx="5" fill="currentColor" />
+            <circle cx="24" cy="31" r="3" fill="#fff" />
+            <rect x="22.5" y="31" width="3" height="6" rx="1.5" fill="#fff" />
+          </svg>
+        </span>
       )}
     </li>
   );
 }
 
-/** Just live, so the numbers start at zero. */
-const liveMetrics = (p: Product): [string, string][] =>
-  p === 'cms'
-    ? [['New today', '0'], ['Open', '0'], ['On time', '—']]
-    : p === 'lnp'
-      ? [['Applications today', '0'], ['Waiting for review', '0'], ['Fees collected', '0']]
-      : [['Coverage', '0%'], ['Households reached', '0'], ['Field workers active', '0']];
-
-/** A product that isn't on yet: shown greyed out, with Enable for admins. */
-function OffCard({ p }: { p: Product }) {
-  const { account, update } = useAccount();
-  const admin = account.ui.viewAs === 'admin';
+/** A product that isn't in their plan: lighter, dashed, with Add for admins. */
+function OffTile({ p, admin }: { p: Product; admin: boolean }) {
+  const { update } = useAccount();
   const meta = PRODUCTS[p];
   return (
-    <li className="pc is-off">
-      <div className="pc-head">
-        <span className="pc-icon" aria-hidden="true">
-          <Icon name={meta.icon} size={26} />
-        </span>
-        <h3>{meta.name}</h3>
-        <span className="tag is-not-started">Not enabled</span>
-      </div>
-      <p className="pc-about">{meta.about}</p>
-      <div className="pc-actions">
+    <li className="pt-card is-off">
+      <span className="pt-tag is-off">
+        <Icon name="AddCircle" size={16} />
+        Not in your plan
+      </span>
+      <h3>{meta.name}</h3>
+      <p className="pt-about">{meta.about}</p>
+      <Stats p={p} />
+      <div className="pt-actions">
         {admin ? (
           <Button
             variation="secondary"
             icon="Add"
-            label="Enable product"
-            title={`Enable ${meta.name}`}
+            label="Add to my products"
+            title={`Add ${meta.name} to my products`}
             onClick={() => update((a) => ({ ...a, products: { ...a.products, [p]: { ...a.products[p], enabled: true } } }))}
           />
         ) : (
-          <p className="pc-note">Ask an admin to enable it.</p>
+          <p className="pt-lock-cta">Ask an admin to add it.</p>
         )}
       </div>
     </li>
