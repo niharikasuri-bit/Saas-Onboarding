@@ -137,7 +137,12 @@ function ChannelFlow({
   const uid = useId();
   const [picked, setPicked] = useState<Channel[]>([]);
   const [step, setStep] = useState(0); // 0 = pick the channels, 1 = add sender details
-  const [values, setValues] = useState<Record<string, Record<string, string>>>({});
+  // Prototype: filled in with the example details, so the flow can be clicked straight through.
+  const [values, setValues] = useState<Record<string, Record<string, string>>>(() =>
+    Object.fromEntries(
+      channels.map((c) => [c.id, Object.fromEntries(c.fields.map((f) => [f.key, f.options ? f.options[0] : f.secret ? 'example-secret' : f.placeholder ?? '']))]),
+    ),
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -187,13 +192,13 @@ function ChannelFlow({
         <h1 id={`${uid}-h`} ref={heading} tabIndex={-1}>
           {step === 1 ? 'Add sender details' : 'Which channels do you want to set up?'}
         </h1>
-        {step === 0 ? (
-          <div className="cg-sub">
-            <p>Choose one or more. You can set up the others later.</p>
-          </div>
-        ) : (
-          <div className="cg-gap" />
-        )}
+        <div className="cg-sub">
+          <p>
+            {step === 0
+              ? 'Choose one or more. You can set up the others later.'
+              : 'Messages go out from your own accounts. Add the details for each channel you chose, and check them before you connect.'}
+          </p>
+        </div>
         <form
           noValidate
           onSubmit={(e) => {
@@ -202,7 +207,7 @@ function ChannelFlow({
           }}
         >
           {step === 0 && (
-            <fieldset className={`qz-tiles ch-tiles${errors.pick ? ' has-error' : ''}`} aria-describedby={errors.pick ? `${uid}-pick-error` : undefined}>
+            <fieldset className={`qz-tiles cg-tiles ch-tiles${errors.pick ? ' has-error' : ''}`} aria-describedby={errors.pick ? `${uid}-pick-error` : undefined}>
               <legend className="ux-visually-hidden">Which channels do you want to set up?</legend>
               {errors.pick && (
                 <p id={`${uid}-pick-error`} className="fld-error">
@@ -225,7 +230,7 @@ function ChannelFlow({
                         }}
                       />
                       <span className="cg-tile-icon" aria-hidden="true">
-                        <Icon name={ICON[c.id]} size={36} />
+                        <Icon name={ICON[c.id]} size={28} />
                       </span>
                       <span className="qz-tile-label">{TILE[c.id]}</span>
                       {on && (
@@ -249,7 +254,6 @@ function ChannelFlow({
                     </span>
                     <div className="ch-sec-title">
                       <h2 id={`${uid}-${c.id}-h`}>{c.label}</h2>
-                      <p>{c.note}</p>
                     </div>
                     <span className="geo-status">Not connected</span>
                   </div>
