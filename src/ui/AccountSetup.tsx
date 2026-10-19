@@ -52,9 +52,26 @@ const TASK: Record<
   },
 };
 
+/**
+ * The orange header on Home once they're past the first landing. The same words whatever's
+ * done, so it reads as their account's starting point rather than a setup step.
+ */
+export function HomeHeader({ ref }: { ref?: React.Ref<HTMLHeadingElement> }) {
+  const { answers } = useAccount();
+  const org = answers.org.trim();
+  return (
+    <header className="pk-head">
+      <h1 ref={ref} tabIndex={-1}>
+        Hi, <em>{firstName(answers)}</em>
+      </h1>
+      <p>Everything for {org || 'your organisation'} in one place: your products, your team and your settings.</p>
+    </header>
+  );
+}
+
 /** onFlow: tells Home when a setup flow takes over the page, so it can hide the products. */
 export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = {}) {
-  const { account, answers } = useAccount();
+  const { account } = useAccount();
   const todos = todosFor(account);
   // Only what's left: a finished step drops off, so they pick up where they left off.
   const open = todos.filter((t) => !todoDone(t.id, account));
@@ -91,12 +108,7 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
     return (
       <div className="pk">
         {toastEl}
-        <header className="pk-head">
-          <h1 ref={heading} tabIndex={-1}>
-            Hi, <em>{firstName(answers)}</em>
-          </h1>
-          <p>Finish setting up your account and start using your products.</p>
-        </header>
+        <HomeHeader ref={heading} />
         <section className="hm-sec pk-panel" aria-labelledby="pk-h">
           <div className="geo-bar">
             <h2 id="pk-h" className="geo-section-h">

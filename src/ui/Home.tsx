@@ -3,13 +3,12 @@ import { Button } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
 import { useAccount } from '../lib/store';
 import { PRODUCTS, PRODUCT_ORDER, hasGeography, setupDone, todoDone, todosFor, type Product } from '../lib/model';
-import { firstName } from '../setup/steps';
-import { AccountSetup } from './AccountSetup';
+import { AccountSetup, HomeHeader } from './AccountSetup';
 
 /**
  * Home, in three parts:
- * 1. An orange band: the account setup checklist (only geographies are
- *    required), or a greeting once it's done.
+ * 1. The account setup checklist (only geographies are required) under an
+ *    orange header, or just the header once it's all done.
  * 2. Your products. Locked until the account has geographies; when they
  *    arrive the lock opens once, then each card leads to the product.
  * 3. Other products, not in their plan yet, to add.
@@ -31,7 +30,7 @@ const CARD: Record<Product, { stats: [string, string][] }> = {
 };
 
 export function Home() {
-  const { account, answers } = useAccount();
+  const { account } = useAccount();
   const uid = useId();
   const admin = account.ui.viewAs === 'admin';
   const on = PRODUCT_ORDER.filter((p) => account.products[p].enabled);
@@ -59,7 +58,7 @@ export function Home() {
   return (
     // First landing keeps the original centred setup page; the band layout starts once they've set something up.
     <div className={`geo is-overview${started ? ' hm-v5' : ' hm-first'}`}>
-      {done ? <Hero name={firstName(answers)} admin={admin} /> : <AccountSetup onFlow={setFlow} />}
+      {done ? <div className="pk"><HomeHeader /></div> : <AccountSetup onFlow={setFlow} />}
 
       {/* Always mounted, so the unlock is announced even when the products first appear unlocked */}
       <p className="ux-visually-hidden" role="status">
@@ -98,20 +97,6 @@ export function Home() {
         </>
       )}
     </div>
-  );
-}
-
-/** Once the account is set up, the band just greets them. */
-function Hero({ name, admin }: { name: string; admin: boolean }) {
-  return (
-    <header className="geo-head geo-band">
-      <div className="geo-band-text">
-        <h1 id="hero-h" tabIndex={-1}>
-          Hi {name}
-        </h1>
-        <p className="geo-lead">{admin ? 'Pick a product below to start using it.' : 'Here are the products your team is working on.'}</p>
-      </div>
-    </header>
   );
 }
 
