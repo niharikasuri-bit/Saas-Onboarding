@@ -59,7 +59,7 @@ export function Home() {
 
       {!flow && (
         <>
-          <section aria-labelledby={`${uid}-p`} className="hm-sec">
+          <section aria-labelledby={`${uid}-p`} className="hm-sec is-mine">
             <div className="geo-bar">
               <h2 id={`${uid}-p`} className="geo-section-h">
                 Your products <span className="geo-section-n">{on.length}</span>
@@ -76,7 +76,7 @@ export function Home() {
           </section>
 
           {off.length > 0 && (
-            <section aria-labelledby={`${uid}-o`} className="hm-sec">
+            <section aria-labelledby={`${uid}-o`} className="hm-sec is-other">
               <div className="geo-bar">
                 <h2 id={`${uid}-o`} className="geo-section-h">
                   Other products
