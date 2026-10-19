@@ -231,10 +231,24 @@ export function CreateGeography({
           : '',
   };
 
+  // Reviewing uploaded or fetched geographies: no white card, the table takes the page.
+  const reviewing = step === 'places' && (!!uploaded || method === 'osm');
+
   return (
     <div className={`cg-page${step === 'places' ? ' is-wide' : ''}`}>
       <Crumbs items={[...trail, { label: 'Create a geography' }]} />
-    <section className="cg" aria-labelledby={`${uid}-h`}>
+    <section className={`cg${reviewing ? ' is-bare' : ''}`} aria-labelledby={`${uid}-h`}>
+      {reviewing ? (
+        <header className="rv-head">
+          <div>
+            <h1 id={`${uid}-h`} ref={heading} tabIndex={-1}>
+              {TITLES[step]}
+            </h1>
+            <p>{LEADS[step]}</p>
+          </div>
+          <Button variation="secondary" icon="Add" label="Add geography" onClick={() => setAddingPlace(true)} />
+        </header>
+      ) : (
       <div className="cg-title-row">
         <h1 id={`${uid}-h`} ref={heading} tabIndex={-1}>
           {TITLES[step]}
@@ -243,7 +257,8 @@ export function CreateGeography({
           <Button variation="secondary" icon="FileDownload" label="Download template" onClick={() => downloadTemplate(country.trim(), cleanLevels)} />
         )}
       </div>
-      {LEADS[step] ? (
+      )}
+      {reviewing ? null : LEADS[step] ? (
         <div className="cg-sub">
           {LEADS[step].split('\n').map((line) => (
             <p key={line}>{line}</p>
@@ -342,7 +357,6 @@ export function CreateGeography({
                       Tree
                     </button>
                   </div>
-                  <Button variation="secondary" icon="Add" label="Add geography" onClick={() => setAddingPlace(true)} />
                 </div>
                 {addingPlace && (
                   <AddGeographyDialog

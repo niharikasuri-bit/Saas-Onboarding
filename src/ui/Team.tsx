@@ -655,7 +655,7 @@ function AddTeam({
       <Crumbs items={[...trail, { label: 'Add team members' }]} />
       <section className={`cg${reviewing ? ' is-bare' : ''}`} aria-labelledby={`${uid}-h`}>
         {reviewing ? (
-          <header className="tm-review-head">
+          <header className="rv-head">
             <div>
               <h1 id={`${uid}-h`} ref={heading} tabIndex={-1}>
                 {title}
