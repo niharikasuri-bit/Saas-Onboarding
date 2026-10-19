@@ -1,12 +1,12 @@
-import { Button } from '@egovernments/digit-ui-components';
+import { Button, Card } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
 import { useAccount } from '../lib/store';
 import { todoDone, todoResult, todosFor, type PageId, type TodoId } from '../lib/model';
 
 /**
- * The account to-do, leading Home until it's done. Full width. Each step has
- * an icon, its title with the action on the right, what to do, an info note
- * on why it matters, and a time tag. Every open step gets a primary button; the next one is highlighted.
+ * The account to-do, leading Home until it's done. A centred column: a header,
+ * the progress, then one DIGIT Card per step with its number, title and status
+ * tag, what to do, why it matters, the time it takes and a primary button.
  */
 
 const TASK: Record<
@@ -14,9 +14,9 @@ const TASK: Record<
   { title: string; what: string; why: string; minutes: number; icon: string; page: PageId; action: string }
 > = {
   geography: {
-    title: 'Add the areas you work in',
-    what: 'Search for your areas, or create your own.',
-    why: 'Products use them to know where people, complaints and campaigns are.',
+    title: 'Add your geographies',
+    what: 'Add the places where you work.',
+    why: 'Every product uses your geographies to know where things happen.',
     minutes: 5,
     icon: 'Public',
     page: 'geographies',
@@ -24,8 +24,8 @@ const TASK: Record<
   },
   sender: {
     title: 'Set up notification channels',
-    what: 'Choose how citizens and staff get SMS and email.',
-    why: 'Approval can take a few days, so start early.',
+    what: 'Connect your SMS and email services, and choose who messages come from.',
+    why: 'Set it up once here, and every product can send messages to citizens and staff.',
     minutes: 5,
     icon: 'Email',
     page: 'sender',
@@ -34,7 +34,7 @@ const TASK: Record<
   users: {
     title: 'Invite your team',
     what: 'Add the emails of the people who’ll work with you.',
-    why: 'You’ll need them to give roles and assign work.',
+    why: 'Once your team is in, you can give each person a role and assign them work.',
     minutes: 2,
     icon: 'Group',
     page: 'team',
@@ -53,12 +53,20 @@ export function AccountSetup() {
   return (
     <div className="as">
       <header className="as-head">
-        <h1 tabIndex={-1}>Let’s complete account setup</h1>
-        <p className="as-lead">Finish these {COUNT[todos.length] ?? todos.length} things to unlock your products.</p>
+        <div className="as-wrap">
+          <p className="as-eyebrow">
+            <span aria-hidden="true" />
+            Welcome aboard
+          </p>
+          <h1 tabIndex={-1}>
+            Let’s complete <em>account setup</em>
+          </h1>
+          <p className="as-lead">Finish these {COUNT[todos.length] ?? todos.length} things to unlock your products.</p>
+        </div>
       </header>
 
-      <section className="as-panel" aria-labelledby="as-panel-h">
-        <div className="as-panel-head">
+      <section className="as-wrap" aria-labelledby="as-panel-h">
+        <div className="as-progress">
           <h2 id="as-panel-h">What you need to do</h2>
           <p className="as-count">
             <strong>{done}</strong> of {todos.length} done
@@ -75,51 +83,56 @@ export function AccountSetup() {
           <span style={{ width: `${(done / todos.length) * 100}%` }} />
         </div>
 
-        <ul className="as-list">
-          {todos.map((t) => {
+        <ol className="as-list">
+          {todos.map((t, i) => {
             const isDone = todoDone(t.id, account);
-            const isNext = t.id === next;
             const task = TASK[t.id];
             return (
-              <li key={t.id} className={`as-row${isDone ? ' is-done' : ''}${isNext ? ' is-next' : ''}`}>
-                <span className="as-icon" aria-hidden="true">
-                  <Icon name={isDone ? 'Check' : task.icon} size={24} />
-                </span>
-                <div className="as-body">
-                  <div className="as-top">
+              <li key={t.id}>
+                <Card className={`as-card${isDone ? ' is-done' : ''}${t.id === next ? ' is-next' : ''}`}>
+                  <div className="as-side" aria-hidden="true">
+                    <span className="as-icon">
+                      <Icon name={isDone ? 'Check' : task.icon} size={22} />
+                    </span>
+                    <span className="as-num">{String(i + 1).padStart(2, '0')}</span>
+                  </div>
+                  <div className="as-body">
                     <h3>
                       {task.title}
-                      <span className="ux-visually-hidden">{isDone ? ' (done)' : ' (to do)'}</span>
+                      <span className={`as-tag${isDone ? ' is-done' : ''}`}>{isDone ? 'Done' : 'To do'}</span>
                     </h3>
-                    <div className="as-cta">
+                    {isDone ? (
+                      <p className="as-result">{todoResult(t.id, account)}</p>
+                    ) : (
+                      <>
+                        <p className="as-what">{task.what}</p>
+                        <p className="as-why">{task.why}</p>
+                      </>
+                    )}
+                    <div className="as-foot">
+                      {isDone ? (
+                        <span />
+                      ) : (
+                        <span className="as-time">
+                          <Icon name="Schedule" size={16} />
+                          {task.minutes} min
+                        </span>
+                      )}
                       <Button
                         variation={isDone ? 'secondary' : 'primary'}
                         label={isDone ? 'View' : task.action}
                         title={isDone ? `View: ${task.title}` : undefined}
+                        icon="ArrowForward"
+                        isSuffix
                         onClick={() => go(task.page)}
                       />
                     </div>
                   </div>
-                  {isDone ? (
-                    <p className="as-result">{todoResult(t.id, account)}</p>
-                  ) : (
-                    <>
-                      <p className="as-what">{task.what}</p>
-                      <p className="as-why">
-                        <Icon name="Info" size={16} />
-                        <span>{task.why}</span>
-                      </p>
-                      <span className="as-time">
-                        <Icon name="Schedule" size={14} />
-                        {task.minutes} min
-                      </span>
-                    </>
-                  )}
-                </div>
+                </Card>
               </li>
             );
           })}
-        </ul>
+        </ol>
       </section>
     </div>
   );
