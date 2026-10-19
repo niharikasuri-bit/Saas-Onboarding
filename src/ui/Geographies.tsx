@@ -83,7 +83,8 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
   const catalogue = [...GEO_SETS, ...(account.geography.custom ?? [])];
   const all = adding ? catalogue : catalogue.filter((s) => added.has(s.id));
   const status = (s: GeoSet) => (added.has(s.id) ? 'Active' : 'Inactive');
-  const term = q.trim().toLowerCase();
+  const term = adding ? q.trim().toLowerCase() : '';
+  const shown = adding ? view : 'cards';
   const hits = all.filter(
     (s) =>
       !term ||
@@ -134,37 +135,39 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
         </header>
       )}
 
-      <div className="geo-bar">
-        <div className="geo-search">
-          <label htmlFor={`${uid}-q`} className="ux-visually-hidden">
-            Search geographies
-          </label>
-          <Icon name="Search" size={20} />
-          <input
-            id={`${uid}-q`}
-            type="search"
-            placeholder={adding ? 'Search by name, country, level or status' : 'Search your geographies'}
-            value={q}
-            onChange={(e) => {
-              setQ(e.target.value);
-              setCreating(null);
-              setMsg('');
-            }}
-          />
+      {adding && (
+        <div className="geo-bar">
+          <div className="geo-search">
+            <label htmlFor={`${uid}-q`} className="ux-visually-hidden">
+              Search geographies
+            </label>
+            <Icon name="Search" size={20} />
+            <input
+              id={`${uid}-q`}
+              type="search"
+              placeholder={adding ? 'Search by name, country, level or status' : 'Search your geographies'}
+              value={q}
+              onChange={(e) => {
+                setQ(e.target.value);
+                setCreating(null);
+                setMsg('');
+              }}
+            />
+          </div>
+          <div className="geo-view" role="group" aria-label="View as">
+            <button type="button" aria-pressed={view === 'cards'} onClick={() => setView('cards')}>
+              <Icon name="GridView" size={18} />
+              Cards
+            </button>
+            <button type="button" aria-pressed={view === 'list'} onClick={() => setView('list')}>
+              <Icon name="List" size={18} />
+              List
+            </button>
+          </div>
         </div>
-        <div className="geo-view" role="group" aria-label="View as">
-          <button type="button" aria-pressed={view === 'cards'} onClick={() => setView('cards')}>
-            <Icon name="GridView" size={18} />
-            Cards
-          </button>
-          <button type="button" aria-pressed={view === 'list'} onClick={() => setView('list')}>
-            <Icon name="List" size={18} />
-            List
-          </button>
-        </div>
-      </div>
+      )}
 
-      <p className="geo-count" role="status">
+      <p className={adding ? 'geo-count' : 'ux-visually-hidden'} role="status">
         {msg ||
           (term
             ? `${hits.length} ${hits.length === 1 ? 'geography' : 'geographies'} found`
@@ -199,7 +202,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
             </>
           )}
         </div>
-      ) : view === 'cards' ? (
+      ) : shown === 'cards' ? (
         <ul className="geo-cards">
           {hits.map((s) => (
             <li key={s.id} className="geo-card">
