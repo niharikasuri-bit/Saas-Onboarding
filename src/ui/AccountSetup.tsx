@@ -62,7 +62,7 @@ export function HomeHeader({ ref }: { ref?: React.Ref<HTMLHeadingElement> }) {
   return (
     <header className="pk-head">
       <h1 ref={ref} tabIndex={-1}>
-        Hi {firstName(answers)}
+        Hi <em>{firstName(answers)}</em>
       </h1>
       <p>Your one stop to access your products for {org}, manage your account and its settings.</p>
     </header>
@@ -76,7 +76,6 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
   // Only what's left: a finished step drops off, so they pick up where they left off.
   const open = todos.filter((t) => !todoDone(t.id, account));
   const started = open.length < todos.length;
-  const unlocked = todoDone('geography', account);
   // Adding geographies happens right here on Home, not on the Geographies page.
   const [addingGeo, setAddingGeo] = useState(false);
   const [addingSender, setAddingSender] = useState(false);
@@ -99,9 +98,6 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
   if (addingTeam) return <Team embedded onDone={() => setAddingTeam(false)} />;
 
   const start = (id: TodoId) => (id === 'geography' ? setAddingGeo(true) : id === 'sender' ? setAddingSender(true) : setAddingTeam(true));
-  const lead = unlocked
-    ? `Your products are unlocked. ${open.length === 1 ? 'One step' : `${open.length} steps`} left, whenever you’re ready.`
-    : 'Add your geographies to unlock your products. Notification channels and your team are optional for now.';
 
   // After the first step: an orange header greets them; what's left sits below as rows in one white panel.
   if (started) {
@@ -152,7 +148,10 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
           <h1 ref={heading} tabIndex={-1}>
             Let’s complete <em>account setup</em>
           </h1>
-          <p className="as-lead">{lead}</p>
+          <p className="as-lead">
+            Complete the following tasks to set up your account. Add your geographies to unlock your products. Notification channels and team
+            members are optional for now.
+          </p>
         </div>
       </header>
 
