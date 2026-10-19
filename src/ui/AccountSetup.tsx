@@ -15,7 +15,7 @@ const TASK: Record<
 > = {
   geography: {
     title: 'Add your geographies',
-    what: 'Add the places where you work.',
+    what: 'Add the places you’ll serve, wherever your team sits.',
     why: 'Every product uses your geographies to know where things happen, so work reaches the right place.',
     minutes: 5,
     icon: 'Public',
