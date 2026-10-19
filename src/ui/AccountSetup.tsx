@@ -151,8 +151,8 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
             Let’s complete <em>account setup</em>
           </h1>
           <p className="as-lead">
-            Complete the following tasks to set up your account. Add your geographies to unlock your products. Notification channels and team
-            members are optional for now.
+            Complete these tasks to set up your account. Start with your geographies to unlock your products. Notification
+            channels and your team are needed before your products can go live.
           </p>
         </div>
       </header>
