@@ -1502,3 +1502,10 @@ p { margin: 0; line-height: 1.5; }
 
 /* First landing: the setup steps as a list, one per row */
 .hm-v5 .as-list.is-first { grid-template-columns: minmax(0, 1fr); }
+
+/* Picking up where they left off: each step left is one compact row (title over time, button right) */
+.hm-v5 .as-list.is-pickup .as-card.digit-card-component { grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; row-gap: 4px; padding: 18px 22px; }
+.hm-v5 .as-list.is-pickup .as-top h2 { grid-column: 1; grid-row: 1; }
+.hm-v5 .as-list.is-pickup .as-time, .hm-v5 .as-list.is-pickup .as-result { grid-column: 1; grid-row: 2; margin: 0 0 0 44px; }
+.hm-v5 .as-list.is-pickup .as-foot { grid-column: 2; grid-row: 1 / span 2; align-self: center; margin: 0; }
+.hm-v5 .as.is-band .as-head { margin-bottom: var(--s5, 20px); }

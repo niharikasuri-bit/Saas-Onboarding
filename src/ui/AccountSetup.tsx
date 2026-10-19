@@ -87,7 +87,15 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
         <div className="as-wrap">
           <p className="as-eyebrow">{started ? 'Welcome back' : 'Welcome aboard'}</p>
           <h1 ref={heading} tabIndex={-1}>
-            Let’s complete <em>account setup</em>
+            {started ? (
+              <>
+                Pick up where you <em>left off</em>
+              </>
+            ) : (
+              <>
+                Let’s complete <em>account setup</em>
+              </>
+            )}
           </h1>
           <p className="as-lead">
             {unlocked
@@ -98,7 +106,7 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
       </header>
 
       <section className="as-wrap" aria-label="What you need to do">
-        <ol className={`as-list${started ? '' : ' is-first'}`} style={{ '--as-n': open.length } as React.CSSProperties}>
+        <ol className={`as-list${started ? ' is-pickup' : ' is-first'}`} style={{ '--as-n': open.length } as React.CSSProperties}>
           {open.map((t) => {
             const isDone = todoDone(t.id, account);
             const task = TASK[t.id];
@@ -122,9 +130,12 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
                     )}
                   </div>
                   <div className="as-body">
-                    <p className="as-what">
-                      {task.what} {task.why}
-                    </p>
+                    {/* Coming back, they've read these: just the step and its button */}
+                    {!started && (
+                      <p className="as-what">
+                        {task.what} {task.why}
+                      </p>
+                    )}
                     <div className="as-foot">
                       <Button
                         variation={isDone ? 'secondary' : 'primary'}
