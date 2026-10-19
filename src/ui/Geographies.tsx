@@ -88,6 +88,12 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
   const [creating, setCreating] = useState<string | null>(null);
   const [msg, setMsg] = useState('');
   const [viewingId, setViewing] = useState<string | null>(null);
+  // View is read-only; Edit lets them rename, remove and add places.
+  const [editing, setEditing] = useState(false);
+  const open = (id: string, edit: boolean) => {
+    setEditing(edit);
+    setViewing(id);
+  };
   const added = new Set(account.geography.sets ?? []);
   const [addingChosen, setAdding] = useState(!added.size);
   const adding = embedded || addingChosen || !added.size;
@@ -98,7 +104,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
       first.current = false;
       if (embedded) heading.current?.focus();
     } else heading.current?.focus();
-  }, [adding, viewingId, creating === null]);
+  }, [adding, viewingId, editing, creating === null]);
 
   const catalogue = [...GEO_SETS, ...(account.geography.custom ?? [])];
   const countOf = (s: GeoSet) => rowsFor(account, s).length;
@@ -135,18 +141,19 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
   };
 
   if (viewing) {
-    const editable = added.has(viewing.id);
+    const isAdded = added.has(viewing.id);
+    const editable = isAdded && editing;
     const rows = rowsFor(account, viewing);
     return (
       <div className="geo is-detail">
         <button type="button" className="geo-back" onClick={() => setViewing(null)}>
           <Icon name="ArrowBack" size={20} />
-          Back<span className="ux-visually-hidden">{editable ? ' to your geographies' : ' to add your geographies'}</span>
+          Back<span className="ux-visually-hidden">{isAdded ? ' to your geographies' : ' to add your geographies'}</span>
         </button>
         <header className="geo-detail-head">
           <div>
             <h1 ref={heading} tabIndex={-1}>
-              {viewing.name}
+              {editable ? `Edit ${viewing.name}` : viewing.name}
             </h1>
             <p className="geo-stats">
               <span>
@@ -161,8 +168,15 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
               <span className="geo-tag">{viewing.levels.join(' › ')}</span>
             </p>
           </div>
-          {editable ? (
-            <Button variation="secondary" icon="FileDownload" label="Download geography data" onClick={() => download(viewing, rows)} />
+          {isAdded ? (
+            <div className="geo-detail-actions">
+              <Button variation="secondary" icon="FileDownload" label="Download geography data" onClick={() => download(viewing, rows)} />
+              {editable ? (
+                <Button variation="primary" icon="CheckCircle" label="Done editing" onClick={() => setEditing(false)} />
+              ) : (
+                <Button variation="primary" icon="Edit" label="Edit" title={`Edit ${viewing.name}`} onClick={() => setEditing(true)} />
+              )}
+            </div>
           ) : (
             <Button
               variation="primary"
@@ -338,9 +352,12 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                   <Button variation="primary" icon="Add" label="Add geographies to account" onClick={() => add(s)} />
                 )}
                 {adding ? (
-                  <Button variation="secondary" icon="Visibility" label="View" title={`View ${s.name}`} onClick={() => setViewing(s.id)} />
+                  <Button variation="secondary" icon="Visibility" label="View" title={`View ${s.name}`} onClick={() => open(s.id, false)} />
                 ) : (
-                  <Button variation="secondary" icon="Edit" label="View and edit" title={`View and edit ${s.name}`} onClick={() => setViewing(s.id)} />
+                  <div className="geo-pair">
+                    <Button variation="secondary" icon="Visibility" label="View" title={`View ${s.name}`} onClick={() => open(s.id, false)} />
+                    <Button variation="secondary" icon="Edit" label="Edit" title={`Edit ${s.name}`} onClick={() => open(s.id, true)} />
+                  </div>
                 )}
               </div>
             </li>
@@ -378,11 +395,14 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                       <Button
                         variation="secondary"
                         size="small"
-                        icon={adding ? 'Visibility' : 'Edit'}
-                        label={adding ? 'View' : 'View and edit'}
-                        title={`${adding ? 'View' : 'View and edit'} ${s.name}`}
-                        onClick={() => setViewing(s.id)}
+                        icon="Visibility"
+                        label="View"
+                        title={`View ${s.name}`}
+                        onClick={() => open(s.id, false)}
                       />
+                      {!adding && (
+                        <Button variation="secondary" size="small" icon="Edit" label="Edit" title={`Edit ${s.name}`} onClick={() => open(s.id, true)} />
+                      )}
                       {!adding ? null : added.has(s.id) ? (
                         <p className="geo-added">
                           <Icon name="CheckCircle" size={16} />

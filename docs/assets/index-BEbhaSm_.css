@@ -948,6 +948,13 @@ p { margin: 0; line-height: 1.5; }
 .cg-grid .cg-grid-n, .cg-grid .cg-grid-x { width: 48px; white-space: nowrap; }
 .cg-grid td, .cg-grid th { vertical-align: middle; }
 .cg-places-bar { align-items: flex-end; }
+
+.geo-pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); }
+.geo-pair > button { width: 100%; height: 40px; }
+.geo-pair > button .digit-button-label { font-size: 1rem; font-weight: 500; }
+.geo-detail-actions { display: flex; flex-wrap: wrap; gap: var(--s2); }
+.geo-detail-actions > button { height: 40px; padding: 0 16px; }
+.geo-detail-actions > button .digit-button-label { font-size: 0.9375rem; font-weight: 500; }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */
