@@ -1492,7 +1492,7 @@ p { margin: 0; line-height: 1.5; }
 .hm-v5 .hm-sec.is-mine, .hm-v5 .hm-sec.is-other { border: 1px solid #EAEAEA; background: #fff; box-shadow: 0 1px 3px rgb(16 24 40 / 0.06), 0 10px 28px rgb(16 24 40 / 0.08); }
 /* Products not in the plan look like locked ones: a light grey card, its content greyed,
    only the button in colour */
-.pt-card.is-off { background: #F7F7F7; box-shadow: none; }
+.pt-card.is-off { border: 1.5px dashed #C9C9C9; background: #F7F7F7; box-shadow: none; }
 .pt-card.is-off > :not(.pt-actions) { filter: grayscale(1); }
 .pt-card.is-off .pt-actions > button { background: #fff; }
 .hm-v5 .hm-sec .geo-bar { margin-top: 0; }
