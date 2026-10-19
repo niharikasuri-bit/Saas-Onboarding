@@ -137,8 +137,7 @@ function ProductTile({ p, locked, opening }: { p: Product; locked: boolean; open
       </span>
       <h3>{meta.name}</h3>
       <p className="pt-about">{meta.about}</p>
-      {/* Locked cards keep it short: the numbers arrive when the product unlocks */}
-      {!locked && <About p={p} />}
+      <About p={p} />
       <div className="pt-actions">
         {locked ? (
           <p className="pt-lock-cta">Unlocks when you add geographies</p>

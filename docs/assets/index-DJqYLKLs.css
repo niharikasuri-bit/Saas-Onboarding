@@ -1385,9 +1385,6 @@ p { margin: 0; line-height: 1.5; }
 .pt-lock-cta { display: flex; align-items: center; justify-content: center; gap: 8px; height: 44px; border-radius: 6px; background: #F3F3F3; color: var(--c-text-2); font-weight: 500; }
 
 /* Locked: muted card with a lock in the middle */
-.pt-card.is-locked > :not(.pt-lock) { filter: grayscale(1); }
-.pt-card.is-locked { background: #F7F7F7; }
-.pt-card.is-locked .pt-actions { filter: none; }
 .pt-lock { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; color: var(--digitv2-lightTheme-primary-2); }
 .pt-lock svg { padding: 14px; border-radius: 50%; background: rgb(255 255 255 / 0.92); box-sizing: content-box; filter: drop-shadow(0 6px 14px rgb(16 24 40 / 0.18)); }
 .pt-shackle { transform-origin: 33px 22px; }
@@ -1504,6 +1501,14 @@ p { margin: 0; line-height: 1.5; }
 .hm-v5 .pt-card.is-off .pt-actions > button { background: #fff; }
 .hm-v5 .hm-sec .geo-bar { margin-top: 0; }
 .hm-v5 .hm-sec.is-mine .pt-card { box-shadow: none; }
+
+/* Locked cards look like the products not in the plan: grey with a dashed edge, in full colour.
+   On unlock the card settles into the white, solid look while the lock lifts away. */
+.hm-v5 .pt-card.is-locked { border: 1.5px dashed #C9C9C9; background: #F3F3F3; box-shadow: none; }
+.hm-v5 .pt-card { transition: background-color 0.6s ease 0.5s, border-color 0.6s ease 0.5s; }
+.pt-card.is-opening > :not(.pt-lock) { animation: none; }
+@media (prefers-reduced-motion: reduce) { .hm-v5 .pt-card { transition: none; } }
+.pt-card.is-locked .pt-lock-cta { padding: 10px 8px; font-size: 0.9375rem; }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */
