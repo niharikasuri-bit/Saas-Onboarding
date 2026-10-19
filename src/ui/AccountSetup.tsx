@@ -92,7 +92,6 @@ export function AccountSetup() {
                         <Icon name={isDone ? 'Check' : task.icon} size={18} />
                       </span>
                       {task.title}
-                      <span className="ux-visually-hidden">{isDone ? ' (done)' : ' (to do)'}</span>
                     </h3>
                     {!isDone && (
                       <p className="as-time">
