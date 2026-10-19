@@ -130,7 +130,9 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
   // Breadcrumbs: Home, then Geographies once they have some, then Add geographies while adding.
   const homeCrumb = { label: 'Home', onClick: embedded ? () => onDone?.() : () => go('home') };
   const geoCrumb = !embedded && added.size ? [{ label: 'Geographies', onClick: () => done('') }] : [];
-  const addTrail = [homeCrumb, ...geoCrumb, { label: 'Add geographies', onClick: () => setCreating(null) }];
+  // The list of DIGIT's geographies is only for Complaints; otherwise adding goes straight to creating one.
+  const canPick = account.products.cms.enabled;
+  const addTrail = canPick ? [homeCrumb, ...geoCrumb, { label: 'Add geographies', onClick: () => setCreating(null) }] : [homeCrumb, ...geoCrumb];
   // Adding shows only what isn't in the account yet; the overview shows only what is.
   const all = catalogue.filter((s) => (adding ? !added.has(s.id) : added.has(s.id)));
   // A geography in the account turns active once a product using it is live.
@@ -289,11 +291,13 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
     </p>
   );
 
+  const createVal = adding && !canPick ? (creating ?? '') : creating;
+
   return (
-    <div className={`geo${adding ? '' : ' is-overview'}${creating !== null ? ' is-creating' : ''}`}>
+    <div className={`geo${adding ? '' : ' is-overview'}${createVal !== null ? ' is-creating' : ''}`}>
       {toastEl}
-      {creating === null && adding && <Crumbs items={[homeCrumb, ...geoCrumb, { label: 'Add geographies' }]} />}
-      {creating !== null ? null : adding ? (
+      {createVal === null && adding && <Crumbs items={[homeCrumb, ...geoCrumb, { label: 'Add geographies' }]} />}
+      {createVal !== null ? null : adding ? (
         <header className="geo-head">
           <h1 ref={heading} tabIndex={-1}>
             Add your geographies
@@ -319,7 +323,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
         </header>
       )}
 
-      {creating === null && (
+      {createVal === null && (
       <div className="geo-bar">
         {/* Adding: search on the left, Cards / List on the right, the count underneath. */}
         {!adding && (
@@ -361,12 +365,20 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
 
       {countLine}
 
-      {creating !== null ? (
+      {createVal !== null ? (
         <CreateGeography
           trail={addTrail}
-          initial={creating}
+          initial={createVal ?? ''}
           taken={catalogue}
-          onCancel={() => setCreating(null)}
+          onCancel={() => {
+            setCreating(null);
+            // Without the list there is nothing to go back to inside Add geographies: leave it.
+            if (!canPick) {
+              if (embedded) onDone?.();
+              else if (added.size) setAdding(false);
+              else go('home');
+            }
+          }}
           onCreate={(s) => {
             update((a) => addSet({ ...a, geography: { ...a.geography, custom: [...(a.geography.custom ?? []), s] } }, s));
             done(`${s.name} created and added to your account`);
@@ -500,7 +512,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
         </div>
       )}
 
-      {creating === null && adding && hits.length > 0 && (
+      {createVal === null && adding && hits.length > 0 && (
         <p className="geo-foot">
           <span>Didn’t find your geography?</span>
           <button type="button" className="geo-foot-cta" onClick={() => setCreating(q.trim())}>

@@ -210,7 +210,7 @@ export function CreateGeography({
   };
 
   const TITLES: Record<Step, string> = {
-    country: method === 'osm' ? 'Search OpenStreetMap' : 'Which country is it?',
+    country: 'What is the name of your country?',
     levels: `How is ${country.trim() || 'it'} divided?`,
     method: 'How would you like to create your geographies?',
     places:
