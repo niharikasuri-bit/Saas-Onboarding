@@ -15,11 +15,20 @@ import { AccountSetup } from './AccountSetup';
  * 3. Other products, not in their plan yet, to add.
  */
 
-/** What each product does, in three highlights (prototype values). */
-const CARD: Record<Product, { stats: [string, string][] }> = {
-  cms: { stats: [['40+', 'Complaint types'], ['4', 'Ways to report'], ['5', 'Service templates']] },
-  hcm: { stats: [['8', 'Campaign templates'], ['Offline', 'Field app'], ['Live', 'Delivery dashboards']] },
-  lnp: { stats: [['20+', 'Licence types'], ['Online', 'Fee payment'], ['QR', 'Verified certificates']] },
+/** Prototype values: the card's three numbers, and what the product does. */
+const CARD: Record<Product, { stats: [string, string][]; about: string[] }> = {
+  cms: {
+    stats: [['6', 'Templates'], ['5', 'Modules'], ['14', 'Features']],
+    about: ['40+ complaint types', '4 ways to report', '5 service templates'],
+  },
+  hcm: {
+    stats: [['4+', 'Templates'], ['8', 'Modules'], ['12', 'Features']],
+    about: ['8 campaign templates', 'Offline field app', 'Live delivery dashboards'],
+  },
+  lnp: {
+    stats: [['3', 'Templates'], ['6', 'Modules'], ['10', 'Features']],
+    about: ['20+ licence types', 'Online fee payment', 'QR-verified certificates'],
+  },
 };
 
 export function Home() {
@@ -110,6 +119,20 @@ function Hero({ name, admin }: { name: string; admin: boolean }) {
   );
 }
 
+/** "About the product": what it does, one line, with dividers between. */
+function About({ p }: { p: Product }) {
+  return (
+    <div className="pt-about-box">
+      <p className="pt-about-h">About the product</p>
+      <ul>
+        {CARD[p].about.map((x) => (
+          <li key={x}>{x}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function Stats({ p }: { p: Product }) {
   return (
     <dl className="pt-stats">
@@ -134,6 +157,7 @@ function ProductTile({ p, locked, opening }: { p: Product; locked: boolean; open
       <h3>{meta.name}</h3>
       <p className="pt-about">{meta.about}</p>
       <Stats p={p} />
+      <About p={p} />
       <div className="pt-actions">
         {locked ? (
           <p className="pt-lock-cta">
@@ -173,6 +197,7 @@ function OffTile({ p, admin }: { p: Product; admin: boolean }) {
       <h3>{meta.name}</h3>
       <p className="pt-about">{meta.about}</p>
       <Stats p={p} />
+      <About p={p} />
       <div className="pt-actions">
         {admin ? (
           <Button

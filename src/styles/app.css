@@ -1417,3 +1417,13 @@ p { margin: 0; line-height: 1.5; }
 @media (max-width: 720px) { .pt-list { grid-template-columns: 1fr; } }
 .pt-card .pt-actions > button { width: 100%; min-width: 0; }
 .pt-stats > div { text-align: center; justify-content: center; }
+
+/* About the product: a yellow box, highlights on one line with dividers */
+.pt-about-box { padding: 12px 14px; border: 1px solid #F3DFA2; border-radius: 8px; background: #FFF8E1; }
+.pt-about-h { margin-bottom: 4px; font-size: 0.875rem; font-weight: 700; color: var(--c-text); }
+.pt-about-box ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; row-gap: 4px; font-size: 0.875rem; color: var(--c-text); }
+.pt-about-box li + li::before { content: '|'; margin: 0 10px; color: #B3A26A; }
+.pt-card.is-off .pt-about-box { background: #F3F3F3; border-color: #E3E3E3; }
+/* Dividers trail each item, so a wrapped line never starts with one */
+.pt-about-box li + li::before { content: none; }
+.pt-about-box li:not(:last-child)::after { content: '|'; margin: 0 10px; color: #B3A26A; }
