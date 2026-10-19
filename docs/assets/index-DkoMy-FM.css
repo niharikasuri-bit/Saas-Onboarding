@@ -18,6 +18,8 @@
   --c-divider: var(--digitv2-lightTheme-generic-divider);
   --c-input-border: var(--digitv2-lightTheme-generic-inputborder);
   --c-text: var(--digitv2-lightTheme-text-primary);
+  /* Secondary text. DIGIT's #787878 is 4.4:1 on white, under AA for body text; this is 7:1. */
+  --c-text-2: #505A5F;
   --c-info-bg: var(--digitv2-lightTheme-alert-infobg);
   --c-success: var(--digitv2-lightTheme-alert-success);
   --s1: var(--digitv2-spacers-spacer1);
@@ -554,7 +556,7 @@ p { margin: 0; line-height: 1.5; }
 .gd-actions { display: flex; align-items: center; justify-content: space-between; margin-top: var(--s3); }
 .gd-nav { display: flex; gap: var(--s2); }
 
-.sh-powered { display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--digitv2-lightTheme-text-secondary); }
+.sh-powered { display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--c-text-2); }
 .sh-powered img { height: 14px; width: auto; display: block; }
 
 /* Side nav in the DIGIT sidebar style */
@@ -566,6 +568,7 @@ p { margin: 0; line-height: 1.5; }
 }
 .sh-search input::placeholder { color: var(--digitv2-lightTheme-text-disabled); }
 .sh-search input:focus { outline: none; border-color: var(--c-primary); }
+.sh-search input:focus-visible { box-shadow: var(--focus); }
 .sh-search input::-webkit-search-cancel-button { display: none; }
 .sh-search svg { position: absolute; right: 10px; top: 10px; color: var(--c-secondary); pointer-events: none; }
 .sh-nav ul { gap: 0; }
@@ -601,7 +604,7 @@ p { margin: 0; line-height: 1.5; }
 .as h1 em { font-style: normal; font-weight: 700; color: var(--c-primary); }
 .as-lead { margin-bottom: 40px; font-size: 1.125rem; line-height: 1.5; color: #505A5F; }
 
-.as-progress { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s4); margin-bottom: var(--s2); }
+.as-progress { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--s4); margin-bottom: var(--s2); }
 .as-progress > p:first-child { font-size: 1rem; font-weight: 700; color: var(--digitv2-lightTheme-primary-2); }
 .as-count { font-size: 1rem; font-weight: 500; color: #505A5F; white-space: nowrap; }
 .as-count strong { font-weight: 700; color: var(--digitv2-lightTheme-primary-2); }
@@ -609,20 +612,20 @@ p { margin: 0; line-height: 1.5; }
 .as-bar span { display: block; height: 100%; border-radius: 7px; background: var(--c-success); transition: width 0.5s ease; }
 
 .as-list { list-style: none; margin: 0; padding: 0; display: grid; grid-auto-rows: 1fr; gap: var(--s4); }
-.as-list > li { display: flex; }
+.as-list > li { display: flex; min-width: 0; }
 .as-card.digit-card-component {
   display: flex; flex-direction: column; gap: 0; width: 100%; margin: 0; padding: 24px 28px;
   border: 1px solid var(--c-divider); border-radius: 16px; background: #fff;
   box-shadow: 0 1px 2px rgb(16 24 40 / 0.04), 0 4px 16px rgb(16 24 40 / 0.05);
 }
-.as-card.digit-card-component { transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+.as-card.digit-card-component { min-width: 0; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
 .as-card.digit-card-component:hover,
 .as-card.digit-card-component:focus-within { border-color: rgb(200 76 14 / 0.45); box-shadow: 0 0 0 3px rgb(200 76 14 / 0.08), 0 4px 16px rgb(16 24 40 / 0.06); }
-.as-top { display: flex; align-items: center; justify-content: space-between; gap: var(--s4); }
+.as-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s2) var(--s4); }
 .as-icon { flex-shrink: 0; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 8px; background: var(--c-primary-bg); color: var(--c-primary); }
 .as-card.is-done .as-icon { border-radius: 50%; background: var(--c-success); color: #fff; }
 .as-body { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-.as-top h3 { display: flex; align-items: center; gap: 12px; font-size: 1.25rem; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; color: var(--digitv2-lightTheme-primary-2); }
+.as-top h2 { display: flex; align-items: center; gap: 12px; font-size: 1.25rem; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; color: var(--digitv2-lightTheme-primary-2); }
 .as-what { margin-top: 10px; font-size: 1rem; line-height: 1.5; color: var(--c-text); }
 .as-result { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px; font-size: 0.875rem; font-weight: 500; white-space: nowrap; color: var(--digitv2-lightTheme-alert-info); background: var(--c-info-bg); }
 .as-foot { display: flex; align-items: center; justify-content: flex-start; gap: var(--s4); margin-top: auto; padding-top: 20px; }
@@ -642,6 +645,16 @@ p { margin: 0; line-height: 1.5; }
 }
 .sh-restart:hover { background: var(--digitv2-lightTheme-generic-background); }
 .sh-restart:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--c-secondary); }
+
+/* Narrow screens (down to 320px, WCAG 1.4.10): the side nav sits above the page instead of beside it */
+@media (max-width: 720px) {
+  .sh-body { flex-direction: column; }
+  .sh-nav { width: auto; height: auto; position: static; border-right: 0; border-bottom: 1px solid var(--c-divider); }
+  .sh-nav ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .sh-nav-foot { margin-top: var(--s2); }
+  .sh-sub { top: 0; }
+  .as-list { grid-auto-rows: auto; }
+}
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */
@@ -1414,7 +1427,7 @@ label.ec-btn { cursor: pointer; }
 }
 .su .su-inner { padding: 44px 48px 36px; }
 .su h1 { font-size: 1.875rem; letter-spacing: -0.01em; }
-.su .sf-sso-btn { height: 40px; border-radius: 8px; border-color: var(--digitv2-lightTheme-text-secondary); transition: background 0.15s ease; }
+.su .sf-sso-btn { height: 40px; border-radius: 8px; border-color: var(--c-text-2); transition: background 0.15s ease; }
 .su .sf-sso-btn:hover { background: var(--digitv2-lightTheme-paper-secondary); }
 .su .su-field input { border-radius: 8px !important; }
 .su .su-foot { color: #505A5F; background: #FBFBFC; border-radius: 0 0 12px 12px; }
@@ -1440,14 +1453,14 @@ label.ec-btn { cursor: pointer; }
 .qz-art .qz-person { transition: opacity 0.3s ease; }
 .qz-form { display: flex; flex-direction: column; padding: 0 56px; overflow-y: auto; }
 .qz-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--s3); }
-.qz-count { font-size: 0.875rem; font-weight: 500; color: var(--digitv2-lightTheme-text-secondary); }
+.qz-count { font-size: 0.875rem; font-weight: 500; color: var(--c-text-2); }
 .qz-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: var(--s8); }
 .qz-bar span { height: 4px; border-radius: 2px; background: var(--c-divider); transition: background 0.3s ease; }
 .qz-bar span.is-on { background: var(--c-primary); }
 .qz h1 { text-align: left; font-size: 1.75rem; margin-bottom: var(--s2); color: var(--c-secondary); }
-.qz-lead { font-size: 1rem; line-height: 1.55; color: var(--digitv2-lightTheme-text-secondary); margin-bottom: var(--s6); }
+.qz-lead { font-size: 1rem; line-height: 1.55; color: var(--c-text-2); margin-bottom: var(--s6); }
 .qz-fields { display: flex; flex-direction: column; gap: 20px; flex: 1; }
-.qz-fields .sf-hint { font-size: 0.875rem; color: var(--digitv2-lightTheme-text-secondary); margin-bottom: var(--s2); }
+.qz-fields .sf-hint { font-size: 0.875rem; color: var(--c-text-2); margin-bottom: var(--s2); }
 .qz-fields .su-field label, .qz-fields .sf-field > label { font-weight: 500; margin-bottom: 2px; }
 /* Pinned top: Back, step and progress. Plain white, no box, so it reads as part of the page. */
 .qz-top { position: sticky; top: 0; z-index: 2; padding-top: 32px; background: #fff; }
@@ -1470,7 +1483,7 @@ label.ec-btn { cursor: pointer; }
 
 /* Help text sits under the field, DIGIT style. */
 .qz .qz-field .sf-error { margin: var(--s1) 0 0; }
-.qz-help { margin-top: var(--s1); font-size: 0.875rem; line-height: 1.4; color: var(--digitv2-lightTheme-text-secondary); }
+.qz-help { margin-top: var(--s1); font-size: 0.875rem; line-height: 1.4; color: var(--c-text-2); }
 
 /* Product choices in DIGIT orange: icon, border, tint and checkbox. */
 .qz .sf-choice { border: 1px solid var(--c-divider); border-radius: 8px; }
@@ -1504,7 +1517,7 @@ label.ec-btn { cursor: pointer; }
 .qz-logo.is-over { border: 1px dashed var(--c-primary); background: var(--c-primary-bg); }
 .qz-logo .sf-label { font-weight: 500; margin-bottom: var(--s2); }
 .qz-logo-row { display: flex; align-items: center; gap: var(--s3); }
-.qz-logo-box { width: 48px; height: 48px; flex-shrink: 0; display: grid; place-items: center; overflow: hidden; border-radius: 8px; border: 1px solid var(--c-divider); background: var(--c-surface); color: var(--digitv2-lightTheme-text-secondary); }
+.qz-logo-box { width: 48px; height: 48px; flex-shrink: 0; display: grid; place-items: center; overflow: hidden; border-radius: 8px; border: 1px solid var(--c-divider); background: var(--c-surface); color: var(--c-text-2); }
 .qz-logo-box img { width: 100%; height: 100%; object-fit: contain; }
 .qz-upload {
   position: relative; display: inline-flex; align-items: center; height: 40px; padding: 0 var(--s4); border-radius: 8px; cursor: pointer;
@@ -1535,15 +1548,16 @@ label.ec-btn { cursor: pointer; }
 .qz-row .sf-error { margin: var(--s1) 0 0; font-size: 0.875rem; }
 .qz-row-remove {
   width: 36px; height: 36px; flex-shrink: 0; display: grid; place-items: center; border: 0; border-radius: 50%; cursor: pointer;
-  background: none; color: var(--digitv2-lightTheme-text-secondary);
+  background: none; color: var(--c-text-2);
 }
 .qz-row-remove:hover { background: var(--digitv2-lightTheme-generic-background); color: var(--c-text); }
 .qz-row-remove:focus-visible { outline: none; box-shadow: var(--focus); }
 .qz-add-row {
   align-self: flex-start; margin-top: var(--s3); display: inline-flex; align-items: center; gap: 4px; padding: 6px 8px 6px 4px;
-  border: 0; border-radius: var(--r1); background: none; cursor: pointer; font: inherit; font-weight: 500; color: var(--c-primary);
+  border: 0; border-radius: var(--r1); background: #fff; cursor: pointer; font: inherit; font-weight: 500; color: var(--c-primary);
 }
-.qz-add-row:hover { background: var(--c-primary-bg); }
+/* White behind the orange keeps it at 4.6:1 inside the #FAFAFA container, hovered or not */
+.qz-add-row:hover { box-shadow: inset 0 0 0 1px var(--c-primary); }
 .qz-add-row:focus-visible { outline: none; box-shadow: var(--focus); }
 
 /* What will you use DIGIT for: three square tiles, mark and name only */
@@ -1600,7 +1614,7 @@ label.ec-btn { cursor: pointer; }
 .al-field:focus-within { border: 1.5px solid var(--c-primary); }
 .al.has-error .al-field { border: 1.5px solid var(--digitv2-lightTheme-alert-error); }
 .al-input { flex: 1; min-width: 0; height: 100%; padding: 0 0 0 12px; border: 0; outline: none; font: inherit; font-weight: 500; color: var(--c-text); background: none; }
-.al-domain { padding: 0 12px 0 1px; color: var(--digitv2-lightTheme-text-secondary); white-space: nowrap; }
+.al-domain { padding: 0 12px 0 1px; color: var(--c-text-2); white-space: nowrap; }
 .al .sf-error { margin: var(--s1) 0 0; font-size: 0.875rem; }
 
 /* Invite step: the sign-in link and the email invites, each in a #FAFAFA container */
@@ -1627,7 +1641,9 @@ label.ec-btn { cursor: pointer; }
 .bl-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 .bl-row { display: flex; align-items: center; gap: var(--s3); padding: 12px 0; border-top: 1px solid var(--c-divider); transition: opacity 0.3s ease; }
 .bl-row:first-child { border-top: 0; }
-.bl-row.is-todo { opacity: 0.45; }
+/* Rows still to come: text stays readable (AA); only the empty mark is faint */
+.bl-row.is-todo .bl-label, .bl-row.is-todo .bl-value { color: var(--c-text-2); font-weight: 400; }
+.bl-row.is-todo .bl-mark { opacity: 0.6; }
 .bl-mark { width: 24px; height: 24px; flex-shrink: 0; display: grid; place-items: center; border-radius: 50%; border: 2px solid var(--c-divider); color: #fff; }
 .bl-row.is-doing .bl-mark { border-color: var(--c-primary); border-top-color: transparent; animation: sf-spin 0.8s linear infinite; }
 .bl-row.is-done .bl-mark { background: var(--c-success); border-color: var(--c-success); }
@@ -1645,16 +1661,16 @@ label.ec-btn { cursor: pointer; }
   flex: 1; min-width: 0; display: flex; align-items: center; height: 44px; padding: 0 14px; border-radius: 8px;
   border: 1px solid var(--digitv2-lightTheme-text-secondary); background: #fff;
 }
-/* The link itself, in link style and #787878 */
-.sc-link-url { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 1rem; font-weight: 500; color: var(--digitv2-lightTheme-text-secondary); text-decoration: underline; text-underline-offset: 3px; user-select: all; }
+/* The link itself, in link style and secondary grey */
+.sc-link-url { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 1rem; font-weight: 500; color: var(--c-text-2); text-decoration: underline; text-underline-offset: 3px; user-select: all; }
 .sc-link-copy {
   flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 16px; border-radius: 8px; cursor: pointer;
   border: 1px solid var(--c-primary); background: #fff; color: var(--c-primary); font: inherit; font-weight: 500;
 }
 .sc-link-copy:hover { background: var(--c-primary-bg); }
 .sc-link-copy:focus-visible { outline: none; box-shadow: var(--focus); }
-/* On the invite step the sign-in link is a secondary tag, text in #787878 */
-.qz-lead .link-tag { color: var(--digitv2-lightTheme-text-secondary); }
+/* On the invite step the sign-in link is a secondary tag, text in secondary grey */
+.qz-lead .link-tag { color: var(--c-text-2); }
 
 /* Success: details as a receipt-style list */
 
@@ -1672,7 +1688,7 @@ label.ec-btn { cursor: pointer; }
 .sc-list .sc-row:last-child { padding-bottom: 0; }
 /* label column, then the answer right beside it */
 .sc-row { display: grid; grid-template-columns: 120px 1fr; gap: var(--s3); align-items: baseline; }
-.sc-row dt { font-size: 0.875rem; color: var(--digitv2-lightTheme-text-secondary); }
+.sc-row dt { font-size: 0.875rem; color: var(--c-text-2); }
 .sc-row dd { margin: 0; min-width: 0; font-weight: 500; color: var(--c-secondary); overflow-wrap: anywhere; }
 
 /* Choose your language */

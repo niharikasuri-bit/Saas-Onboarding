@@ -93,12 +93,12 @@ export function AccountSetup() {
               <li key={t.id}>
                 <Card className={`as-card${isDone ? ' is-done' : ''}`}>
                   <div className="as-top">
-                    <h3>
+                    <h2>
                       <span className="as-icon" aria-hidden="true">
                         <Icon name={isDone ? 'Check' : task.icon} size={18} />
                       </span>
                       {task.title}
-                    </h3>
+                    </h2>
                     {isDone ? (
                       <p className="as-result">{todoResult(t.id, account)}</p>
                     ) : (

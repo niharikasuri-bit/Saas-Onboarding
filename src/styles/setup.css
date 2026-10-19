@@ -294,7 +294,7 @@
 }
 .su .su-inner { padding: 44px 48px 36px; }
 .su h1 { font-size: 1.875rem; letter-spacing: -0.01em; }
-.su .sf-sso-btn { height: 40px; border-radius: 8px; border-color: var(--digitv2-lightTheme-text-secondary); transition: background 0.15s ease; }
+.su .sf-sso-btn { height: 40px; border-radius: 8px; border-color: var(--c-text-2); transition: background 0.15s ease; }
 .su .sf-sso-btn:hover { background: var(--digitv2-lightTheme-paper-secondary); }
 .su .su-field input { border-radius: 8px !important; }
 .su .su-foot { color: #505A5F; background: #FBFBFC; border-radius: 0 0 12px 12px; }
@@ -320,14 +320,14 @@
 .qz-art .qz-person { transition: opacity 0.3s ease; }
 .qz-form { display: flex; flex-direction: column; padding: 0 56px; overflow-y: auto; }
 .qz-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--s3); }
-.qz-count { font-size: 0.875rem; font-weight: 500; color: var(--digitv2-lightTheme-text-secondary); }
+.qz-count { font-size: 0.875rem; font-weight: 500; color: var(--c-text-2); }
 .qz-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: var(--s8); }
 .qz-bar span { height: 4px; border-radius: 2px; background: var(--c-divider); transition: background 0.3s ease; }
 .qz-bar span.is-on { background: var(--c-primary); }
 .qz h1 { text-align: left; font-size: 1.75rem; margin-bottom: var(--s2); color: var(--c-secondary); }
-.qz-lead { font-size: 1rem; line-height: 1.55; color: var(--digitv2-lightTheme-text-secondary); margin-bottom: var(--s6); }
+.qz-lead { font-size: 1rem; line-height: 1.55; color: var(--c-text-2); margin-bottom: var(--s6); }
 .qz-fields { display: flex; flex-direction: column; gap: 20px; flex: 1; }
-.qz-fields .sf-hint { font-size: 0.875rem; color: var(--digitv2-lightTheme-text-secondary); margin-bottom: var(--s2); }
+.qz-fields .sf-hint { font-size: 0.875rem; color: var(--c-text-2); margin-bottom: var(--s2); }
 .qz-fields .su-field label, .qz-fields .sf-field > label { font-weight: 500; margin-bottom: 2px; }
 /* Pinned top: Back, step and progress. Plain white, no box, so it reads as part of the page. */
 .qz-top { position: sticky; top: 0; z-index: 2; padding-top: 32px; background: #fff; }
@@ -350,7 +350,7 @@
 
 /* Help text sits under the field, DIGIT style. */
 .qz .qz-field .sf-error { margin: var(--s1) 0 0; }
-.qz-help { margin-top: var(--s1); font-size: 0.875rem; line-height: 1.4; color: var(--digitv2-lightTheme-text-secondary); }
+.qz-help { margin-top: var(--s1); font-size: 0.875rem; line-height: 1.4; color: var(--c-text-2); }
 
 /* Product choices in DIGIT orange: icon, border, tint and checkbox. */
 .qz .sf-choice { border: 1px solid var(--c-divider); border-radius: 8px; }
@@ -384,7 +384,7 @@
 .qz-logo.is-over { border: 1px dashed var(--c-primary); background: var(--c-primary-bg); }
 .qz-logo .sf-label { font-weight: 500; margin-bottom: var(--s2); }
 .qz-logo-row { display: flex; align-items: center; gap: var(--s3); }
-.qz-logo-box { width: 48px; height: 48px; flex-shrink: 0; display: grid; place-items: center; overflow: hidden; border-radius: 8px; border: 1px solid var(--c-divider); background: var(--c-surface); color: var(--digitv2-lightTheme-text-secondary); }
+.qz-logo-box { width: 48px; height: 48px; flex-shrink: 0; display: grid; place-items: center; overflow: hidden; border-radius: 8px; border: 1px solid var(--c-divider); background: var(--c-surface); color: var(--c-text-2); }
 .qz-logo-box img { width: 100%; height: 100%; object-fit: contain; }
 .qz-upload {
   position: relative; display: inline-flex; align-items: center; height: 40px; padding: 0 var(--s4); border-radius: 8px; cursor: pointer;
@@ -415,15 +415,16 @@
 .qz-row .sf-error { margin: var(--s1) 0 0; font-size: 0.875rem; }
 .qz-row-remove {
   width: 36px; height: 36px; flex-shrink: 0; display: grid; place-items: center; border: 0; border-radius: 50%; cursor: pointer;
-  background: none; color: var(--digitv2-lightTheme-text-secondary);
+  background: none; color: var(--c-text-2);
 }
 .qz-row-remove:hover { background: var(--digitv2-lightTheme-generic-background); color: var(--c-text); }
 .qz-row-remove:focus-visible { outline: none; box-shadow: var(--focus); }
 .qz-add-row {
   align-self: flex-start; margin-top: var(--s3); display: inline-flex; align-items: center; gap: 4px; padding: 6px 8px 6px 4px;
-  border: 0; border-radius: var(--r1); background: none; cursor: pointer; font: inherit; font-weight: 500; color: var(--c-primary);
+  border: 0; border-radius: var(--r1); background: #fff; cursor: pointer; font: inherit; font-weight: 500; color: var(--c-primary);
 }
-.qz-add-row:hover { background: var(--c-primary-bg); }
+/* White behind the orange keeps it at 4.6:1 inside the #FAFAFA container, hovered or not */
+.qz-add-row:hover { box-shadow: inset 0 0 0 1px var(--c-primary); }
 .qz-add-row:focus-visible { outline: none; box-shadow: var(--focus); }
 
 /* What will you use DIGIT for: three square tiles, mark and name only */
@@ -480,7 +481,7 @@
 .al-field:focus-within { border: 1.5px solid var(--c-primary); }
 .al.has-error .al-field { border: 1.5px solid var(--digitv2-lightTheme-alert-error); }
 .al-input { flex: 1; min-width: 0; height: 100%; padding: 0 0 0 12px; border: 0; outline: none; font: inherit; font-weight: 500; color: var(--c-text); background: none; }
-.al-domain { padding: 0 12px 0 1px; color: var(--digitv2-lightTheme-text-secondary); white-space: nowrap; }
+.al-domain { padding: 0 12px 0 1px; color: var(--c-text-2); white-space: nowrap; }
 .al .sf-error { margin: var(--s1) 0 0; font-size: 0.875rem; }
 
 /* Invite step: the sign-in link and the email invites, each in a #FAFAFA container */
@@ -507,7 +508,9 @@
 .bl-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 .bl-row { display: flex; align-items: center; gap: var(--s3); padding: 12px 0; border-top: 1px solid var(--c-divider); transition: opacity 0.3s ease; }
 .bl-row:first-child { border-top: 0; }
-.bl-row.is-todo { opacity: 0.45; }
+/* Rows still to come: text stays readable (AA); only the empty mark is faint */
+.bl-row.is-todo .bl-label, .bl-row.is-todo .bl-value { color: var(--c-text-2); font-weight: 400; }
+.bl-row.is-todo .bl-mark { opacity: 0.6; }
 .bl-mark { width: 24px; height: 24px; flex-shrink: 0; display: grid; place-items: center; border-radius: 50%; border: 2px solid var(--c-divider); color: #fff; }
 .bl-row.is-doing .bl-mark { border-color: var(--c-primary); border-top-color: transparent; animation: sf-spin 0.8s linear infinite; }
 .bl-row.is-done .bl-mark { background: var(--c-success); border-color: var(--c-success); }
@@ -525,16 +528,16 @@
   flex: 1; min-width: 0; display: flex; align-items: center; height: 44px; padding: 0 14px; border-radius: 8px;
   border: 1px solid var(--digitv2-lightTheme-text-secondary); background: #fff;
 }
-/* The link itself, in link style and #787878 */
-.sc-link-url { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 1rem; font-weight: 500; color: var(--digitv2-lightTheme-text-secondary); text-decoration: underline; text-underline-offset: 3px; user-select: all; }
+/* The link itself, in link style and secondary grey */
+.sc-link-url { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 1rem; font-weight: 500; color: var(--c-text-2); text-decoration: underline; text-underline-offset: 3px; user-select: all; }
 .sc-link-copy {
   flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 16px; border-radius: 8px; cursor: pointer;
   border: 1px solid var(--c-primary); background: #fff; color: var(--c-primary); font: inherit; font-weight: 500;
 }
 .sc-link-copy:hover { background: var(--c-primary-bg); }
 .sc-link-copy:focus-visible { outline: none; box-shadow: var(--focus); }
-/* On the invite step the sign-in link is a secondary tag, text in #787878 */
-.qz-lead .link-tag { color: var(--digitv2-lightTheme-text-secondary); }
+/* On the invite step the sign-in link is a secondary tag, text in secondary grey */
+.qz-lead .link-tag { color: var(--c-text-2); }
 
 /* Success: details as a receipt-style list */
 
@@ -552,7 +555,7 @@
 .sc-list .sc-row:last-child { padding-bottom: 0; }
 /* label column, then the answer right beside it */
 .sc-row { display: grid; grid-template-columns: 120px 1fr; gap: var(--s3); align-items: baseline; }
-.sc-row dt { font-size: 0.875rem; color: var(--digitv2-lightTheme-text-secondary); }
+.sc-row dt { font-size: 0.875rem; color: var(--c-text-2); }
 .sc-row dd { margin: 0; min-width: 0; font-weight: 500; color: var(--c-secondary); overflow-wrap: anywhere; }
 
 /* Choose your language */
