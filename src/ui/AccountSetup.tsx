@@ -5,8 +5,8 @@ import { todoDone, todoResult, todosFor, type PageId, type TodoId } from '../lib
 
 /**
  * The account to-do, leading Home until it's done. A centred column: a header,
- * the welcome, the progress, then one DIGIT Card per step with its title, what
- * to do, why it matters, the time it takes (an info tag) and a primary button.
+ * the welcome, the progress, then one DIGIT Card per step: its icon and time,
+ * then the title, what to do, why it matters and a primary button.
  */
 
 const TASK: Record<
@@ -78,8 +78,7 @@ export function AccountSetup() {
         </div>
       </header>
 
-      <section className="as-wrap" aria-labelledby="as-list-h">
-        <h2 id="as-list-h" className="as-list-h">What you need to do</h2>
+      <section className="as-wrap" aria-label="What you need to do">
         <ol className="as-list">
           {todos.map((t) => {
             const isDone = todoDone(t.id, account);
@@ -87,9 +86,17 @@ export function AccountSetup() {
             return (
               <li key={t.id}>
                 <Card className={`as-card${isDone ? ' is-done' : ''}`}>
-                  <span className="as-icon" aria-hidden="true">
-                    <Icon name={isDone ? 'Check' : task.icon} size={22} />
-                  </span>
+                  <div className="as-top">
+                    <span className="as-icon" aria-hidden="true">
+                      <Icon name={isDone ? 'Check' : task.icon} size={22} />
+                    </span>
+                    {!isDone && (
+                      <p className="as-time">
+                        <Icon name="Schedule" size={16} />
+                        {task.minutes} min
+                      </p>
+                    )}
+                  </div>
                   <div className="as-body">
                     <h3>
                       {task.title}
@@ -107,14 +114,6 @@ export function AccountSetup() {
                       </>
                     )}
                     <div className="as-foot">
-                      {isDone ? (
-                        <span />
-                      ) : (
-                        <span className="as-time">
-                          <Icon name="Schedule" size={16} />
-                          {task.minutes} min
-                        </span>
-                      )}
                       <Button
                         variation={isDone ? 'secondary' : 'primary'}
                         label={isDone ? 'View' : task.action}
