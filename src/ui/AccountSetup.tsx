@@ -5,8 +5,8 @@ import { todoDone, todoResult, todosFor, type PageId, type TodoId } from '../lib
 
 /**
  * The account to-do, leading Home until it's done. A centred column: a header,
- * the progress, then one DIGIT Card per step with its number, title and status
- * tag, what to do, why it matters, the time it takes and a primary button.
+ * the progress and the welcome, then one DIGIT Card per step with its title, what
+ * to do, why it matters, the time it takes (an info tag) and a primary button.
  */
 
 const TASK: Record<
@@ -48,16 +48,29 @@ export function AccountSetup() {
   const { account, go } = useAccount();
   const todos = todosFor(account);
   const done = todos.filter((t) => todoDone(t.id, account)).length;
-  const next = todos.find((t) => !todoDone(t.id, account))?.id;
 
   return (
     <div className="as">
       <header className="as-head">
         <div className="as-wrap">
-          <p className="as-eyebrow">
-            <span aria-hidden="true" />
-            Welcome aboard
-          </p>
+          <div className="as-progress">
+            <p id="as-progress-l">Your account setup</p>
+            <p className="as-count">
+              <strong>{done}</strong> of {todos.length} done
+            </p>
+          </div>
+          <div
+            className="as-bar"
+            role="progressbar"
+            aria-labelledby="as-progress-l"
+            aria-valuemin={0}
+            aria-valuemax={todos.length}
+            aria-valuenow={done}
+            aria-valuetext={`${done} of ${todos.length} done`}
+          >
+            <span style={{ width: `${(done / todos.length) * 100}%` }} />
+          </div>
+          <p className="as-eyebrow">Welcome aboard</p>
           <h1 tabIndex={-1}>
             Let’s complete <em>account setup</em>
           </h1>
@@ -65,41 +78,22 @@ export function AccountSetup() {
         </div>
       </header>
 
-      <section className="as-wrap" aria-labelledby="as-panel-h">
-        <div className="as-progress">
-          <h2 id="as-panel-h">What you need to do</h2>
-          <p className="as-count">
-            <strong>{done}</strong> of {todos.length} done
-          </p>
-        </div>
-        <div
-          className="as-bar"
-          role="progressbar"
-          aria-label="Account setup"
-          aria-valuemin={0}
-          aria-valuemax={todos.length}
-          aria-valuenow={done}
-        >
-          <span style={{ width: `${(done / todos.length) * 100}%` }} />
-        </div>
-
+      <section className="as-wrap" aria-labelledby="as-list-h">
+        <h2 id="as-list-h" className="as-list-h">What you need to do</h2>
         <ol className="as-list">
-          {todos.map((t, i) => {
+          {todos.map((t) => {
             const isDone = todoDone(t.id, account);
             const task = TASK[t.id];
             return (
               <li key={t.id}>
-                <Card className={`as-card${isDone ? ' is-done' : ''}${t.id === next ? ' is-next' : ''}`}>
-                  <div className="as-side" aria-hidden="true">
-                    <span className="as-icon">
-                      <Icon name={isDone ? 'Check' : task.icon} size={22} />
-                    </span>
-                    <span className="as-num">{String(i + 1).padStart(2, '0')}</span>
-                  </div>
+                <Card className={`as-card${isDone ? ' is-done' : ''}`}>
+                  <span className="as-icon" aria-hidden="true">
+                    <Icon name={isDone ? 'Check' : task.icon} size={22} />
+                  </span>
                   <div className="as-body">
                     <h3>
                       {task.title}
-                      <span className={`as-tag${isDone ? ' is-done' : ''}`}>{isDone ? 'Done' : 'To do'}</span>
+                      <span className="ux-visually-hidden">{isDone ? ' (done)' : ' (to do)'}</span>
                     </h3>
                     {isDone ? (
                       <p className="as-result">{todoResult(t.id, account)}</p>
