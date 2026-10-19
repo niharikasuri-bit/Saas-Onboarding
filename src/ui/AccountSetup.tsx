@@ -6,7 +6,7 @@ import { todoDone, todoResult, todosFor, type PageId, type TodoId } from '../lib
 /**
  * The account to-do, leading Home until it's done. A centred column: a header,
  * the welcome, the progress, then one DIGIT Card per step: its icon, title and
- * time, then what to do, why it matters (an info box) and a primary button.
+ * time, then what to do and why it matters as one description, and a primary button.
  */
 
 const TASK: Record<
@@ -104,13 +104,9 @@ export function AccountSetup() {
                     {isDone ? (
                       <p className="as-result">{todoResult(t.id, account)}</p>
                     ) : (
-                      <>
-                        <p className="as-what">{task.what}</p>
-                        <p className="as-why">
-                          <Icon name="Info" size={18} />
-                          <span>{task.why}</span>
-                        </p>
-                      </>
+                      <p className="as-what">
+                        {task.what} {task.why}
+                      </p>
                     )}
                     <div className="as-foot">
                       <Button
