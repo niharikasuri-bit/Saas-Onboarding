@@ -1352,6 +1352,9 @@ p { margin: 0; line-height: 1.5; }
 .cg-grid.is-sheet thead th.is-req, .cg-grid.is-sheet thead th.is-opt { background: #FAFAFA; border-top: 0; }
 /* Team manual: Form / Sheet tabs */
 .tm-mode { margin-bottom: 0; }
+
+/* Pages without the footer bar (Home, overviews, detail) keep the toast at the bottom edge */
+.as .cg-toast, .geo.is-detail .cg-toast, .geo:not(.is-creating) .cg-toast { bottom: 24px; }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */

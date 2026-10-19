@@ -6,6 +6,7 @@ import { GEO_SETS, REFERENCE_AREAS, newId, type Account, type Area, type GeoRow,
 import { CreateGeography } from './CreateGeography';
 import { PlacesTabs } from './GeoTree';
 import { Crumbs } from './Crumbs';
+import { usePageToast } from './PageToast';
 
 /**
  * The Geographies page, in two states, both centred at the top:
@@ -81,13 +82,14 @@ function download(set: GeoSet, rows: GeoRow[]) {
 
 
 /** embedded: shown inside Home's account setup; always adding, and onDone goes back. */
-export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?: () => void } = {}) {
+export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?: (message?: string) => void } = {}) {
   const { account, update, go } = useAccount();
   const uid = useId();
   const [q, setQ] = useState('');
   const [view, setView] = useState<'cards' | 'list'>('cards');
   const [creating, setCreating] = useState<string | null>(null);
   const [msg, setMsg] = useState('');
+  const [toastEl, showToast] = usePageToast();
   const [viewingId, setViewing] = useState<string | null>(null);
   // View is read-only; Edit lets them rename, remove and add places.
   const [editing, setEditing] = useState(false);
@@ -134,15 +136,16 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
 
   /** After adding, go back to the account's geographies. */
   const done = (m: string) => {
-    if (embedded) return onDone?.();
+    if (embedded) return onDone?.(m);
     setAdding(false);
     setQ('');
     setCreating(null);
-    setMsg(m);
+    setMsg('');
+    if (m) showToast(m);
   };
   const add = (s: GeoSet) => {
     update((a) => addSet(a, s));
-    done(`${s.name} added to your account.`);
+    done(`${s.name} added to your account`);
   };
 
   if (viewing) {
@@ -197,6 +200,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
             />
           )}
         </header>
+        {toastEl}
         <PlacesTabs
           root={viewing.country}
           levels={viewing.levels}
@@ -210,6 +214,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
 
   return (
     <div className={`geo${adding ? '' : ' is-overview'}${creating !== null ? ' is-creating' : ''}`}>
+      {toastEl}
       {creating === null && adding && <Crumbs items={[homeCrumb, ...geoCrumb, { label: 'Add geographies' }]} />}
       {creating !== null ? null : adding ? (
         <header className="geo-head">
@@ -293,7 +298,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
           onCancel={() => setCreating(null)}
           onCreate={(s) => {
             update((a) => addSet({ ...a, geography: { ...a.geography, custom: [...(a.geography.custom ?? []), s] } }, s));
-            done(`${s.name} created and added to your account.`);
+            done(`${s.name} created and added to your account`);
           }}
         />
       ) : !hits.length ? (

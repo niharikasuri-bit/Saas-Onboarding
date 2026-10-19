@@ -5,6 +5,7 @@ import { useAccount } from '../lib/store';
 import { Geographies } from './Geographies';
 import { Channels } from './Channels';
 import { Team } from './Team';
+import { usePageToast } from './PageToast';
 import { todoDone, todoResult, todosFor, type PageId, type TodoId } from '../lib/model';
 
 /**
@@ -62,6 +63,7 @@ export function AccountSetup() {
   const [addingGeo, setAddingGeo] = useState(false);
   const [addingSender, setAddingSender] = useState(false);
   const [addingTeam, setAddingTeam] = useState(false);
+  const [toastEl, showToast] = usePageToast();
   const heading = useRef<HTMLHeadingElement>(null);
   const wasAdding = useRef(false);
   useEffect(() => {
@@ -69,12 +71,17 @@ export function AccountSetup() {
     wasAdding.current = addingGeo || addingSender || addingTeam;
   }, [addingGeo, addingSender, addingTeam]);
 
-  if (addingGeo) return <Geographies embedded onDone={() => setAddingGeo(false)} />;
-  if (addingSender) return <Channels embedded onDone={() => setAddingSender(false)} />;
+  const back = (set: (v: boolean) => void) => (message?: string) => {
+    set(false);
+    if (message) showToast(message);
+  };
+  if (addingGeo) return <Geographies embedded onDone={back(setAddingGeo)} />;
+  if (addingSender) return <Channels embedded onDone={back(setAddingSender)} />;
   if (addingTeam) return <Team embedded onDone={() => setAddingTeam(false)} />;
 
   return (
     <div className="as">
+      {toastEl}
       <header className="as-head">
         <div className="as-wrap">
           <p className="as-eyebrow">Welcome aboard</p>

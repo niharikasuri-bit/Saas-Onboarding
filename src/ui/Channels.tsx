@@ -26,7 +26,7 @@ function check(id: Channel, key: string, v: string): string {
   return '';
 }
 
-export function Channels({ embedded, onDone }: { embedded?: boolean; onDone?: () => void } = {}) {
+export function Channels({ embedded, onDone }: { embedded?: boolean; onDone?: (message?: string) => void } = {}) {
   const { account, update, go } = useAccount();
   const setUp = CHANNELS.filter((c) => account.sender[c.id].state !== 'none');
   const left = CHANNELS.filter((c) => account.sender[c.id].state === 'none');
@@ -85,9 +85,10 @@ export function Channels({ embedded, onDone }: { embedded?: boolean; onDone?: ()
           channels={left}
           onCancel={embedded ? () => onDone?.() : setUp.length ? () => setChosen(false) : () => go('home')}
           onSubmitted={(n) => {
-            if (embedded) return onDone?.();
+            const m = `${n === 1 ? 'Channel' : `${n} channels`} connected`;
+            if (embedded) return onDone?.(m);
             setChosen(false);
-            setToast(`${n === 1 ? 'Channel' : `${n} channels`} connected`);
+            setToast(m);
           }}
         />
         {toastEl}
