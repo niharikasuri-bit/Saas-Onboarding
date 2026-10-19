@@ -112,12 +112,14 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
                     <Icon name={task.icon} size={20} />
                   </span>
                   <span className="pk-text">
-                    <strong className="pk-title">{task.title}</strong>
+                    <span className="pk-title-row">
+                      <strong className="pk-title">{task.title}</strong>
+                      <span className="pk-time">
+                        <Icon name="Schedule" size={14} />
+                        {task.minutes} min
+                      </span>
+                    </span>
                     <span className="pk-what">{task.what}</span>
-                  </span>
-                  <span className="pk-time">
-                    <Icon name="Schedule" size={16} />
-                    {task.minutes} min
                   </span>
                   <Button variation="primary" label={task.action} icon="ArrowForward" isSuffix onClick={() => start(t.id)} />
                 </li>
