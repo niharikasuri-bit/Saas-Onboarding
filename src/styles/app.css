@@ -1858,3 +1858,10 @@ p { margin: 0; line-height: 1.5; }
 .hm-v5 .pk .pk-sec { margin-bottom: 0; }
 .hm-v5 .pk-sec .pk-next { padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
 .hm-v5 .hm-sec.is-other .pt-card.is-off { background: #F7F7F7; }
+
+/* Home, v9: in each container the heading sits above a full-width divider, then the cards.
+   The setup step is a card item, like the product cards. */
+.hm-v5 .hm-sec.is-mine .geo-bar, .hm-v5 .hm-sec.is-other .geo-bar, .hm-v5 .pk .pk-sec .pk-sec-h {
+  margin: 0 -28px 24px; padding: 0 28px 18px; border-bottom: 1px solid var(--c-divider);
+}
+.hm-v5 .pk-sec .pk-next { padding: 20px 24px; border: 1px solid #EAEAEA; border-radius: 14px; background: #fff; box-shadow: 0 1px 3px rgb(16 24 40 / 0.06), 0 6px 18px rgb(16 24 40 / 0.06); }
