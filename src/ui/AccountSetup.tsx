@@ -104,7 +104,7 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
             </h2>
           </div>
           <ul className="pk-list">
-            {open.map((t, i) => {
+            {open.map((t) => {
               const task = TASK[t.id];
               return (
                 <li key={t.id} className="pk-row">
@@ -119,7 +119,7 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
                     <Icon name="Schedule" size={16} />
                     {task.minutes} min
                   </span>
-                  <Button variation={i === 0 ? 'primary' : 'secondary'} label={task.action} icon="ArrowForward" isSuffix onClick={() => start(t.id)} />
+                  <Button variation="primary" label={task.action} icon="ArrowForward" isSuffix onClick={() => start(t.id)} />
                 </li>
               );
             })}
