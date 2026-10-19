@@ -601,7 +601,7 @@ p { margin: 0; line-height: 1.5; }
 
 .as-list { list-style: none; margin: var(--s8) 0 0; padding: 0; display: grid; gap: var(--s4); }
 .as-card.digit-card-component {
-  display: flex; flex-direction: column; gap: var(--s4); width: 100%; margin: 0; padding: 24px 28px;
+  display: flex; flex-direction: column; gap: 0; width: 100%; margin: 0; padding: 24px 28px;
   border: 1px solid var(--c-divider); border-radius: 16px; background: #fff;
   box-shadow: 0 1px 2px rgb(16 24 40 / 0.04), 0 4px 16px rgb(16 24 40 / 0.05);
 }
@@ -609,16 +609,16 @@ p { margin: 0; line-height: 1.5; }
 .as-card.digit-card-component:hover,
 .as-card.digit-card-component:focus-within { border-color: rgb(200 76 14 / 0.45); box-shadow: 0 0 0 3px rgb(200 76 14 / 0.08), 0 4px 16px rgb(16 24 40 / 0.06); }
 .as-top { display: flex; align-items: center; justify-content: space-between; gap: var(--s4); }
-.as-icon { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 12px; background: var(--c-primary-bg); color: var(--c-primary); }
+.as-icon { flex-shrink: 0; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 8px; background: var(--c-primary-bg); color: var(--c-primary); }
 .as-card.is-done .as-icon { border-radius: 50%; background: var(--c-success); color: #fff; }
 .as-body { min-width: 0; }
-.as-body h3 { display: flex; align-items: center; min-height: 28px; font-size: 1.25rem; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; color: var(--digitv2-lightTheme-primary-2); }
-.as-what { margin-top: 4px; font-size: 1rem; line-height: 1.5; color: var(--c-text); }
+.as-top h3 { display: flex; align-items: center; gap: 12px; font-size: 1.25rem; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; color: var(--digitv2-lightTheme-primary-2); }
+.as-what { margin-top: 10px; font-size: 1rem; line-height: 1.5; color: var(--c-text); }
 .as-why {
   display: flex; align-items: flex-start; gap: 10px; margin-top: 14px; padding: 10px 14px; border-radius: 8px;
-  border: 1px solid var(--c-divider); background: #FAFAFA; font-size: 0.875rem; line-height: 1.5; color: #505A5F;
+  background: var(--c-info-bg); font-size: 0.875rem; line-height: 1.5; color: var(--c-text);
 }
-.as-why .ux-icon { flex-shrink: 0; margin-top: 1px; color: var(--digitv2-lightTheme-primary-2); }
+.as-why .ux-icon { flex-shrink: 0; margin-top: 1px; color: var(--digitv2-lightTheme-alert-info); }
 .as-result { margin-top: 6px; font-size: 1rem; font-weight: 500; color: var(--c-success); }
 .as-foot { display: flex; align-items: center; justify-content: flex-end; gap: var(--s4); margin-top: 20px; }
 .as-time { display: inline-flex; align-items: center; gap: 6px; font-size: 0.875rem; font-weight: 500; color: #505A5F; }

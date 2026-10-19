@@ -5,8 +5,8 @@ import { todoDone, todoResult, todosFor, type PageId, type TodoId } from '../lib
 
 /**
  * The account to-do, leading Home until it's done. A centred column: a header,
- * the welcome, the progress, then one DIGIT Card per step: its icon and time,
- * then the title, what to do, why it matters and a primary button.
+ * the welcome, the progress, then one DIGIT Card per step: its icon, title and
+ * time, then what to do, why it matters (an info box) and a primary button.
  */
 
 const TASK: Record<
@@ -15,7 +15,7 @@ const TASK: Record<
 > = {
   geography: {
     title: 'Add your geographies',
-    what: 'Add the places where you work.',
+    what: 'Find the places where you work, or add any that are missing.',
     why: 'Every product uses your geographies to know where things happen.',
     minutes: 5,
     icon: 'Public',
@@ -87,9 +87,13 @@ export function AccountSetup() {
               <li key={t.id}>
                 <Card className={`as-card${isDone ? ' is-done' : ''}`}>
                   <div className="as-top">
-                    <span className="as-icon" aria-hidden="true">
-                      <Icon name={isDone ? 'Check' : task.icon} size={22} />
-                    </span>
+                    <h3>
+                      <span className="as-icon" aria-hidden="true">
+                        <Icon name={isDone ? 'Check' : task.icon} size={18} />
+                      </span>
+                      {task.title}
+                      <span className="ux-visually-hidden">{isDone ? ' (done)' : ' (to do)'}</span>
+                    </h3>
                     {!isDone && (
                       <p className="as-time">
                         <Icon name="Schedule" size={16} />
@@ -98,17 +102,13 @@ export function AccountSetup() {
                     )}
                   </div>
                   <div className="as-body">
-                    <h3>
-                      {task.title}
-                      <span className="ux-visually-hidden">{isDone ? ' (done)' : ' (to do)'}</span>
-                    </h3>
                     {isDone ? (
                       <p className="as-result">{todoResult(t.id, account)}</p>
                     ) : (
                       <>
                         <p className="as-what">{task.what}</p>
                         <p className="as-why">
-                          <Icon name="LightbulbOutline" size={18} />
+                          <Icon name="Info" size={18} />
                           <span>{task.why}</span>
                         </p>
                       </>
