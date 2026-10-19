@@ -1560,6 +1560,8 @@ p { margin: 0; line-height: 1.5; }
 .pk-title-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
 .pk-time { padding: 2px 8px; border-radius: 999px; background: #F3F3F3; font-size: 0.8125rem; }
 @media (max-width: 760px) { .pk-row { grid-template-columns: auto minmax(0, 1fr); } .pk-time { grid-column: auto; } }
+/* Unlocked product cards lift off the white panel */
+.hm-v5 .hm-sec.is-mine .pt-card:not(.is-locked) { box-shadow: 0 1px 3px rgb(16 24 40 / 0.08), 0 8px 24px rgb(16 24 40 / 0.10); }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */
