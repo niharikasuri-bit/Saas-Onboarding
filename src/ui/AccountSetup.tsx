@@ -131,7 +131,7 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
                       {task.what} {task.why}
                     </span>
                   </span>
-                  <Button variation="primary" label={task.action} icon="ArrowForward" isSuffix onClick={() => start(t.id)} />
+                  <Button variation={t.id === 'users' ? 'secondary' : 'primary'} label={task.action} icon="ArrowForward" isSuffix onClick={() => start(t.id)} />
                 </li>
               );
             })}
@@ -181,7 +181,7 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
                       {task.what} {task.why}
                     </p>
                     <div className="as-foot">
-                      <Button variation="primary" label={task.action} icon="ArrowForward" isSuffix onClick={() => start(t.id)} />
+                      <Button variation={t.id === 'users' ? 'secondary' : 'primary'} label={task.action} icon="ArrowForward" isSuffix onClick={() => start(t.id)} />
                     </div>
                   </div>
                 </Card>
