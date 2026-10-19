@@ -157,9 +157,6 @@ export function Geographies() {
                 <Status active={added.has(s.id)} />
               </div>
               <h2>{s.name}</h2>
-              <p className="geo-meta">
-                {s.country} · {s.levels[0]}
-              </p>
               <p className="geo-stats">
                 <span>
                   <strong>{s.levels.length}</strong> {s.levels.length === 1 ? 'level' : 'levels'}
@@ -168,7 +165,9 @@ export function Geographies() {
                   <strong>{s.count.toLocaleString('en')}</strong> {s.count === 1 ? 'geography' : 'geographies'}
                 </span>
               </p>
-              <p className="geo-levels">{s.levels.join(' › ')}</p>
+              <p className="geo-levels">
+                <span className="geo-tag">{s.levels.join(' › ')}</span>
+              </p>
               <div className="geo-actions">
                 {added.has(s.id) ? (
                   <p className="geo-added">
@@ -210,7 +209,9 @@ export function Geographies() {
                     </span>
                   </th>
                   <td>{s.country}</td>
-                  <td>{s.levels.join(' › ')}</td>
+                  <td>
+                    <span className="geo-tag">{s.levels.join(' › ')}</span>
+                  </td>
                   <td>{s.count.toLocaleString('en')}</td>
                   <td>
                     <Status active={added.has(s.id)} />
