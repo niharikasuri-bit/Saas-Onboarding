@@ -602,9 +602,9 @@ p { margin: 0; line-height: 1.5; }
 .as-lead { margin-bottom: 40px; font-size: 1.125rem; line-height: 1.5; color: #505A5F; }
 
 .as-progress { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s4); margin-bottom: var(--s2); }
-.as-progress > p:first-child { font-size: 0.9375rem; font-weight: 700; color: var(--digitv2-lightTheme-primary-2); }
-.as-count { font-size: 0.875rem; color: #505A5F; white-space: nowrap; }
-.as-count strong { margin-right: 2px; font-size: 1.25rem; font-weight: 700; color: var(--c-text); }
+.as-progress > p:first-child { font-size: 1rem; font-weight: 700; color: var(--digitv2-lightTheme-primary-2); }
+.as-count { font-size: 1rem; font-weight: 500; color: #505A5F; white-space: nowrap; }
+.as-count strong { font-weight: 700; color: var(--digitv2-lightTheme-primary-2); }
 .as-bar { height: 14px; margin-bottom: 0; border-radius: 7px; background: #E4E4E4; overflow: hidden; }
 .as-bar span { display: block; height: 100%; border-radius: 7px; background: var(--c-success); transition: width 0.5s ease; }
 
