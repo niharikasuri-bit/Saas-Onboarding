@@ -185,19 +185,34 @@ export function CreateGeography({
 
   const TITLES: Record<Step, string> = {
     country: 'Which country is it?',
-    levels: `What are the levels in ${country.trim() || 'it'}?`,
+    levels: `How is ${country.trim() || 'it'} divided?`,
     method: 'How would you like to create your geographies?',
     places: method === 'upload' ? 'Upload your places' : method === 'osm' ? 'Check the places we fetched' : 'Add your places',
   };
 
+  const LEADS: Record<Step, string> = {
+    method: 'Pick one. You can change the places afterwards.',
+    country: 'Your geography starts here. Everything you add sits inside it.',
+    levels: 'List the boundary levels from largest to smallest — for example Country, Region, District.',
+    places:
+      method === 'upload'
+        ? 'Download the template, fill it in, and upload it. You can check every place before you save.'
+        : method === 'osm'
+          ? 'Check the places, and fix any before you create the geography.'
+          : 'Add one row per place, from the largest level down. Switch to the tree to see how they fit.',
+  };
+
   return (
+    <div className={`cg-page${step === 'places' ? ' is-wide' : ''}`}>
+      <button type="button" className="geo-back" onClick={back}>
+        <Icon name="ArrowBack" size={20} />
+        Back<span className="ux-visually-hidden">{n === 1 ? ' to add your geographies' : ' to the previous step'}</span>
+      </button>
     <section className="cg" aria-labelledby={`${uid}-h`}>
-      <p className="cg-step">
-        Create a geography · Step {n} of {STEPS.length}
-      </p>
       <h1 id={`${uid}-h`} ref={heading} tabIndex={-1}>
         {TITLES[step]}
       </h1>
+      <p className="cg-sub">{LEADS[step]}</p>
 
       <form
         noValidate
@@ -219,107 +234,46 @@ export function CreateGeography({
           </Field>
         )}
 
-        {step === 'levels' && (
-          <div className="cg-levels">
-            <p className="cg-lead">Largest first. For example State, then District, then Ward.</p>
-            <ol>
-              {levels.map((l, i) => (
-                <li key={i} className={errors[`level-${i}`] ? 'has-error' : undefined}>
-                  <span className="cg-level-n" aria-hidden="true">
-                    {i + 1}
-                  </span>
-                  <div className="cg-level-field">
-                    <label htmlFor={`${uid}-level-${i}`} className="ux-visually-hidden">
-                      Level {i + 1}
-                    </label>
-                    {errors[`level-${i}`] && (
-                      <p id={`${uid}-level-${i}-error`} className="fld-error">
-                        <span className="ux-visually-hidden">Error: </span>
-                        {errors[`level-${i}`]}
-                      </p>
-                    )}
-                    <input
-                      id={`${uid}-level-${i}`}
-                      value={l}
-                      placeholder={['e.g. State', 'e.g. District', 'e.g. Ward'][i] ?? 'Level name'}
-                      aria-invalid={!!errors[`level-${i}`] || undefined}
-                      aria-describedby={errors[`level-${i}`] ? `${uid}-level-${i}-error` : undefined}
-                      onChange={(e) => setLevels(levels.map((x, j) => (j === i ? e.target.value : x)))}
-                    />
-                  </div>
-                  <div className="cg-level-tools">
-                    <button
-                      type="button"
-                      className="cg-icon-btn"
-                      aria-label={`Move level ${i + 1} up`}
-                      disabled={i === 0}
-                      onClick={() => setLevels(levels.map((x, j) => (j === i - 1 ? levels[i] : j === i ? levels[i - 1] : x)))}
-                    >
-                      <Icon name="ArrowUpward" size={18} />
-                    </button>
-                    <button
-                      type="button"
-                      className="cg-icon-btn"
-                      aria-label={`Move level ${i + 1} down`}
-                      disabled={i === levels.length - 1}
-                      onClick={() => setLevels(levels.map((x, j) => (j === i + 1 ? levels[i] : j === i ? levels[i + 1] : x)))}
-                    >
-                      <Icon name="ArrowDownward" size={18} />
-                    </button>
-                    <button
-                      type="button"
-                      className="cg-icon-btn"
-                      aria-label={`Remove level ${i + 1}`}
-                      disabled={levels.length === 1}
-                      onClick={() => setLevels(levels.filter((_, j) => j !== i))}
-                    >
-                      <Icon name="Delete" size={18} />
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ol>
-            <button type="button" className="cg-add" onClick={() => setLevels([...levels, ''])}>
-              <Icon name="AddBox" size={18} />
-              Add a level
-            </button>
-          </div>
-        )}
+        {step === 'levels' && <LevelsEditor uid={uid} levels={levels} errors={errors} onChange={setLevels} />}
 
         {step === 'method' && (
-          <fieldset className="cg-choice" aria-describedby={errors.method ? `${uid}-method-error` : undefined}>
-            <legend className="ux-visually-hidden">How to add the places</legend>
+          <fieldset className={`qz-tiles cg-tiles${errors.method ? ' has-error' : ''}`} aria-describedby={errors.method ? `${uid}-method-error` : undefined}>
+            <legend className="ux-visually-hidden">How would you like to create your geographies?</legend>
             {errors.method && (
               <p id={`${uid}-method-error`} className="fld-error">
                 <span className="ux-visually-hidden">Error: </span>
                 {errors.method}
               </p>
             )}
-            {(
-              [
-                ['manual', 'Edit', 'Add them manually', 'Type the places into a table, or build them as a tree.'],
-                ['upload', 'FileUpload', 'Bulk upload geography data', 'Fill in our template, one column per level, and upload it.'],
-                ['osm', 'Public', 'Fetch from OpenStreetMap', 'We fetch your country’s boundaries. You check them before you save.'],
-              ] as const
-            ).map(([value, icon, title, hint], i) => (
-              <label key={value} className={`cg-option${method === value ? ' is-on' : ''}`}>
-                <input
-                  type="radio"
-                  name={`${uid}-method`}
-                  id={i === 0 ? `${uid}-method` : undefined}
-                  value={value}
-                  checked={method === value}
-                  onChange={() => setMethod(value)}
-                />
-                <span className="cg-option-icon" aria-hidden="true">
-                  <Icon name={icon} size={22} />
-                </span>
-                <span className="cg-option-text">
-                  <strong>{title}</strong>
-                  <span>{hint}</span>
-                </span>
-              </label>
-            ))}
+            <div className="qz-tile-row">
+              {(
+                [
+                  ['manual', 'Edit', 'Add manually'],
+                  ['upload', 'FileUpload', 'Bulk upload geography data'],
+                  ['osm', 'Public', 'Fetch from OpenStreetMap'],
+                ] as const
+              ).map(([value, icon, title], i) => (
+                <label key={value} className={`qz-tile${method === value ? ' is-on' : ''}`}>
+                  <input
+                    type="radio"
+                    name={`${uid}-method`}
+                    id={i === 0 ? `${uid}-method` : undefined}
+                    value={value}
+                    checked={method === value}
+                    onChange={() => setMethod(value)}
+                  />
+                  <span className="cg-tile-icon" aria-hidden="true">
+                    <Icon name={icon} size={36} />
+                  </span>
+                  <span className="qz-tile-label">{title}</span>
+                  {method === value && (
+                    <span className="qz-tile-tick" aria-hidden="true">
+                      <Icon name="Check" size={12} />
+                    </span>
+                  )}
+                </label>
+              ))}
+            </div>
           </fieldset>
         )}
 
@@ -332,7 +286,7 @@ export function CreateGeography({
                 country={country.trim()}
                 uploaded={uploaded}
                 onRows={(r, file) => {
-                  setRows(r.map((p) => fit(p, cleanLevels.length)));
+                  setRows(r.length ? r.map((p) => fit(p, cleanLevels.length)) : [blankRow(cleanLevels.length)]);
                   setUploaded(file);
                   setErrors({});
                 }}
@@ -347,7 +301,7 @@ export function CreateGeography({
             {method === 'osm' && fetched && (
               <p className="cg-uploaded" role="status">
                 <Icon name="CheckCircle" size={18} />
-                Fetched from OpenStreetMap. Check the places, and fix any before you create the geography.
+                Fetched from OpenStreetMap.
               </p>
             )}
             {(method === 'manual' || uploaded || (method === 'osm' && fetched)) && (
@@ -373,6 +327,7 @@ export function CreateGeography({
                     {errors.places}
                   </p>
                 )}
+                <div className="pt-panel">
                 {view === 'table' ? (
                   <Grid levels={cleanLevels} rows={rows} problems={problems} onChange={setRows} />
                 ) : (
@@ -384,17 +339,18 @@ export function CreateGeography({
                     onChange={(r) => setRows([...toPaths(r, cleanLevels.length), ...rows.filter((_, i) => problems[i])])}
                   />
                 )}
+                </div>
               </>
             )}
           </div>
         )}
 
         <div className="cg-foot">
-          <Button variation="secondary" label={n === 1 ? 'Cancel' : 'Back'} onClick={back} />
           <Button variation="primary" label={step === 'places' ? 'Create geography' : 'Continue'} submit onClick={() => {}} />
         </div>
       </form>
     </section>
+    </div>
   );
 }
 
@@ -481,7 +437,121 @@ function Grid({
   );
 }
 
-/** Bulk upload: download the template (one column per level), then upload it. */
+/**
+ * Boundary levels, largest first. Each row: a handle to reorder (drag it, or
+ * focus it and use the up and down arrow keys), the level number, its name,
+ * and remove.
+ */
+function LevelsEditor({
+  uid,
+  levels,
+  errors,
+  onChange,
+}: {
+  uid: string;
+  levels: string[];
+  errors: Record<string, string>;
+  onChange: (l: string[]) => void;
+}) {
+  const [armed, setArmed] = useState<number | null>(null);
+  const [dragging, setDragging] = useState<number | null>(null);
+  const [moved, setMoved] = useState('');
+  const move = (from: number, to: number) => {
+    if (to < 0 || to >= levels.length || from === to) return;
+    const next = [...levels];
+    const [x] = next.splice(from, 1);
+    next.splice(to, 0, x);
+    onChange(next);
+    setMoved(`${x || 'Level'} moved to level ${to + 1} of ${levels.length}`);
+    requestAnimationFrame(() => document.getElementById(`${uid}-handle-${to}`)?.focus());
+  };
+  return (
+    <div className="lv">
+      <p className="lv-h" id={`${uid}-lv-h`}>
+        Boundary levels
+      </p>
+      <ol className="lv-list" aria-labelledby={`${uid}-lv-h`}>
+        {levels.map((l, i) => {
+          const err = errors[`level-${i}`];
+          return (
+            <li
+              key={i}
+              className={`lv-row${err ? ' has-error' : ''}${dragging === i ? ' is-dragging' : ''}`}
+              draggable={armed === i}
+              onDragStart={(e) => {
+                setDragging(i);
+                e.dataTransfer.effectAllowed = 'move';
+              }}
+              onDragEnd={() => {
+                setDragging(null);
+                setArmed(null);
+              }}
+              onDragOver={(e) => dragging !== null && e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                if (dragging !== null) move(dragging, i);
+                setDragging(null);
+                setArmed(null);
+              }}
+            >
+              <button
+                type="button"
+                id={`${uid}-handle-${i}`}
+                className="lv-handle"
+                aria-label={`Reorder level ${i + 1}${l ? `, ${l}` : ''}. Use the up and down arrow keys.`}
+                onMouseDown={() => setArmed(i)}
+                onMouseUp={() => setArmed(null)}
+                onKeyDown={(e) => {
+                  if (e.key === 'ArrowUp') e.preventDefault(), move(i, i - 1);
+                  if (e.key === 'ArrowDown') e.preventDefault(), move(i, i + 1);
+                }}
+              >
+                <Icon name="DragIndicator" size={20} />
+              </button>
+              <label htmlFor={`${uid}-level-${i}`} className="lv-n">
+                Level {i + 1}
+              </label>
+              <div className="lv-field">
+                <input
+                  id={`${uid}-level-${i}`}
+                  value={l}
+                  placeholder={['e.g. State', 'e.g. District', 'e.g. Ward'][i] ?? 'Level name'}
+                  aria-invalid={!!err || undefined}
+                  aria-describedby={err ? `${uid}-level-${i}-error` : undefined}
+                  onChange={(e) => onChange(levels.map((x, j) => (j === i ? e.target.value : x)))}
+                />
+                {err && (
+                  <p id={`${uid}-level-${i}-error`} className="fld-error">
+                    <span className="ux-visually-hidden">Error: </span>
+                    {err}
+                  </p>
+                )}
+              </div>
+              <button
+                type="button"
+                className="lv-remove"
+                aria-label={`Remove level ${i + 1}${l ? `, ${l}` : ''}`}
+                disabled={levels.length === 1}
+                onClick={() => onChange(levels.filter((_, j) => j !== i))}
+              >
+                <Icon name="Close" size={18} />
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+      <p className="ux-visually-hidden" role="status">
+        {moved}
+      </p>
+      <button type="button" className="lv-add" onClick={() => onChange([...levels, ''])}>
+        <Icon name="Add" size={18} />
+        Add level
+      </button>
+    </div>
+  );
+}
+
+/** Bulk upload: a box with the template on the right, a drop area, and the uploaded file. */
 function Upload({
   uid,
   levels,
@@ -496,62 +566,113 @@ function Upload({
   onRows: (rows: Path[], file: string) => void;
 }) {
   const [error, setError] = useState('');
+  const [file, setFile] = useState<File | null>(null);
+  const [over, setOver] = useState(false);
+  const input = useRef<HTMLInputElement>(null);
+  const take = async (f: File | undefined) => {
+    if (!f) return;
+    const data = parseCsv(await f.text());
+    const head = (data[0] ?? []).map((c) => c.trim().toLowerCase());
+    if (head.join(',') !== levels.map((l) => l.toLowerCase()).join(',')) {
+      setError(`The columns should be ${levels.join(', ')}, in that order. Download the template and try again.`);
+      return;
+    }
+    setError('');
+    setFile(f);
+    onRows(data.slice(1), f.name);
+  };
+  const browse = () => input.current?.click();
   return (
-    <div className="cg-upload">
-      <ol className="cg-upload-steps">
-        <li>
-          <span>
-            <strong>Download the template.</strong> It has a column for each level: {levels.join(', ')}.
-          </span>
-          <Button variation="secondary" icon="FileDownload" label="Download template" onClick={() => downloadTemplate(country, levels)} />
-        </li>
-        <li>
-          <span>
-            <strong>Fill in one row per place,</strong> from the largest level to the smallest.
-          </span>
-        </li>
-        <li>
-          <span>
-            <strong>Upload it.</strong> You can check and fix the places before you create the geography.
-          </span>
-          <label className="cg-file" htmlFor={`${uid}-file`}>
-            <Icon name="FileUpload" size={18} />
-            {uploaded ? 'Upload a different file' : 'Choose a CSV file'}
-          </label>
-          <input
-            id={`${uid}-file`}
-            className="ux-visually-hidden"
-            type="file"
-            accept=".csv,text/csv"
-            aria-describedby={error ? `${uid}-file-error` : undefined}
-            onChange={async (e) => {
-              const f = e.target.files?.[0];
-              e.target.value = '';
-              if (!f) return;
-              const data = parseCsv(await f.text());
-              const head = (data[0] ?? []).map((c) => c.trim().toLowerCase());
-              if (head.join(',') !== levels.map((l) => l.toLowerCase()).join(',')) {
-                setError(`The columns should be ${levels.join(', ')}, in that order. Download the template and try again.`);
-                return;
-              }
-              setError('');
-              onRows(data.slice(1), f.name);
-            }}
-          />
-        </li>
-      </ol>
+    <section className="up" aria-labelledby={`${uid}-up-h`}>
+      <div className="up-head">
+        <div>
+          <h2 id={`${uid}-up-h`}>Upload document</h2>
+          <p className="up-hint">A CSV with one column per level: {levels.join(', ')}.</p>
+        </div>
+        <Button variation="secondary" icon="FileDownload" label="Download template" onClick={() => downloadTemplate(country, levels)} />
+      </div>
+      <input
+        ref={input}
+        id={`${uid}-file`}
+        className="ux-visually-hidden"
+        type="file"
+        accept=".csv,text/csv"
+        tabIndex={-1}
+        aria-hidden="true"
+        onChange={(e) => {
+          take(e.target.files?.[0]);
+          e.target.value = '';
+        }}
+      />
+      {!uploaded && (
+        <div
+          className={`up-drop${over ? ' is-over' : ''}`}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setOver(true);
+          }}
+          onDragLeave={() => setOver(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setOver(false);
+            take(e.dataTransfer.files?.[0]);
+          }}
+        >
+          <Icon name="FileUpload" size={40} />
+          <p>
+            Drag and drop your file or{' '}
+            <button type="button" className="up-browse" onClick={browse}>
+              Browse in my files
+            </button>
+          </p>
+        </div>
+      )}
       {error && (
-        <p id={`${uid}-file-error`} className="fld-error" role="alert">
+        <p className="fld-error" role="alert">
           {error}
         </p>
       )}
-      {uploaded && !error && (
-        <p className="cg-uploaded" role="status">
-          <Icon name="CheckCircle" size={18} />
-          {uploaded} uploaded. Check the places below.
-        </p>
+      {uploaded && (
+        <div className="up-file">
+          <span className="up-file-icon" aria-hidden="true">
+            CSV
+          </span>
+          <span className="up-file-name">{uploaded}</span>
+          <div className="up-file-actions">
+            <Button variation="secondary" icon="FileUpload" label="Re-upload" onClick={browse} />
+            {file && (
+              <Button
+                variation="secondary"
+                icon="FileDownload"
+                label="Download"
+                onClick={() => {
+                  const url = URL.createObjectURL(file);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = file.name;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+              />
+            )}
+          </div>
+          <button
+            type="button"
+            className="up-file-x"
+            aria-label={`Remove ${uploaded}`}
+            onClick={() => {
+              setFile(null);
+              onRows([], '');
+            }}
+          >
+            <Icon name="Close" size={18} />
+          </button>
+        </div>
       )}
-    </div>
+      <p className="ux-visually-hidden" role="status">
+        {uploaded ? `${uploaded} uploaded. Check the places below.` : ''}
+      </p>
+    </section>
   );
 }
 

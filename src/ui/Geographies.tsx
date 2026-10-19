@@ -201,13 +201,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
   }
 
   return (
-    <div className={`geo${adding ? '' : ' is-overview'}`}>
-      {creating !== null && (
-        <button type="button" className="geo-back" onClick={() => setCreating(null)}>
-          <Icon name="ArrowBack" size={20} />
-          Back<span className="ux-visually-hidden"> to add your geographies</span>
-        </button>
-      )}
+    <div className={`geo${adding ? '' : ' is-overview'}${creating !== null ? ' is-creating' : ''}`}>
       {creating === null && adding && (embedded || !!added.size) && (
         <button type="button" className="geo-back" onClick={() => (embedded ? onDone?.() : done(''))}>
           <Icon name="ArrowBack" size={20} />
