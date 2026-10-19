@@ -137,7 +137,8 @@ function ProductTile({ p, locked, opening }: { p: Product; locked: boolean; open
       </span>
       <h3>{meta.name}</h3>
       <p className="pt-about">{meta.about}</p>
-      <About p={p} />
+      {/* Locked cards keep it short: the numbers arrive when the product unlocks */}
+      {!locked && <About p={p} />}
       <div className="pt-actions">
         {locked ? (
           <p className="pt-lock-cta">Unlocks when you add geographies</p>
@@ -159,7 +160,7 @@ function ProductTile({ p, locked, opening }: { p: Product; locked: boolean; open
   );
 }
 
-/** A product that isn't in their plan yet: the same white card, with Add for admins. */
+/** A product that isn't in their plan yet: greyed like a locked card, with Add for admins. */
 function OffTile({ p, admin }: { p: Product; admin: boolean }) {
   const { update } = useAccount();
   const meta = PRODUCTS[p];
@@ -170,7 +171,6 @@ function OffTile({ p, admin }: { p: Product; admin: boolean }) {
       </span>
       <h3>{meta.name}</h3>
       <p className="pt-about">{meta.about}</p>
-      <About p={p} />
       <div className="pt-actions">
         {admin ? (
           <Button
