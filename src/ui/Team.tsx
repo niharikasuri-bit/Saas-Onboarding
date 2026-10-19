@@ -433,14 +433,12 @@ function PeopleTable({
   products,
   errors,
   onChange,
-  onAdd,
 }: {
   uid: string;
   people: Person[];
   products: Product[];
   errors: Record<string, string>;
   onChange: (p: Person[]) => void;
-  onAdd: () => void;
 }) {
   const set = (key: string, n: Partial<Person>) => onChange(people.map((x) => (x.key === key ? { ...x, ...n } : x)));
   const cellErr = (p: Person, k: string) =>
@@ -452,19 +450,6 @@ function PeopleTable({
     );
   const desc = (p: Person, k: string) => (errors[`${p.key}-${k}`] ? `${uid}-${p.key}-${k}-err` : undefined);
   return (
-    <div className="tm-sheet">
-    <div className="cg-places-bar">
-      <Button
-        variation="secondary"
-        icon="Add"
-        label="Add team member"
-        onClick={() => {
-          onAdd();
-          // Straight into the new row's first cell.
-          requestAnimationFrame(() => (document.querySelector('.tm-grid tbody tr:last-child input') as HTMLInputElement | null)?.focus());
-        }}
-      />
-    </div>
     <div className="pt-panel tm-panel">
     <div className="cg-grid-wrap">
       <SheetIntro action="Send invites" />
@@ -559,7 +544,6 @@ function PeopleTable({
           ))}
         </tbody>
       </table>
-    </div>
     </div>
     </div>
   );
@@ -662,27 +646,46 @@ function AddTeam({
     onSent(method === 'manual' ? people.slice(0, 1) : people.filter((p) => p.name.trim() || p.email.trim()));
   };
 
+  // Reviewing an uploaded file: no white card, the table takes the page.
+  const reviewing = step === 1 && method === 'upload' && !!uploaded;
   const title = step === 0 ? 'How would you like to add your team?' : method === 'upload' ? (uploaded ? 'View and edit uploaded team data' : 'Upload team data') : 'Add a team member';
 
   return (
     <div className={`cg-page${step === 1 ? ' is-wide' : ''}`}>
       <Crumbs items={[...trail, { label: 'Add team members' }]} />
-      <section className="cg" aria-labelledby={`${uid}-h`}>
-        <div className="cg-title-row">
-          <h1 id={`${uid}-h`} ref={heading} tabIndex={-1}>
-            {title}
-          </h1>
-          {step === 1 && method === 'upload' && !uploaded && (
-            <Button variation="secondary" icon="FileDownload" label="Download template" onClick={downloadTemplate} />
-          )}
-        </div>
-        {step === 0 ? (
+      <section className={`cg${reviewing ? ' is-bare' : ''}`} aria-labelledby={`${uid}-h`}>
+        {reviewing ? (
+          <header className="tm-review-head">
+            <div>
+              <h1 id={`${uid}-h`} ref={heading} tabIndex={-1}>
+                {title}
+              </h1>
+              <p>Review the team members from your file and edit any row before you add them.</p>
+            </div>
+            <Button
+              variation="secondary"
+              icon="Add"
+              label="Add team member"
+              onClick={() => {
+                setPeople([...people, blank()]);
+                // Straight into the new row's first cell.
+                requestAnimationFrame(() => (document.querySelector('.tm-grid tbody tr:last-child input') as HTMLInputElement | null)?.focus());
+              }}
+            />
+          </header>
+        ) : (
+          <div className="cg-title-row">
+            <h1 id={`${uid}-h`} ref={heading} tabIndex={-1}>
+              {title}
+            </h1>
+            {step === 1 && method === 'upload' && !uploaded && (
+              <Button variation="secondary" icon="FileDownload" label="Download template" onClick={downloadTemplate} />
+            )}
+          </div>
+        )}
+        {reviewing ? null : step === 0 ? (
           <div className="cg-sub">
             <p>Upload a file using the template to add many people at once, or add them one at a time. Everyone you add gets an email invite.</p>
-          </div>
-        ) : method === 'upload' && uploaded ? (
-          <div className="cg-sub">
-            <p>Review the team members from your file and edit any row before you add them.</p>
           </div>
         ) : method === 'manual' ? (
           <div className="cg-sub">
@@ -783,14 +786,7 @@ function AddTeam({
           )}
 
           {step === 1 && method === 'upload' && !!uploaded && (
-            <PeopleTable
-              uid={uid}
-              people={people}
-              products={products}
-              errors={errors}
-              onChange={setPeople}
-              onAdd={() => setPeople([...people, blank()])}
-            />
+            <PeopleTable uid={uid} people={people} products={products} errors={errors} onChange={setPeople} />
           )}
           <button type="submit" className="ux-visually-hidden" tabIndex={-1} aria-hidden="true" />
         </form>
