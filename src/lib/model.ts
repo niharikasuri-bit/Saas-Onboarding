@@ -365,7 +365,7 @@ export type Account = {
   branding: { name: string; logo: string; colour: string; saved: boolean };
   users: User[];
   /** sets: catalogue geographies added to the account; custom: ones they created. */
-  geography: { areas: Area[]; sets?: string[]; custom?: GeoSet[] };
+  geography: { areas: Area[]; sets?: string[]; custom?: GeoSet[]; edited?: Record<string, GeoRow[]> };
   sender: Record<Channel, { state: SenderState; fields: Record<string, string> }>;
   products: Record<Product, ProductState>;
   /** Complaints: the service, its departments and type → department map. */
@@ -479,7 +479,18 @@ export const REFERENCE_AREAS: { name: string; parent: string; level: number }[] 
  * Geographies DIGIT holds, by country (prototype). Each one is a place with its
  * levels, largest first, and how many geographies it contains in all.
  */
-export type GeoSet = { id: string; name: string; country: string; levels: string[]; count: number; custom?: boolean };
+/** One place inside a geography: key is unique within it, parent is the key above (or ''). */
+export type GeoRow = { key: string; name: string; level: number; parent: string };
+export type GeoSet = {
+  id: string;
+  name: string;
+  country: string;
+  levels: string[];
+  count: number;
+  custom?: boolean;
+  /** Places of a geography they created. */
+  rows?: GeoRow[];
+};
 export const GEO_SETS: GeoSet[] = [
   { id: 'nairobi', name: 'Nairobi', country: 'Kenya', levels: LEVELS, count: REFERENCE_AREAS.length },
   { id: 'mombasa', name: 'Mombasa County', country: 'Kenya', levels: ['County', 'Sub-county', 'Ward'], count: 37 },

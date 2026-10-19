@@ -1,0 +1,557 @@
+import { useEffect, useId, useRef, useState } from 'react';
+import { Button } from '@egovernments/digit-ui-components';
+import { Icon } from '../components/Icon';
+import { newId, type GeoRow, type GeoSet } from '../lib/model';
+import { Field, describedBy } from './StepFrame';
+import { GeoTree } from './GeoTree';
+
+/**
+ * Create a geography, one step at a time:
+ * 1. How: by hand, by uploading a file, or by fetching from OpenStreetMap.
+ * 2. The country's name.
+ * 3. Its boundary levels, largest first (filled in when fetched).
+ * 4. The places, as a table (one column per level, like a spreadsheet) or a tree.
+ *
+ * Places are kept as rows of names, one cell per level: a row is one path from
+ * the largest area down. The tree is built from the same rows.
+ */
+
+type Path = string[];
+type Step = 'country' | 'levels' | 'method' | 'places';
+type Method = 'manual' | 'upload' | 'osm';
+const STEPS: Step[] = ['method', 'country', 'levels', 'places'];
+/** Prototype: the levels and places OpenStreetMap "returns". */
+const OSM_LEVELS = ['Region', 'District', 'Sub-district'];
+const osmPaths = (): Path[] =>
+  [1, 2, 3].flatMap((r) => [1, 2].flatMap((d) => [1, 2].map((x) => [`Region ${r}`, `District ${r}.${d}`, `Sub-district ${r}.${d}.${x}`])));
+
+const blankRow = (n: number): Path => Array.from({ length: n }, () => '');
+const fit = (p: Path, n: number): Path => (p.length >= n ? p.slice(0, n) : [...p, ...blankRow(n - p.length)]);
+
+/** A row is fine if its cells are filled from the left with no gaps. Empty rows are ignored. */
+function rowProblem(p: Path, levels: string[]): string {
+  const last = p.map((c) => c.trim()).findLastIndex(Boolean);
+  if (last < 0) return '';
+  const gap = p.slice(0, last).findIndex((c) => !c.trim());
+  return gap >= 0 ? `Fill in ${levels[gap]} before ${levels[last]}` : '';
+}
+
+/** Every distinct place in the rows, with its parent, largest first. */
+function toGeoRows(paths: Path[]): GeoRow[] {
+  const out: GeoRow[] = [];
+  const seen = new Set<string>();
+  for (const p of paths) {
+    for (let i = 0; i < p.length && p[i].trim(); i++) {
+      const key = p.slice(0, i + 1).map((c) => c.trim()).join(' › ');
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({ key, name: p[i].trim(), level: i, parent: i ? p.slice(0, i).map((c) => c.trim()).join(' › ') : '' });
+    }
+  }
+  return out;
+}
+
+/** Back from places to rows of names: one row per place with nothing inside it. */
+function toPaths(rows: GeoRow[], n: number): Path[] {
+  const byKey = new Map(rows.map((r) => [r.key, r]));
+  const parents = new Set(rows.map((r) => r.parent));
+  const out = rows
+    .filter((r) => !parents.has(r.key))
+    .map((r) => {
+      const p: string[] = [];
+      for (let x: GeoRow | undefined = r; x; x = byKey.get(x.parent)) p.unshift(x.name);
+      return fit(p, n);
+    });
+  return out.length ? out : [blankRow(n)];
+}
+
+/** A small CSV reader: commas, quoted cells, and doubled quotes. */
+function parseCsv(text: string): string[][] {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let cell = '';
+  let quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (quoted) {
+      if (c === '"' && text[i + 1] === '"') (cell += '"'), i++;
+      else if (c === '"') quoted = false;
+      else cell += c;
+    } else if (c === '"') quoted = true;
+    else if (c === ',') row.push(cell), (cell = '');
+    else if (c === '\n' || c === '\r') {
+      if (c === '\r' && text[i + 1] === '\n') i++;
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = '';
+    } else cell += c;
+  }
+  if (cell || row.length) row.push(cell), rows.push(row);
+  return rows.filter((r) => r.some((c) => c.trim()));
+}
+
+function downloadTemplate(country: string, levels: string[]) {
+  const esc = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+  const url = URL.createObjectURL(new Blob([levels.map(esc).join(',') + '\n'], { type: 'text/csv' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${(country || 'geography').toLowerCase().replace(/[^a-z0-9]+/g, '-')}-template.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export function CreateGeography({
+  initial,
+  taken,
+  onCancel,
+  onCreate,
+}: {
+  initial: string;
+  taken: GeoSet[];
+  onCancel: () => void;
+  onCreate: (s: GeoSet) => void;
+}) {
+  const uid = useId();
+  const [step, setStep] = useState<Step>('method');
+  const [country, setCountry] = useState(initial);
+  const [levels, setLevels] = useState<string[]>(['', '']);
+  const [method, setMethod] = useState<Method | ''>('');
+  const [view, setView] = useState<'table' | 'tree'>('table');
+  const [rows, setRows] = useState<Path[]>([blankRow(2), blankRow(2)]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [uploaded, setUploaded] = useState('');
+  const [fetched, setFetched] = useState(false);
+  const heading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    heading.current?.focus();
+  }, [step]);
+  // Fetching from OpenStreetMap takes a moment; then the places can be checked like any others.
+  useEffect(() => {
+    if (step !== 'places' || method !== 'osm' || fetched) return;
+    const t = setTimeout(() => {
+      setRows(osmPaths().map((p) => fit(p, levels.length)));
+      setFetched(true);
+    }, 900);
+    return () => clearTimeout(t);
+  }, [step, method, fetched, levels.length]);
+
+  const n = STEPS.indexOf(step) + 1;
+  const go = (s: Step) => {
+    setErrors({});
+    setStep(s);
+  };
+  const back = () => (n === 1 ? onCancel() : go(STEPS[n - 2]));
+
+  const cleanLevels = levels.map((l) => l.trim());
+  const filled = rows.filter((r) => r.some((c) => c.trim()));
+  const problems = rows.map((r) => rowProblem(r, cleanLevels));
+  const places = toGeoRows(filled);
+
+  const next = () => {
+    const e: Record<string, string> = {};
+    if (step === 'country') {
+      const name = country.trim();
+      if (!name) e.country = 'Enter the country’s name';
+      else if (taken.some((s) => s.name.toLowerCase() === name.toLowerCase()))
+        e.country = `${name} is already here. Search for it instead.`;
+    }
+    if (step === 'levels') {
+      cleanLevels.forEach((l, i) => {
+        if (!l) e[`level-${i}`] = 'Enter a name for this level, or remove it';
+        else if (cleanLevels.findIndex((x) => x.toLowerCase() === l.toLowerCase()) !== i) e[`level-${i}`] = `${l} is already a level`;
+      });
+    }
+    if (step === 'method' && !method) e.method = 'Choose how you’d like to create your geographies';
+    if (step === 'places') {
+      if (!places.length) e.places = `Add at least one ${cleanLevels[0] || 'place'}`;
+      else if (problems.some(Boolean)) e.places = 'Some rows have gaps. Fix the highlighted rows.';
+    }
+    setErrors(e);
+    if (Object.keys(e).length) {
+      const firstKey = Object.keys(e)[0];
+      document.getElementById(`${uid}-${firstKey}`)?.focus();
+      return;
+    }
+    if (step === 'country' && method === 'osm' && levels.every((l) => !l.trim())) setLevels(OSM_LEVELS);
+    if (step === 'levels') setRows((r) => r.map((p) => fit(p, cleanLevels.length)));
+    if (step === 'places') {
+      const name = country.trim();
+      onCreate({ id: newId(), name, country: name, levels: cleanLevels, count: places.length, custom: true, rows: places });
+      return;
+    }
+    go(STEPS[n]);
+  };
+
+  const TITLES: Record<Step, string> = {
+    country: 'Which country is it?',
+    levels: `What are the levels in ${country.trim() || 'it'}?`,
+    method: 'How would you like to create your geographies?',
+    places: method === 'upload' ? 'Upload your places' : method === 'osm' ? 'Check the places we fetched' : 'Add your places',
+  };
+
+  return (
+    <section className="cg" aria-labelledby={`${uid}-h`}>
+      <p className="cg-step">
+        Create a geography · Step {n} of {STEPS.length}
+      </p>
+      <h1 id={`${uid}-h`} ref={heading} tabIndex={-1}>
+        {TITLES[step]}
+      </h1>
+
+      <form
+        noValidate
+        onSubmit={(e) => {
+          e.preventDefault();
+          next();
+        }}
+      >
+        {step === 'country' && (
+          <Field id={`${uid}-country`} label="Country name" error={errors.country}>
+            <input
+              id={`${uid}-country`}
+              value={country}
+              autoComplete="country-name"
+              aria-invalid={!!errors.country || undefined}
+              aria-describedby={describedBy(`${uid}-country`, undefined, errors.country)}
+              onChange={(e) => setCountry(e.target.value)}
+            />
+          </Field>
+        )}
+
+        {step === 'levels' && (
+          <div className="cg-levels">
+            <p className="cg-lead">Largest first. For example State, then District, then Ward.</p>
+            <ol>
+              {levels.map((l, i) => (
+                <li key={i} className={errors[`level-${i}`] ? 'has-error' : undefined}>
+                  <span className="cg-level-n" aria-hidden="true">
+                    {i + 1}
+                  </span>
+                  <div className="cg-level-field">
+                    <label htmlFor={`${uid}-level-${i}`} className="ux-visually-hidden">
+                      Level {i + 1}
+                    </label>
+                    {errors[`level-${i}`] && (
+                      <p id={`${uid}-level-${i}-error`} className="fld-error">
+                        <span className="ux-visually-hidden">Error: </span>
+                        {errors[`level-${i}`]}
+                      </p>
+                    )}
+                    <input
+                      id={`${uid}-level-${i}`}
+                      value={l}
+                      placeholder={['e.g. State', 'e.g. District', 'e.g. Ward'][i] ?? 'Level name'}
+                      aria-invalid={!!errors[`level-${i}`] || undefined}
+                      aria-describedby={errors[`level-${i}`] ? `${uid}-level-${i}-error` : undefined}
+                      onChange={(e) => setLevels(levels.map((x, j) => (j === i ? e.target.value : x)))}
+                    />
+                  </div>
+                  <div className="cg-level-tools">
+                    <button
+                      type="button"
+                      className="cg-icon-btn"
+                      aria-label={`Move level ${i + 1} up`}
+                      disabled={i === 0}
+                      onClick={() => setLevels(levels.map((x, j) => (j === i - 1 ? levels[i] : j === i ? levels[i - 1] : x)))}
+                    >
+                      <Icon name="ArrowUpward" size={18} />
+                    </button>
+                    <button
+                      type="button"
+                      className="cg-icon-btn"
+                      aria-label={`Move level ${i + 1} down`}
+                      disabled={i === levels.length - 1}
+                      onClick={() => setLevels(levels.map((x, j) => (j === i + 1 ? levels[i] : j === i ? levels[i + 1] : x)))}
+                    >
+                      <Icon name="ArrowDownward" size={18} />
+                    </button>
+                    <button
+                      type="button"
+                      className="cg-icon-btn"
+                      aria-label={`Remove level ${i + 1}`}
+                      disabled={levels.length === 1}
+                      onClick={() => setLevels(levels.filter((_, j) => j !== i))}
+                    >
+                      <Icon name="Delete" size={18} />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <button type="button" className="cg-add" onClick={() => setLevels([...levels, ''])}>
+              <Icon name="AddBox" size={18} />
+              Add a level
+            </button>
+          </div>
+        )}
+
+        {step === 'method' && (
+          <fieldset className="cg-choice" aria-describedby={errors.method ? `${uid}-method-error` : undefined}>
+            <legend className="ux-visually-hidden">How to add the places</legend>
+            {errors.method && (
+              <p id={`${uid}-method-error`} className="fld-error">
+                <span className="ux-visually-hidden">Error: </span>
+                {errors.method}
+              </p>
+            )}
+            {(
+              [
+                ['manual', 'Edit', 'Add them manually', 'Type the places into a table, or build them as a tree.'],
+                ['upload', 'FileUpload', 'Bulk upload geography data', 'Fill in our template, one column per level, and upload it.'],
+                ['osm', 'Public', 'Fetch from OpenStreetMap', 'We fetch your country’s boundaries. You check them before you save.'],
+              ] as const
+            ).map(([value, icon, title, hint], i) => (
+              <label key={value} className={`cg-option${method === value ? ' is-on' : ''}`}>
+                <input
+                  type="radio"
+                  name={`${uid}-method`}
+                  id={i === 0 ? `${uid}-method` : undefined}
+                  value={value}
+                  checked={method === value}
+                  onChange={() => setMethod(value)}
+                />
+                <span className="cg-option-icon" aria-hidden="true">
+                  <Icon name={icon} size={22} />
+                </span>
+                <span className="cg-option-text">
+                  <strong>{title}</strong>
+                  <span>{hint}</span>
+                </span>
+              </label>
+            ))}
+          </fieldset>
+        )}
+
+        {step === 'places' && (
+          <div className="cg-places">
+            {method === 'upload' && (
+              <Upload
+                uid={uid}
+                levels={cleanLevels}
+                country={country.trim()}
+                uploaded={uploaded}
+                onRows={(r, file) => {
+                  setRows(r.map((p) => fit(p, cleanLevels.length)));
+                  setUploaded(file);
+                  setErrors({});
+                }}
+              />
+            )}
+            {method === 'osm' && !fetched && (
+              <p className="cg-fetching" role="status">
+                <span className="cg-spinner" aria-hidden="true" />
+                Fetching the boundaries for {country.trim()} from OpenStreetMap…
+              </p>
+            )}
+            {method === 'osm' && fetched && (
+              <p className="cg-uploaded" role="status">
+                <Icon name="CheckCircle" size={18} />
+                Fetched from OpenStreetMap. Check the places, and fix any before you create the geography.
+              </p>
+            )}
+            {(method === 'manual' || uploaded || (method === 'osm' && fetched)) && (
+              <>
+                <div className="cg-places-bar">
+                  <div className="pt-tabs" role="group" aria-label="View as">
+                    <button type="button" aria-pressed={view === 'table'} onClick={() => setView('table')}>
+                      <Icon name="TableView" size={18} />
+                      Table
+                    </button>
+                    <button type="button" aria-pressed={view === 'tree'} onClick={() => setView('tree')}>
+                      <Icon name="AccountTree" size={18} />
+                      Tree
+                    </button>
+                  </div>
+                  <p className="cg-count" role="status">
+                    {places.length} {places.length === 1 ? 'place' : 'places'}
+                  </p>
+                </div>
+                {errors.places && (
+                  <p id={`${uid}-places`} className="fld-error" tabIndex={-1}>
+                    <span className="ux-visually-hidden">Error: </span>
+                    {errors.places}
+                  </p>
+                )}
+                {view === 'table' ? (
+                  <Grid levels={cleanLevels} rows={rows} problems={problems} onChange={setRows} />
+                ) : (
+                  <GeoTree
+                    root={country.trim()}
+                    levels={cleanLevels}
+                    rows={places}
+                    // Rows with gaps can't sit in the tree; keep them for the table.
+                    onChange={(r) => setRows([...toPaths(r, cleanLevels.length), ...rows.filter((_, i) => problems[i])])}
+                  />
+                )}
+              </>
+            )}
+          </div>
+        )}
+
+        <div className="cg-foot">
+          <Button variation="secondary" label={n === 1 ? 'Cancel' : 'Back'} onClick={back} />
+          <Button variation="primary" label={step === 'places' ? 'Create geography' : 'Continue'} submit onClick={() => {}} />
+        </div>
+      </form>
+    </section>
+  );
+}
+
+/** Spreadsheet-style table: one row per path, one editable cell per level. */
+function Grid({
+  levels,
+  rows,
+  problems,
+  onChange,
+}: {
+  levels: string[];
+  rows: Path[];
+  problems: string[];
+  onChange: (r: Path[]) => void;
+}) {
+  const set = (i: number, j: number, v: string) => onChange(rows.map((r, a) => (a === i ? r.map((c, b) => (b === j ? v : c)) : r)));
+  return (
+    <div className="cg-grid-wrap">
+      <table className="cg-grid">
+        <thead>
+          <tr>
+            <th scope="col" className="cg-grid-n">
+              <span className="ux-visually-hidden">Row</span>
+            </th>
+            {levels.map((l) => (
+              <th key={l} scope="col">
+                {l}
+              </th>
+            ))}
+            <th scope="col" className="cg-grid-x">
+              <span className="ux-visually-hidden">Remove</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={i} className={problems[i] ? 'has-error' : undefined}>
+              <td className="cg-grid-n">{i + 1}</td>
+              {r.map((c, j) => (
+                <td key={j}>
+                  <input
+                    value={c}
+                    aria-label={`${levels[j]}, row ${i + 1}`}
+                    aria-invalid={(!!problems[i] && !c.trim() && j < r.map((x) => x.trim()).findLastIndex(Boolean)) || undefined}
+                    onChange={(e) => set(i, j, e.target.value)}
+                    onKeyDown={(e) => {
+                      // Enter moves down a row, adding one at the end, like a spreadsheet.
+                      if (e.key !== 'Enter') return;
+                      e.preventDefault();
+                      const body = e.currentTarget.closest('tbody');
+                      // The next row starts with this row's places above the current column.
+                      const below = fit(r.slice(0, j), r.length);
+                      if (i === rows.length - 1) onChange([...rows, below]);
+                      else if (rows[i + 1].every((x) => !x.trim())) onChange(rows.map((x, a) => (a === i + 1 ? below : x)));
+                      requestAnimationFrame(() => (body?.rows[i + 1]?.cells[j + 1]?.querySelector('input') as HTMLInputElement | null)?.focus());
+                    }}
+                  />
+                </td>
+              ))}
+              <td className="cg-grid-x">
+                <button
+                  type="button"
+                  className="cg-icon-btn"
+                  aria-label={`Remove row ${i + 1}`}
+                  onClick={() => onChange(rows.length > 1 ? rows.filter((_, a) => a !== i) : [blankRow(levels.length)])}
+                >
+                  <Icon name="Close" size={16} />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {problems.some(Boolean) && (
+        <ul className="cg-grid-problems">
+          {problems.map((p, i) => (p ? <li key={i}>Row {i + 1}: {p}</li> : null))}
+        </ul>
+      )}
+      <button type="button" className="cg-add" onClick={() => onChange([...rows, blankRow(levels.length)])}>
+        <Icon name="AddBox" size={18} />
+        Add a row
+      </button>
+    </div>
+  );
+}
+
+/** Bulk upload: download the template (one column per level), then upload it. */
+function Upload({
+  uid,
+  levels,
+  country,
+  uploaded,
+  onRows,
+}: {
+  uid: string;
+  levels: string[];
+  country: string;
+  uploaded: string;
+  onRows: (rows: Path[], file: string) => void;
+}) {
+  const [error, setError] = useState('');
+  return (
+    <div className="cg-upload">
+      <ol className="cg-upload-steps">
+        <li>
+          <span>
+            <strong>Download the template.</strong> It has a column for each level: {levels.join(', ')}.
+          </span>
+          <Button variation="secondary" icon="FileDownload" label="Download template" onClick={() => downloadTemplate(country, levels)} />
+        </li>
+        <li>
+          <span>
+            <strong>Fill in one row per place,</strong> from the largest level to the smallest.
+          </span>
+        </li>
+        <li>
+          <span>
+            <strong>Upload it.</strong> You can check and fix the places before you create the geography.
+          </span>
+          <label className="cg-file" htmlFor={`${uid}-file`}>
+            <Icon name="FileUpload" size={18} />
+            {uploaded ? 'Upload a different file' : 'Choose a CSV file'}
+          </label>
+          <input
+            id={`${uid}-file`}
+            className="ux-visually-hidden"
+            type="file"
+            accept=".csv,text/csv"
+            aria-describedby={error ? `${uid}-file-error` : undefined}
+            onChange={async (e) => {
+              const f = e.target.files?.[0];
+              e.target.value = '';
+              if (!f) return;
+              const data = parseCsv(await f.text());
+              const head = (data[0] ?? []).map((c) => c.trim().toLowerCase());
+              if (head.join(',') !== levels.map((l) => l.toLowerCase()).join(',')) {
+                setError(`The columns should be ${levels.join(', ')}, in that order. Download the template and try again.`);
+                return;
+              }
+              setError('');
+              onRows(data.slice(1), f.name);
+            }}
+          />
+        </li>
+      </ol>
+      {error && (
+        <p id={`${uid}-file-error`} className="fld-error" role="alert">
+          {error}
+        </p>
+      )}
+      {uploaded && !error && (
+        <p className="cg-uploaded" role="status">
+          <Icon name="CheckCircle" size={18} />
+          {uploaded} uploaded. Check the places below.
+        </p>
+      )}
+    </div>
+  );
+}
+

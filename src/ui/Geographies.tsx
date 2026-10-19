@@ -2,8 +2,9 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { Button } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
 import { useAccount } from '../lib/store';
-import { GEO_SETS, REFERENCE_AREAS, newId, type Account, type Area, type GeoSet } from '../lib/model';
-import { Field, describedBy } from './StepFrame';
+import { GEO_SETS, REFERENCE_AREAS, newId, type Account, type Area, type GeoRow, type GeoSet } from '../lib/model';
+import { CreateGeography } from './CreateGeography';
+import { PlacesTabs } from './GeoTree';
 
 /**
  * The Geographies page, in two states, both centred at the top:
@@ -15,40 +16,60 @@ import { Field, describedBy } from './StepFrame';
  *   the account's own geographies.
  */
 
-type Row = { name: string; level: number; parent: string };
-
-/** Every geography inside a set, largest first. Nairobi is real; the rest are sample rows. */
-function rowsOf(set: GeoSet): Row[] {
-  if (set.id === 'nairobi') return REFERENCE_AREAS.map((r) => ({ name: r.name, level: r.level, parent: r.parent }));
-  const rows: Row[] = [{ name: set.name, level: 0, parent: '' }];
+/** Every geography inside a set, largest first. Created ones keep their own; Nairobi is real; the rest are samples. */
+function rowsOf(set: GeoSet): GeoRow[] {
+  if (set.rows) return set.rows;
+  // Keyed by level too: a ward can share its district's name.
+  if (set.id === 'nairobi')
+    return REFERENCE_AREAS.map((r) => ({ key: `${r.level}:${r.name}`, name: r.name, level: r.level, parent: r.parent ? `${r.level - 1}:${r.parent}` : '' }));
+  const rows: GeoRow[] = [{ key: set.name, name: set.name, level: 0, parent: '' }];
   let above = [set.name];
   let left = set.count - 1;
   for (let l = 1; l < set.levels.length && left > 0; l++) {
     const last = l === set.levels.length - 1;
     const n = last ? left : Math.max(1, Math.min(left, Math.round(left * 0.2)));
     const names = Array.from({ length: n }, (_, i) => `${set.levels[l]} ${i + 1}`);
-    names.forEach((name, i) => rows.push({ name, level: l, parent: above[i % above.length] }));
+    names.forEach((name, i) => rows.push({ key: name, name, level: l, parent: above[i % above.length] }));
     above = names;
     left -= n;
   }
   return rows;
 }
 
+/** A set's places as the account has them: edited if they've changed them. */
+const rowsFor = (a: Account, set: GeoSet) => a.geography.edited?.[set.id] ?? rowsOf(set);
+
+function toAreas(rows: GeoRow[]): Area[] {
+  const ids = new Map<string, string>();
+  return rows.map((r) => {
+    const id = newId();
+    ids.set(r.key, id);
+    return { id, name: r.name, level: r.level, parentId: r.parent ? ids.get(r.parent) ?? null : null };
+  });
+}
+
 /** Add a set's geographies to the account, keeping the parent links. */
 function addSet(a: Account, set: GeoSet): Account {
-  const areas: Area[] = [...a.geography.areas];
-  const ids = new Map<string, string>();
-  for (const r of rowsOf(set)) {
-    const id = newId();
-    ids.set(r.name, id);
-    areas.push({ id, name: r.name, level: r.level, parentId: r.parent ? ids.get(r.parent) ?? null : null });
-  }
+  const areas: Area[] = [...a.geography.areas, ...toAreas(rowsFor(a, set))];
   return { ...a, geography: { ...a.geography, areas, sets: [...(a.geography.sets ?? []), set.id] } };
 }
 
-function download(set: GeoSet) {
+/** Save edited places for a set, and rebuild the account's areas from every set it has. */
+function editSet(a: Account, set: GeoSet, rows: GeoRow[]): Account {
+  const edited = { ...a.geography.edited, [set.id]: rows };
+  const next = { ...a, geography: { ...a.geography, edited } };
+  const catalogue = [...GEO_SETS, ...(a.geography.custom ?? [])];
+  const areas = (a.geography.sets ?? []).flatMap((id) => {
+    const s = catalogue.find((x) => x.id === id);
+    return s ? toAreas(rowsFor(next, s)) : [];
+  });
+  return { ...next, geography: { ...next.geography, areas } };
+}
+
+function download(set: GeoSet, rows: GeoRow[]) {
   const esc = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
-  const csv = ['Name,Level,Sits inside', ...rowsOf(set).map((r) => [r.name, set.levels[r.level] ?? '', r.parent].map(esc).join(','))].join('\n');
+  const nameOf = new Map(rows.map((r) => [r.key, r.name]));
+  const csv = ['Name,Level,Sits inside', ...rows.map((r) => [r.name, set.levels[r.level] ?? '', nameOf.get(r.parent) ?? ''].map(esc).join(','))].join('\n');
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
   const link = document.createElement('a');
   link.href = url;
@@ -57,8 +78,6 @@ function download(set: GeoSet) {
   URL.revokeObjectURL(url);
 }
 
-const COUNTRIES = [...new Set(GEO_SETS.map((s) => s.country))].sort();
-const TOP_LEVELS = ['Country', 'State', 'Region', 'County', 'City', 'District', 'Municipality'];
 
 /** embedded: shown inside Home's account setup; always adding, and onDone goes back. */
 export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?: () => void } = {}) {
@@ -68,6 +87,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
   const [view, setView] = useState<'cards' | 'list'>('cards');
   const [creating, setCreating] = useState<string | null>(null);
   const [msg, setMsg] = useState('');
+  const [viewingId, setViewing] = useState<string | null>(null);
   const added = new Set(account.geography.sets ?? []);
   const [addingChosen, setAdding] = useState(!added.size);
   const adding = embedded || addingChosen || !added.size;
@@ -78,9 +98,11 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
       first.current = false;
       if (embedded) heading.current?.focus();
     } else heading.current?.focus();
-  }, [adding]);
+  }, [adding, viewingId, creating === null]);
 
   const catalogue = [...GEO_SETS, ...(account.geography.custom ?? [])];
+  const countOf = (s: GeoSet) => rowsFor(account, s).length;
+  const viewing = catalogue.find((s) => s.id === viewingId) ?? null;
   // Adding shows only what isn't in the account yet; the overview shows only what is.
   const all = catalogue.filter((s) => (adding ? !added.has(s.id) : added.has(s.id)));
   // A geography in the account turns active once a product using it is live.
@@ -112,16 +134,74 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
     done(`${s.name} added to your account.`);
   };
 
+  if (viewing) {
+    const editable = added.has(viewing.id);
+    const rows = rowsFor(account, viewing);
+    return (
+      <div className="geo is-detail">
+        <button type="button" className="geo-back" onClick={() => setViewing(null)}>
+          <Icon name="ArrowBack" size={20} />
+          Back<span className="ux-visually-hidden">{editable ? ' to your geographies' : ' to add your geographies'}</span>
+        </button>
+        <header className="geo-detail-head">
+          <div>
+            <h1 ref={heading} tabIndex={-1}>
+              {viewing.name}
+            </h1>
+            <p className="geo-stats">
+              <span>
+                <strong>{viewing.levels.length}</strong> {viewing.levels.length === 1 ? 'level' : 'levels'}
+              </span>
+              <span>
+                <strong>{rows.length.toLocaleString('en')}</strong> {rows.length === 1 ? 'geography' : 'geographies'}
+              </span>
+              <Status value={status(viewing)} />
+            </p>
+            <p className="geo-levels">
+              <span className="geo-tag">{viewing.levels.join(' › ')}</span>
+            </p>
+          </div>
+          {editable ? (
+            <Button variation="secondary" icon="FileDownload" label="Download geography data" onClick={() => download(viewing, rows)} />
+          ) : (
+            <Button
+              variation="primary"
+              icon="Add"
+              label="Add geographies to account"
+              onClick={() => {
+                setViewing(null);
+                add(viewing);
+              }}
+            />
+          )}
+        </header>
+        <PlacesTabs
+          root={viewing.country}
+          levels={viewing.levels}
+          rows={rows}
+          onChange={editable ? (r) => update((a) => editSet(a, viewing, r)) : undefined}
+          aside={editable ? <p className="pt-saved">Changes save as you go</p> : undefined}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={`geo${adding ? '' : ' is-overview'}`}>
-      {adding && (embedded || !!added.size) && (
+      {creating !== null && (
+        <button type="button" className="geo-back" onClick={() => setCreating(null)}>
+          <Icon name="ArrowBack" size={20} />
+          Back<span className="ux-visually-hidden"> to add your geographies</span>
+        </button>
+      )}
+      {creating === null && adding && (embedded || !!added.size) && (
         <button type="button" className="geo-back" onClick={() => (embedded ? onDone?.() : done(''))}>
           <Icon name="ArrowBack" size={20} />
           Back
           <span className="ux-visually-hidden">{embedded ? ' to account setup' : ' to your geographies'}</span>
         </button>
       )}
-      {adding ? (
+      {creating !== null ? null : adding ? (
         <header className="geo-head">
           <h1 ref={heading} tabIndex={-1}>
             Add your geographies
@@ -147,6 +227,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
         </header>
       )}
 
+      {creating === null && (
       <div className="geo-bar">
         {!adding && (
           <h2 className="geo-section-h">
@@ -183,8 +264,9 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
           </div>
         </div>
       </div>
+      )}
 
-      <p className={adding || term ? 'geo-count' : 'ux-visually-hidden'} role="status">
+      <p className={creating === null && (adding || term) ? 'geo-count' : 'ux-visually-hidden'} role="status">
         {msg ||
           (term
             ? `${hits.length} ${hits.length === 1 ? 'geography' : 'geographies'} found`
@@ -240,7 +322,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                   <strong>{s.levels.length}</strong> {s.levels.length === 1 ? 'level' : 'levels'}
                 </span>
                 <span>
-                  <strong>{s.count.toLocaleString('en')}</strong> {s.count === 1 ? 'geography' : 'geographies'}
+                  <strong>{countOf(s).toLocaleString('en')}</strong> {countOf(s) === 1 ? 'geography' : 'geographies'}
                 </span>
               </p>
               <p className="geo-levels">
@@ -255,7 +337,11 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                 ) : (
                   <Button variation="primary" icon="Add" label="Add geographies to account" onClick={() => add(s)} />
                 )}
-                <Button variation="secondary" icon="FileDownload" label="Download geography data" onClick={() => download(s)} />
+                {adding ? (
+                  <Button variation="secondary" icon="Visibility" label="View" title={`View ${s.name}`} onClick={() => setViewing(s.id)} />
+                ) : (
+                  <Button variation="secondary" icon="Edit" label="View and edit" title={`View and edit ${s.name}`} onClick={() => setViewing(s.id)} />
+                )}
               </div>
             </li>
           ))}
@@ -283,7 +369,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                   <td>
                     <span className="geo-tag">{s.levels.join(' › ')}</span>
                   </td>
-                  <td>{s.count.toLocaleString('en')}</td>
+                  <td>{countOf(s).toLocaleString('en')}</td>
                   <td>
                     <Status value={status(s)} />
                   </td>
@@ -292,10 +378,10 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                       <Button
                         variation="secondary"
                         size="small"
-                        icon="FileDownload"
-                        label="Download"
-                        title={`Download ${s.name} data`}
-                        onClick={() => download(s)}
+                        icon={adding ? 'Visibility' : 'Edit'}
+                        label={adding ? 'View' : 'View and edit'}
+                        title={`${adding ? 'View' : 'View and edit'} ${s.name}`}
+                        onClick={() => setViewing(s.id)}
                       />
                       {!adding ? null : added.has(s.id) ? (
                         <p className="geo-added">
@@ -333,97 +419,6 @@ function CardHeading({ level, children }: { level: 2 | 3; children: React.ReactN
 function Status({ value }: { value: string }) {
   if (!value) return null;
   return <span className={`geo-status${value === 'Active' ? ' is-active' : ''}`}>{value}</span>;
-}
-
-/** Create a geography that isn't in the catalogue: its name, country and largest level. */
-function CreateGeography({
-  initial,
-  taken,
-  onCancel,
-  onCreate,
-}: {
-  initial: string;
-  taken: GeoSet[];
-  onCancel: () => void;
-  onCreate: (s: GeoSet) => void;
-}) {
-  const uid = useId();
-  const [f, setF] = useState({ name: initial, country: '', level: '' });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const save = () => {
-    const name = f.name.trim();
-    const e: Record<string, string> = {};
-    if (!name) e.name = 'Enter the geography’s name';
-    else if (taken.some((s) => s.name.toLowerCase() === name.toLowerCase() && (!f.country || s.country === f.country)))
-      e.name = `${name} is already here. Search for it instead.`;
-    if (!f.country) e.country = 'Choose the country';
-    if (!f.level) e.level = 'Choose its level';
-    setErrors(e);
-    if (Object.keys(e).length) {
-      document.getElementById(`${uid}-${Object.keys(e)[0]}`)?.focus();
-      return;
-    }
-    onCreate({ id: newId(), name, country: f.country, levels: [f.level], count: 1, custom: true });
-  };
-
-  return (
-    <section className="geo-create" aria-labelledby={`${uid}-h`}>
-      <h2 id={`${uid}-h`}>Create a geography</h2>
-      <p className="geo-create-lead">You can add the areas inside it afterwards.</p>
-      <form
-        noValidate
-        onSubmit={(e) => {
-          e.preventDefault();
-          save();
-        }}
-      >
-        <Field id={`${uid}-name`} label="Geography name" error={errors.name}>
-          <input
-            id={`${uid}-name`}
-            value={f.name}
-            aria-invalid={!!errors.name || undefined}
-            aria-describedby={describedBy(`${uid}-name`, undefined, errors.name)}
-            onChange={(e) => setF({ ...f, name: e.target.value })}
-          />
-        </Field>
-        <div className="row">
-          <Field id={`${uid}-country`} label="Country" error={errors.country}>
-            <select
-              id={`${uid}-country`}
-              value={f.country}
-              aria-invalid={!!errors.country || undefined}
-              aria-describedby={describedBy(`${uid}-country`, undefined, errors.country)}
-              onChange={(e) => setF({ ...f, country: e.target.value })}
-            >
-              <option value="">Choose</option>
-              {COUNTRIES.map((c) => (
-                <option key={c}>{c}</option>
-              ))}
-            </select>
-          </Field>
-          <Field id={`${uid}-level`} label="Level" error={errors.level}>
-            <select
-              id={`${uid}-level`}
-              value={f.level}
-              aria-invalid={!!errors.level || undefined}
-              aria-describedby={describedBy(`${uid}-level`, undefined, errors.level)}
-              onChange={(e) => setF({ ...f, level: e.target.value })}
-            >
-              <option value="">Choose</option>
-              {TOP_LEVELS.map((l) => (
-                <option key={l}>{l}</option>
-              ))}
-            </select>
-          </Field>
-        </div>
-        <div className="form-foot">
-          <Button variation="primary" label="Create geography" submit onClick={() => {}} />
-          <Button variation="link" label="Cancel" onClick={onCancel} />
-        </div>
-      </form>
-    </section>
-  );
 }
 
 /** A globe with a plus: nothing found, but you can make it. */

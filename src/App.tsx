@@ -3,7 +3,7 @@ import { Button } from '@egovernments/digit-ui-components';
 import { SetupFlow } from './setup/SetupFlow';
 import type { Answers } from './setup/steps';
 import { AccountProvider, loadSaved, useAccount } from './lib/store';
-import { METRICS, PRODUCTS, enabledProducts, geoMode, type Account } from './lib/model';
+import { METRICS, PRODUCTS, enabledProducts, type Account } from './lib/model';
 import { Shell } from './ui/Shell';
 import { Home } from './ui/Home';
 import { Branding } from './ui/Branding';
@@ -33,7 +33,7 @@ export default function App() {
 }
 
 function Pages() {
-  const { page, account } = useAccount();
+  const { page } = useAccount();
   switch (page) {
     case 'home':
       return <Home />;
