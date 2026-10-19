@@ -25,7 +25,7 @@ const TASK: Record<
   sender: {
     title: 'Set up notification channels',
     what: 'Connect your SMS and email services, and choose who messages come from.',
-    why: 'Set it up once here, and every product can send messages to citizens and staff.',
+    why: 'Updates go out in your organisation’s name, so your products need your services and sender details.',
     minutes: 5,
     icon: 'Email',
     page: 'sender',
