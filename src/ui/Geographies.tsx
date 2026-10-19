@@ -278,7 +278,8 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
   }
 
   const countLine = (
-    <p className={creating === null && (adding || term) ? 'geo-count' : 'ux-visually-hidden'} role="status">
+    // While adding, the count is shown at the foot of the list instead; this stays for screen readers.
+    <p className={creating === null && term && !adding ? 'geo-count' : 'ux-visually-hidden'} role="status">
       {msg ||
         (term
           ? `${hits.length} ${hits.length === 1 ? 'geography' : 'geographies'} found`
@@ -497,6 +498,17 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
             </tbody>
           </table>
         </div>
+      )}
+
+      {creating === null && adding && hits.length > 0 && (
+        <p className="geo-foot">
+          {hits.length} of {all.length} {all.length === 1 ? 'geography' : 'geographies'}
+          <span aria-hidden="true"> · </span>
+          Can’t find yours?{' '}
+          <button type="button" className="geo-foot-cta" onClick={() => setCreating(q.trim())}>
+            Create a new geography
+          </button>
+        </p>
       )}
     </div>
   );

@@ -10,7 +10,7 @@ import { LOGO } from '../logo';
 
 /**
  * After the last question: the loader, where each part of the account ticks
- * off in turn ("Setting up your account"), then "Your account is created":
+ * off in turn ("Creating your account"), then "Your account is created":
  * the sign-in link first (to copy and keep), the other details below it
  * (everything except look and feel), and Go to Home. Not "ready": products
  * still need setting up inside. Reduced motion skips the stagger.
@@ -234,13 +234,13 @@ export function Building({
       <main className="bl-main">
         <div className="bl-card" aria-busy="true">
           <h1 ref={headingRef} tabIndex={-1}>
-            Setting up your account
+            Creating your account
           </h1>
           <p className="qz-lead">This only takes a moment.</p>
           <div
             className="bl-bar"
             role="progressbar"
-            aria-label="Account setup"
+            aria-label="Creating your account"
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={pct}
