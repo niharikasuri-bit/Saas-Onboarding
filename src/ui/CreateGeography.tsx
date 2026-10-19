@@ -4,6 +4,7 @@ import { Icon } from '../components/Icon';
 import { newId, type GeoRow, type GeoSet } from '../lib/model';
 import { Field, describedBy } from './StepFrame';
 import { AddGeographyDialog, GeoTree } from './GeoTree';
+import { OsmMap } from './OsmMap';
 import { SheetIntro, UploadSteps, colLetter } from './Sheet';
 import { Crumbs } from './Crumbs';
 
@@ -220,7 +221,7 @@ export function CreateGeography({
       'Choose how to set up your geography data. Upload a file using the template for bulk setup, or open the map to select them visually.',
     country:
       method === 'osm'
-        ? 'Search for the country or place you serve, then fetch its geographies.'
+        ? 'Search for the country you serve, then fetch its geographies.'
         : 'Your geography starts here. Everything you add sits inside it.',
     levels: 'List the geography levels from largest to smallest, for example Country, Region, District. This will help us customize your template for bulk upload.',
     places:
@@ -277,10 +278,10 @@ export function CreateGeography({
       >
         {step === 'country' && (
           <div className="cg-split">
-          <Field id={`${uid}-country`} label={method === 'osm' ? 'Country or place' : 'Country name'} error={errors.country}>
+          <Field id={`${uid}-country`} label={method === 'osm' ? 'Country' : 'Country name'} error={errors.country}>
             <input
               id={`${uid}-country`}
-              type={method === 'osm' ? 'search' : 'text'}
+              type="text"
               value={country}
               placeholder={method === 'osm' ? 'For example Rwanda' : undefined}
               autoComplete="country-name"
@@ -289,6 +290,7 @@ export function CreateGeography({
               onChange={(e) => setCountry(e.target.value)}
             />
           </Field>
+          {method === 'osm' && <OsmMap query={country} />}
           </div>
         )}
 
