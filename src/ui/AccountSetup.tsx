@@ -100,10 +100,7 @@ export function AccountSetup() {
                       {task.title}
                     </h3>
                     {isDone ? (
-                      <p className="as-result">
-                        <Icon name="CheckCircle" size={16} />
-                        {todoResult(t.id, account)}
-                      </p>
+                      <p className="as-result">{todoResult(t.id, account)}</p>
                     ) : (
                       <p className="as-time">
                         <Icon name="Schedule" size={16} />
