@@ -313,7 +313,9 @@ export const LNP_FLOW = ['Applied', 'Fee paid', 'Documents checked', 'Inspected'
 
 export type Dept = { id: string; name: string; parentId: string | null };
 export type Area = { id: string; name: string; parentId: string | null; level: number };
-export type User = { id: string; name: string; email: string };
+/** role and products are optional: older members default to Staff on every product that's on. */
+export type User = { id: string; name: string; email: string; role?: string; products?: Product[] };
+export const ROLES = ['Admin', 'Supervisor', 'Staff', 'Viewer'];
 export type Channel = 'sms' | 'email' | 'whatsapp';
 export type SenderState = 'none' | 'submitted' | 'approved';
 

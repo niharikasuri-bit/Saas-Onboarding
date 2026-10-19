@@ -615,10 +615,11 @@ function Upload({
   // Once uploaded the box goes; a toast says so, and Back clears it to upload another.
   if (uploaded) return null;
   return (
-    <div className="up" role="group" aria-label="Upload a file">
-      <div className="up-head">
+    <>
+    <div className="up-top">
         <Button variation="secondary" icon="FileDownload" label="Download template" onClick={() => downloadTemplate(country, levels)} />
-      </div>
+    </div>
+    <div className="up" role="group" aria-label="Upload a file">
       <input
         ref={input}
         id={`${uid}-file`}
@@ -661,6 +662,7 @@ function Upload({
         </p>
       )}
     </div>
+    </>
   );
 }
 

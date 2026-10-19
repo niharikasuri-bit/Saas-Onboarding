@@ -2,20 +2,18 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { Button, Toast } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
 import { useAccount } from '../lib/store';
-import { newId, type User } from '../lib/model';
-import { Field, describedBy } from './StepFrame';
+import { PRODUCTS, PRODUCT_ORDER, ROLES, newId, type Product, type User } from '../lib/model';
 import { Crumbs } from './Crumbs';
 
 /**
  * Team, set up the same way as geographies and notification channels:
- * choose how (by hand or by uploading a file), add the people, send the
- * invites. The page lists everyone, as cards or a list, and each member can
- * be edited or removed.
+ * choose how (by hand or by uploading a file), add the people with their
+ * role and the products they can use, send the invites. The page lists
+ * everyone, as cards or a list, and each member can be edited or removed.
  */
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-type Person = { key: string; name: string; email: string };
-const blank = (): Person => ({ key: newId(), name: '', email: '' });
+type Person = { key: string; name: string; email: string; role: string; products: Product[] };
 
 /** A small CSV reader: commas, quoted cells, doubled quotes. */
 function parseCsv(text: string): string[][] {
@@ -41,7 +39,7 @@ function parseCsv(text: string): string[][] {
 }
 
 function downloadTemplate() {
-  const url = URL.createObjectURL(new Blob(['Name,Work email\n'], { type: 'text/csv' }));
+  const url = URL.createObjectURL(new Blob(['Name,Work email,Role,Product access\n'], { type: 'text/csv' }));
   const a = document.createElement('a');
   a.href = url;
   a.download = 'team-template.csv';
@@ -49,9 +47,15 @@ function downloadTemplate() {
   URL.revokeObjectURL(url);
 }
 
+/** What a member can see: their role and products, defaulting to Staff on every product that's on. */
+const roleOf = (u: User) => u.role ?? 'Staff';
+const productsOf = (u: User, on: Product[]) => u.products ?? on;
+const productNames = (ps: Product[]) => (ps.length ? ps.map((p) => PRODUCTS[p].name).join(', ') : 'None');
+
 export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => void } = {}) {
   const { account, update, go } = useAccount();
   const uid = useId();
+  const on = PRODUCT_ORDER.filter((p) => account.products[p].enabled);
   const [adding, setAdding] = useState(!!embedded);
   const [editing, setEditing] = useState<string | null>(null);
   const [view, setView] = useState<'cards' | 'list'>('cards');
@@ -84,10 +88,14 @@ export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => 
       <div className="geo is-creating">
         <AddTeam
           trail={[home, ...(!embedded ? [{ label: 'Team', onClick: () => setAdding(false) }] : [])]}
+          products={on}
           taken={taken}
           onCancel={embedded ? () => onDone?.() : () => setAdding(false)}
           onSent={(people) => {
-            update((a) => ({ ...a, users: [...a.users, ...people.map((p) => ({ id: newId(), name: p.name.trim(), email: p.email.trim() }))] }));
+            update((a) => ({
+              ...a,
+              users: [...a.users, ...people.map((p) => ({ id: newId(), name: p.name.trim(), email: p.email.trim(), role: p.role, products: p.products }))],
+            }));
             if (embedded) return onDone?.();
             setAdding(false);
             setToast(`${people.length} ${people.length === 1 ? 'invite' : 'invites'} sent`);
@@ -103,6 +111,7 @@ export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => 
         <EditMember
           trail={[home, { label: 'Team', onClick: () => setEditing(null) }]}
           member={member}
+          products={on}
           taken={(e) => taken(e, member.id)}
           onCancel={() => setEditing(null)}
           onSave={(u) => {
@@ -120,9 +129,12 @@ export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => 
       </div>
     );
 
-  const everyone: (User & { admin?: boolean })[] = [{ id: 'admin', name: account.admin.name, email: account.admin.email, admin: true }, ...account.users];
+  const everyone: (User & { admin?: boolean })[] = [
+    { id: 'admin', name: account.admin.name, email: account.admin.email, role: 'Admin', products: on, admin: true },
+    ...account.users,
+  ];
   const term = q.trim().toLowerCase();
-  const hits = everyone.filter((u) => !term || u.name.toLowerCase().includes(term) || u.email.toLowerCase().includes(term));
+  const hits = everyone.filter((u) => !term || [u.name, u.email, roleOf(u)].some((x) => x.toLowerCase().includes(term)));
 
   return (
     <div className="geo is-overview">
@@ -131,7 +143,9 @@ export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => 
           <h1 ref={heading} tabIndex={-1}>
             Team
           </h1>
-          <p className="geo-lead">The team is the set of members who have access to the account. Add members and choose what each person can do.</p>
+          <p className="geo-lead">
+            The team is the set of members who have access to the account. Add members and choose what each person can do.
+          </p>
         </div>
         <Button variation="primary" icon="Add" label="Add team members" onClick={() => setAdding(true)} />
       </header>
@@ -145,7 +159,7 @@ export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => 
               Search the team
             </label>
             <Icon name="Search" size={20} />
-            <input id={`${uid}-q`} type="search" placeholder="Search by name or email" value={q} onChange={(e) => setQ(e.target.value)} />
+            <input id={`${uid}-q`} type="search" placeholder="Search by name, email or role" value={q} onChange={(e) => setQ(e.target.value)} />
           </div>
           <div className="geo-view" role="group" aria-label="View as">
             <button type="button" aria-pressed={view === 'cards'} onClick={() => setView('cards')}>
@@ -170,20 +184,35 @@ export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => 
       ) : view === 'cards' ? (
         <ul className="geo-cards">
           {hits.map((u) => (
-            <li key={u.id} className="geo-card">
-              <div className="geo-card-top">
+            <li key={u.id} className="geo-card tm-card">
+              <div className="tm-card-top">
+                <h3 className="geo-card-h">
+                  {u.name}
+                  {u.admin && ' (you)'}
+                </h3>
                 <span className={`geo-status${u.admin ? ' is-active' : ''}`}>{u.admin ? 'Admin' : 'Invited'}</span>
               </div>
-              <h3 className="geo-card-h">
-                {u.name}
-                {u.admin && ' (you)'}
-              </h3>
-              <p className="ch-note tm-email">{u.email}</p>
-              {!u.admin && (
-                <div className="geo-actions">
-                  <Button variation="secondary" icon="Edit" label="Edit member details" title={`Edit ${u.name}’s details`} onClick={() => setEditing(u.id)} />
+              <dl className="tm-fields">
+                <div>
+                  <dt>Email</dt>
+                  <dd>{u.email}</dd>
                 </div>
-              )}
+                <div>
+                  <dt>Role</dt>
+                  <dd>{roleOf(u)}</dd>
+                </div>
+                <div>
+                  <dt>Product access</dt>
+                  <dd>{productNames(productsOf(u, on))}</dd>
+                </div>
+              </dl>
+              <div className="geo-actions">
+                {u.admin ? (
+                  <p className="tm-you">This is you. Your access can’t be changed here.</p>
+                ) : (
+                  <Button variation="secondary" icon="Edit" label="Edit member details" title={`Edit ${u.name}’s details`} onClick={() => setEditing(u.id)} />
+                )}
+              </div>
             </li>
           ))}
         </ul>
@@ -193,7 +222,9 @@ export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => 
             <thead>
               <tr>
                 <th scope="col">Name</th>
-                <th scope="col">Work email</th>
+                <th scope="col">Email</th>
+                <th scope="col">Role</th>
+                <th scope="col">Product access</th>
                 <th scope="col">Status</th>
                 <th scope="col">Actions</th>
               </tr>
@@ -206,6 +237,8 @@ export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => 
                     {u.admin && ' (you)'}
                   </th>
                   <td>{u.email}</td>
+                  <td>{roleOf(u)}</td>
+                  <td>{productNames(productsOf(u, on))}</td>
                   <td>
                     <span className={`geo-status${u.admin ? ' is-active' : ''}`}>{u.admin ? 'Admin' : 'Invited'}</span>
                   </td>
@@ -227,22 +260,108 @@ export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => 
   );
 }
 
+/** One person's fields, labels on top and errors under each field so the inputs line up. */
+function PersonFields({
+  uid,
+  p,
+  products,
+  errors,
+  onChange,
+}: {
+  uid: string;
+  p: Person;
+  products: Product[];
+  errors: Record<string, string>;
+  onChange: (p: Person) => void;
+}) {
+  const id = (k: string) => `${uid}-${p.key}-${k}`;
+  const err = (k: string) => errors[`${p.key}-${k}`];
+  const field = (k: 'name' | 'email', label: string, type = 'text') => (
+    <div className={`tm-fld${err(k) ? ' has-error' : ''}`}>
+      <label htmlFor={id(k)}>{label}</label>
+      <input
+        id={id(k)}
+        type={type}
+        value={p[k]}
+        autoComplete="off"
+        aria-invalid={!!err(k) || undefined}
+        aria-describedby={err(k) ? `${id(k)}-err` : undefined}
+        onChange={(e) => onChange({ ...p, [k]: e.target.value })}
+      />
+      {err(k) && (
+        <p className="fld-error" id={`${id(k)}-err`}>
+          <span className="ux-visually-hidden">Error: </span>
+          {err(k)}
+        </p>
+      )}
+    </div>
+  );
+  return (
+    <>
+      {field('name', 'Name')}
+      {field('email', 'Work email', 'email')}
+      <div className="tm-fld">
+        <label htmlFor={id('role')}>Role</label>
+        <select id={id('role')} value={p.role} onChange={(e) => onChange({ ...p, role: e.target.value })}>
+          {ROLES.map((r) => (
+            <option key={r}>{r}</option>
+          ))}
+        </select>
+      </div>
+      <fieldset className={`tm-fld tm-access${err('products') ? ' has-error' : ''}`} aria-describedby={err('products') ? `${id('products')}-err` : undefined}>
+        <legend>Product access</legend>
+        <div className="tm-checks">
+          {products.map((pr) => (
+            <label key={pr} className="tm-check">
+              <input
+                type="checkbox"
+                id={pr === products[0] ? id('products') : undefined}
+                checked={p.products.includes(pr)}
+                onChange={() => onChange({ ...p, products: p.products.includes(pr) ? p.products.filter((x) => x !== pr) : [...p.products, pr] })}
+              />
+              {PRODUCTS[pr].name}
+            </label>
+          ))}
+        </div>
+        {err('products') && (
+          <p className="fld-error" id={`${id('products')}-err`}>
+            <span className="ux-visually-hidden">Error: </span>
+            {err('products')}
+          </p>
+        )}
+      </fieldset>
+    </>
+  );
+}
+
+function checkPerson(p: Person, taken: (e: string) => boolean, seen: Set<string>, e: Record<string, string>) {
+  const email = p.email.trim().toLowerCase();
+  if (!p.name.trim()) e[`${p.key}-name`] = 'Enter their name';
+  if (!EMAIL.test(email)) e[`${p.key}-email`] = 'Enter a work email, like name@example.gov';
+  else if (taken(email) || seen.has(email)) e[`${p.key}-email`] = 'Someone with this email is already here';
+  if (!p.products.length) e[`${p.key}-products`] = 'Choose at least one product';
+  seen.add(email);
+}
+
 /** Step 1: how. Step 2: the people, typed in or from the uploaded file. */
 function AddTeam({
   trail,
+  products,
   taken,
   onCancel,
   onSent,
 }: {
   trail: { label: string; onClick?: () => void }[];
+  products: Product[];
   taken: (email: string) => boolean;
   onCancel: () => void;
   onSent: (people: Person[]) => void;
 }) {
   const uid = useId();
+  const blank = (): Person => ({ key: newId(), name: '', email: '', role: 'Staff', products: [...products] });
   const [step, setStep] = useState(0);
   const [method, setMethod] = useState<'manual' | 'upload' | ''>('');
-  const [people, setPeople] = useState<Person[]>([blank()]);
+  const [people, setPeople] = useState<Person[]>(() => [blank()]);
   const [uploaded, setUploaded] = useState('');
   const [fileError, setFileError] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -264,11 +383,19 @@ function AddTeam({
     const data = parseCsv(await f.text());
     const head = (data[0] ?? []).map((c) => c.trim().toLowerCase());
     if (head[0] !== 'name' || !head[1]?.includes('email')) {
-      setFileError('The columns should be Name, then Work email. Download the template and try again.');
+      setFileError('The columns should be Name, Work email, Role and Product access. Download the template and try again.');
       return;
     }
     setFileError('');
-    const rows = data.slice(1).map((r) => ({ key: newId(), name: (r[0] ?? '').trim(), email: (r[1] ?? '').trim() }));
+    const byName = (s: string) => PRODUCT_ORDER.find((p) => PRODUCTS[p].name.toLowerCase() === s.trim().toLowerCase());
+    const rows = data.slice(1).map((r) => {
+      const listed = (r[3] ?? '')
+        .split(/[;|]/)
+        .map(byName)
+        .filter((p): p is Product => !!p && products.includes(p));
+      const role = ROLES.find((x) => x.toLowerCase() === (r[2] ?? '').trim().toLowerCase()) ?? 'Staff';
+      return { key: newId(), name: (r[0] ?? '').trim(), email: (r[1] ?? '').trim(), role, products: listed.length ? listed : [...products] };
+    });
     setPeople(rows.length ? rows : [blank()]);
     setUploaded(f.name);
     setToast(`${f.name} uploaded`);
@@ -291,13 +418,7 @@ function AddTeam({
       const filled = people.filter((p) => p.name.trim() || p.email.trim());
       if (!filled.length) e[`${people[0].key}-name`] = 'Add at least one person';
       const seen = new Set<string>();
-      for (const p of filled) {
-        const email = p.email.trim().toLowerCase();
-        if (!p.name.trim()) e[`${p.key}-name`] = 'Enter their name';
-        if (!EMAIL.test(email)) e[`${p.key}-email`] = 'Enter a work email, like name@example.gov';
-        else if (taken(email) || seen.has(email)) e[`${p.key}-email`] = 'Someone with this email is already here';
-        seen.add(email);
-      }
+      for (const p of filled) checkPerson(p, taken, seen, e);
     } else e.file = 'Upload the filled-in template first';
     setErrors(e);
     if (Object.keys(e).length) {
@@ -309,10 +430,6 @@ function AddTeam({
   };
 
   const title = step === 0 ? 'How would you like to add your team?' : method === 'upload' ? (uploaded ? 'Review team members' : 'Upload team data') : 'Add team members';
-  const lead =
-    step === 0
-      ? 'Upload a file using the template to add many people at once, or add them one at a time. Everyone you add gets an email invite.'
-      : '';
 
   return (
     <div className={`cg-page${step === 1 ? ' is-wide' : ''}`}>
@@ -321,9 +438,9 @@ function AddTeam({
         <h1 id={`${uid}-h`} ref={heading} tabIndex={-1}>
           {title}
         </h1>
-        {lead ? (
+        {step === 0 ? (
           <div className="cg-sub">
-            <p>{lead}</p>
+            <p>Upload a file using the template to add many people at once, or add them one at a time. Everyone you add gets an email invite.</p>
           </div>
         ) : (
           <div className="cg-gap" />
@@ -373,44 +490,46 @@ function AddTeam({
           )}
 
           {step === 1 && method === 'upload' && !uploaded && (
-            <div className="up" role="group" aria-label="Upload a file">
-              <div className="up-head">
+            <>
+              <div className="up-top">
                 <Button variation="secondary" icon="FileDownload" label="Download template" onClick={downloadTemplate} />
               </div>
-              <input
-                ref={input}
-                className="ux-visually-hidden"
-                type="file"
-                accept=".csv,text/csv"
-                tabIndex={-1}
-                aria-hidden="true"
-                onChange={(e) => {
-                  take(e.target.files?.[0]);
-                  e.target.value = '';
-                }}
-              />
-              <div
-                className="up-drop"
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  take(e.dataTransfer.files?.[0]);
-                }}
-              >
-                <Icon name="FileUpload" size={40} />
-                <p>
-                  Drag and drop your file or{' '}
-                  <button type="button" id={`${uid}-file`} className="up-browse" onClick={() => input.current?.click()}>
-                    Browse in my files
-                  </button>
-                </p>
+              <div className="up" role="group" aria-label="Upload a file">
+                <input
+                  ref={input}
+                  className="ux-visually-hidden"
+                  type="file"
+                  accept=".csv,text/csv"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  onChange={(e) => {
+                    take(e.target.files?.[0]);
+                    e.target.value = '';
+                  }}
+                />
+                <div
+                  className="up-drop"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    take(e.dataTransfer.files?.[0]);
+                  }}
+                >
+                  <Icon name="FileUpload" size={40} />
+                  <p>
+                    Drag and drop your file or{' '}
+                    <button type="button" id={`${uid}-file`} className="up-browse" onClick={() => input.current?.click()}>
+                      Browse in my files
+                    </button>
+                  </p>
+                </div>
+                {(fileError || errors.file) && (
+                  <p className="fld-error" role="alert">
+                    {fileError || errors.file}
+                  </p>
+                )}
               </div>
-              {(fileError || errors.file) && (
-                <p className="fld-error" role="alert">
-                  {fileError || errors.file}
-                </p>
-              )}
-            </div>
+            </>
           )}
 
           {step === 1 && showRows && (
@@ -418,37 +537,27 @@ function AddTeam({
               <ol className="lv-list">
                 {people.map((p, i) => (
                   <li key={p.key} className="tm-row">
-                    <span className="lv-n">Member {i + 1}</span>
-                    <Field id={`${uid}-${p.key}-name`} label="Name" error={errors[`${p.key}-name`]}>
-                      <input
-                        id={`${uid}-${p.key}-name`}
-                        value={p.name}
-                        autoComplete="off"
-                        aria-invalid={!!errors[`${p.key}-name`] || undefined}
-                        aria-describedby={describedBy(`${uid}-${p.key}-name`, undefined, errors[`${p.key}-name`])}
-                        onChange={(e) => setPeople(people.map((x) => (x.key === p.key ? { ...x, name: e.target.value } : x)))}
+                    <div className="tm-row-head">
+                      <span className="lv-n">Member {i + 1}</span>
+                      <button
+                        type="button"
+                        className="lv-remove"
+                        aria-label={`Remove member ${i + 1}${p.name ? `, ${p.name}` : ''}`}
+                        disabled={people.length === 1}
+                        onClick={() => setPeople(people.filter((x) => x.key !== p.key))}
+                      >
+                        <Icon name="Close" size={18} />
+                      </button>
+                    </div>
+                    <div className="tm-row-fields">
+                      <PersonFields
+                        uid={uid}
+                        p={p}
+                        products={products}
+                        errors={errors}
+                        onChange={(n) => setPeople(people.map((x) => (x.key === p.key ? n : x)))}
                       />
-                    </Field>
-                    <Field id={`${uid}-${p.key}-email`} label="Work email" error={errors[`${p.key}-email`]}>
-                      <input
-                        id={`${uid}-${p.key}-email`}
-                        type="email"
-                        value={p.email}
-                        autoComplete="off"
-                        aria-invalid={!!errors[`${p.key}-email`] || undefined}
-                        aria-describedby={describedBy(`${uid}-${p.key}-email`, undefined, errors[`${p.key}-email`])}
-                        onChange={(e) => setPeople(people.map((x) => (x.key === p.key ? { ...x, email: e.target.value } : x)))}
-                      />
-                    </Field>
-                    <button
-                      type="button"
-                      className="lv-remove"
-                      aria-label={`Remove member ${i + 1}${p.name ? `, ${p.name}` : ''}`}
-                      disabled={people.length === 1}
-                      onClick={() => setPeople(people.filter((x) => x.key !== p.key))}
-                    >
-                      <Icon name="Close" size={18} />
-                    </button>
+                    </div>
                   </li>
                 ))}
               </ol>
@@ -480,6 +589,7 @@ function AddTeam({
 function EditMember({
   trail,
   member,
+  products,
   taken,
   onCancel,
   onSave,
@@ -487,13 +597,20 @@ function EditMember({
 }: {
   trail: { label: string; onClick?: () => void }[];
   member: User;
+  products: Product[];
   taken: (email: string) => boolean;
   onCancel: () => void;
   onSave: (u: User) => void;
   onRemove: () => void;
 }) {
   const uid = useId();
-  const [f, setF] = useState({ name: member.name, email: member.email });
+  const [p, setP] = useState<Person>({
+    key: member.id,
+    name: member.name,
+    email: member.email,
+    role: roleOf(member),
+    products: productsOf(member, products),
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -501,12 +618,10 @@ function EditMember({
   }, []);
   const save = () => {
     const e: Record<string, string> = {};
-    if (!f.name.trim()) e.name = 'Enter their name';
-    if (!EMAIL.test(f.email.trim())) e.email = 'Enter a work email, like name@example.gov';
-    else if (taken(f.email.trim())) e.email = 'Someone with this email is already here';
+    checkPerson(p, taken, new Set(), e);
     setErrors(e);
     if (Object.keys(e).length) return document.getElementById(`${uid}-${Object.keys(e)[0]}`)?.focus();
-    onSave({ ...member, name: f.name.trim(), email: f.email.trim() });
+    onSave({ ...member, name: p.name.trim(), email: p.email.trim(), role: p.role, products: p.products });
   };
   return (
     <div className="cg-page">
@@ -518,34 +633,15 @@ function EditMember({
         <div className="cg-gap" />
         <form
           noValidate
-          className="ch-form"
           onSubmit={(e) => {
             e.preventDefault();
             save();
           }}
         >
-          <div className="cg-split">
-            <Field id={`${uid}-name`} label="Name" error={errors.name}>
-              <input
-                id={`${uid}-name`}
-                value={f.name}
-                aria-invalid={!!errors.name || undefined}
-                aria-describedby={describedBy(`${uid}-name`, undefined, errors.name)}
-                onChange={(e) => setF({ ...f, name: e.target.value })}
-              />
-            </Field>
-          </div>
-          <div className="cg-split">
-            <Field id={`${uid}-email`} label="Work email" error={errors.email}>
-              <input
-                id={`${uid}-email`}
-                type="email"
-                value={f.email}
-                aria-invalid={!!errors.email || undefined}
-                aria-describedby={describedBy(`${uid}-email`, undefined, errors.email)}
-                onChange={(e) => setF({ ...f, email: e.target.value })}
-              />
-            </Field>
+          <div className="tm-row is-edit">
+            <div className="tm-row-fields">
+              <PersonFields uid={uid} p={p} products={products} errors={errors} onChange={setP} />
+            </div>
           </div>
           <button type="submit" className="ux-visually-hidden" tabIndex={-1} aria-hidden="true" />
         </form>
