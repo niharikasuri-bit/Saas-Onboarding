@@ -1251,3 +1251,4 @@ p { margin: 0; line-height: 1.5; }
 .pc.is-off .pc-actions > button { background: #fff; }
 .hm-done .pc .pc-actions { align-self: flex-start; }
 .hm-done .pc .pc-actions > button { width: auto; min-width: 180px; }
+.tm-fields dd { font-weight: 500; }
