@@ -405,11 +405,6 @@ export function AddGeographyDialog({
             <Icon name="Close" size={22} />
           </button>
         </div>
-        {fixed && (
-          <p className="ag-where">
-            Inside <strong>{fixed.parentName}</strong>
-          </p>
-        )}
         <div className="ag-body">
           {field(
             'level',
@@ -453,6 +448,7 @@ export function AddGeographyDialog({
                 ))}
               </select>,
             )}
+          <div className="ag-box">
           {field(
             'name',
             'Name of the geography',
@@ -530,6 +526,7 @@ export function AddGeographyDialog({
                 </button>
               </p>
             )}
+          </div>
           </div>
         </div>
         <div className="ag-foot">

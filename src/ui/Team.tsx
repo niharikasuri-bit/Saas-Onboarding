@@ -4,6 +4,7 @@ import { Icon } from '../components/Icon';
 import { useAccount } from '../lib/store';
 import { PRODUCTS, PRODUCT_ORDER, ROLES, newId, type Product, type User } from '../lib/model';
 import { Crumbs } from './Crumbs';
+import { SheetIntro, UploadSteps, colLetter } from './Sheet';
 
 /**
  * Team, set up the same way as geographies and notification channels:
@@ -452,16 +453,32 @@ function PeopleTable({
   const desc = (p: Person, k: string) => (errors[`${p.key}-${k}`] ? `${uid}-${p.key}-${k}-err` : undefined);
   return (
     <div className="cg-grid-wrap">
-      <table className="cg-grid tm-grid">
+      <SheetIntro />
+      <table className="cg-grid tm-grid is-sheet">
         <thead>
+          <tr className="sheet-letters" aria-hidden="true">
+            <td className="cg-grid-n" />
+            {[0, 1, 2, 3].map((j) => (
+              <td key={j}>{colLetter(j)}</td>
+            ))}
+            <td className="cg-grid-x" />
+          </tr>
           <tr>
             <th scope="col" className="cg-grid-n">
               <span className="ux-visually-hidden">Row</span>
             </th>
-            <th scope="col">Name</th>
-            <th scope="col">Work email</th>
-            <th scope="col">Role</th>
-            <th scope="col">Product access</th>
+            <th scope="col" className="is-req">
+              Name<span className="ux-visually-hidden"> (required)</span>
+            </th>
+            <th scope="col" className="is-req">
+              Work email<span className="ux-visually-hidden"> (required)</span>
+            </th>
+            <th scope="col" className="is-opt">
+              Role<span className="ux-visually-hidden"> (optional)</span>
+            </th>
+            <th scope="col" className="is-req">
+              Product access<span className="ux-visually-hidden"> (required)</span>
+            </th>
             <th scope="col" className="cg-grid-x">
               <span className="ux-visually-hidden">Remove</span>
             </th>
@@ -631,7 +648,7 @@ function AddTeam({
     onSent(people.filter((p) => p.name.trim() || p.email.trim()));
   };
 
-  const title = step === 0 ? 'How would you like to add your team?' : method === 'upload' ? (uploaded ? 'Review team members' : 'Upload team data') : 'Add a team member';
+  const title = step === 0 ? 'How would you like to add your team?' : method === 'upload' ? (uploaded ? 'View and Edit Uploaded Team Data' : 'Upload team data') : 'Add a team member';
 
   return (
     <div className={`cg-page${step === 1 ? ' is-wide' : ''}`}>
@@ -698,6 +715,7 @@ function AddTeam({
 
           {step === 1 && method === 'upload' && !uploaded && (
             <>
+              <UploadSteps thing="team member" />
               <div className="up" role="group" aria-label="Upload a file">
                 <input
                   ref={input}

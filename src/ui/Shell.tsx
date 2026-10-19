@@ -22,10 +22,10 @@ const INERT: PageId[] = ['health', 'integrations', 'branding', 'languages'];
 
 const ACCOUNT_NAV: { id: PageId; label: string; icon: string }[] = [
   { id: 'home', label: 'Home', icon: 'Home' },
-  { id: 'health', label: 'Product health', icon: 'Analytics' },
+  { id: 'health', label: 'Product Health', icon: 'Analytics' },
   { id: 'geographies', label: 'Geographies', icon: 'Public' },
   { id: 'team', label: 'Team', icon: 'Group' },
-  { id: 'sender', label: 'Notification channels', icon: 'Email' },
+  { id: 'sender', label: 'Notification Channels', icon: 'Email' },
   { id: 'integrations', label: 'Integrations', icon: 'Extension' },
   { id: 'branding', label: 'Branding', icon: 'InvertColors' },
   { id: 'languages', label: 'Language', icon: 'Translate' },

@@ -1304,3 +1304,34 @@ p { margin: 0; line-height: 1.5; }
 .cg .cg-title-row > h1:focus { outline: none; }
 /* Text-input styles never reach the dropdown's checkboxes */
 .msel-panel input[type='checkbox'] { min-width: 0 !important; width: 18px !important; height: 18px !important; padding: 0 !important; box-shadow: none !important; flex-shrink: 0; }
+
+/* How to proceed with upload: three steps with arrows */
+.us { margin-bottom: var(--s4); padding: 20px; border: 1px solid #E3E3E3; border-radius: 12px; background: #fff; }
+.us > h2 { margin-bottom: var(--s3); font-size: 1.125rem; font-weight: 700; color: var(--digitv2-lightTheme-primary-2); }
+.us-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+.us-step { position: relative; display: flex; align-items: flex-start; gap: 10px; padding: 14px 16px; border: 1px solid #E3E3E3; border-radius: 8px; background: #FAFAFA; }
+.us-icon { flex-shrink: 0; margin-top: 1px; color: var(--c-primary); }
+.us-text { display: flex; flex-direction: column; gap: 4px; font-size: 0.9375rem; line-height: 1.45; color: var(--c-text-2); }
+.us-text strong { color: var(--c-text); }
+.us-title { font-size: 1rem; color: var(--digitv2-lightTheme-primary-2) !important; }
+.us-arrow { position: absolute; right: -22px; top: 50%; transform: translateY(-50%); color: #9A9A9A; }
+@media (max-width: 900px) { .us-list { grid-template-columns: 1fr; } .us-arrow { display: none; } }
+
+/* Editable sheet: note and colour key above; letters row, striped headers */
+.sh-intro { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--s3); margin-bottom: var(--s3); }
+.sh-note { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; border-radius: 8px; background: var(--c-info-bg); color: var(--c-text); }
+.sh-note .ux-icon { flex-shrink: 0; margin-top: 2px; color: var(--digitv2-lightTheme-primary-2); }
+.sh-note > span { display: flex; flex-direction: column; font-size: 0.875rem; }
+.sh-note strong { font-size: 1rem; color: var(--digitv2-lightTheme-primary-2); }
+.sh-legend { list-style: none; margin: 0; padding: 8px 14px; display: flex; gap: var(--s4); border: 1px solid #E3E3E3; border-radius: 8px; background: #fff; font-weight: 500; }
+.sh-legend li { display: flex; align-items: center; gap: 8px; }
+.sh-key { width: 14px; height: 14px; border-radius: 2px; }
+.sh-key.is-req { background: #E07A1F; }
+.sh-key.is-opt { background: #00703C; }
+.cg-grid.is-sheet .sheet-letters td { padding: 4px 8px; background: #F0F0F0; font-size: 0.75rem; font-weight: 500; text-align: center; color: var(--c-text-2); }
+.cg-grid.is-sheet thead th.is-req { background: #FFF8E8; border-top: 3px solid #E07A1F; color: var(--c-text); }
+.cg-grid.is-sheet thead th.is-opt { background: #EEF8F2; border-top: 3px solid #00703C; color: var(--c-text); }
+.cg-grid.is-sheet tbody .cg-grid-n { background: #F0F0F0; }
+
+/* Add a geography pop-up: everything after the level sits in a #FAFAFA box */
+.ag-box { display: flex; flex-direction: column; gap: 20px; padding: 20px; border: 1px solid #E3E3E3; border-radius: 12px; background: #FAFAFA; }

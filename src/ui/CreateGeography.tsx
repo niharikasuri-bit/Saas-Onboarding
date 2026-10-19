@@ -3,7 +3,8 @@ import { Button, Toast } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
 import { newId, type GeoRow, type GeoSet } from '../lib/model';
 import { Field, describedBy } from './StepFrame';
-import { GeoTree } from './GeoTree';
+import { AddGeographyDialog, GeoTree } from './GeoTree';
+import { SheetIntro, UploadSteps, colLetter } from './Sheet';
 import { Crumbs } from './Crumbs';
 
 /**
@@ -205,7 +206,7 @@ export function CreateGeography({
     country: 'Which country is it?',
     levels: `How is ${country.trim() || 'it'} divided?`,
     method: 'How would you like to create your geographies?',
-    places: method === 'upload' ? (uploaded ? 'Review geography data' : 'Upload geography data') : method === 'osm' ? 'Check the geographies we fetched' : 'Add geography data',
+    places: method === 'upload' ? (uploaded ? 'View and Edit Uploaded Geography Data' : 'Upload geography data') : method === 'osm' ? 'Check the geographies we fetched' : 'Add geography data',
   };
 
   const LEADS: Record<Step, string> = {
@@ -348,7 +349,14 @@ export function CreateGeography({
                 )}
                 <div className="pt-panel">
                 {view === 'table' ? (
-                  <Grid levels={cleanLevels} rows={rows} problems={problems} onChange={setRows} />
+                  <Grid
+                    levels={cleanLevels}
+                    rows={rows}
+                    problems={problems}
+                    onChange={setRows}
+                    places={places}
+                    onAdd={(r) => setRows([...toPaths([...places, r], cleanLevels.length), ...rows.filter((_, i) => problems[i])])}
+                  />
                 ) : (
                   <GeoTree
                     root={country.trim()}
@@ -397,24 +405,39 @@ function Grid({
   rows,
   problems,
   onChange,
+  places,
+  onAdd,
 }: {
   levels: string[];
   rows: Path[];
   problems: string[];
   onChange: (r: Path[]) => void;
+  /** For the "Add geography" pop-up: the geographies so far, and what to do with a new one. */
+  places: GeoRow[];
+  onAdd: (r: GeoRow) => void;
 }) {
+  const [adding, setAdding] = useState(false);
   const set = (i: number, j: number, v: string) => onChange(rows.map((r, a) => (a === i ? r.map((c, b) => (b === j ? v : c)) : r)));
   return (
     <div className="cg-grid-wrap">
-      <table className="cg-grid">
+      <SheetIntro />
+      <table className="cg-grid is-sheet">
         <thead>
+          <tr className="sheet-letters" aria-hidden="true">
+            <td className="cg-grid-n" />
+            {levels.map((l, j) => (
+              <td key={l}>{colLetter(j)}</td>
+            ))}
+            <td className="cg-grid-x" />
+          </tr>
           <tr>
             <th scope="col" className="cg-grid-n">
               <span className="ux-visually-hidden">Row</span>
             </th>
-            {levels.map((l) => (
-              <th key={l} scope="col">
+            {levels.map((l, j) => (
+              <th key={l} scope="col" className={j === 0 ? 'is-req' : 'is-opt'}>
                 {l}
+                <span className="ux-visually-hidden">{j === 0 ? ' (required)' : ' (optional)'}</span>
               </th>
             ))}
             <th scope="col" className="cg-grid-x">
@@ -466,10 +489,10 @@ function Grid({
           {problems.map((p, i) => (p ? <li key={i}>Row {i + 1}: {p}</li> : null))}
         </ul>
       )}
-      <button type="button" className="cg-add" onClick={() => onChange([...rows, blankRow(levels.length)])}>
-        <Icon name="AddBox" size={18} />
-        Add a row
-      </button>
+      <div className="lv-add">
+        <Button variation="secondary" icon="Add" label="Add geography" onClick={() => setAdding(true)} />
+      </div>
+      {adding && <AddGeographyDialog levels={levels} rows={places} onAdd={onAdd} onClose={() => setAdding(false)} />}
     </div>
   );
 }
@@ -618,6 +641,7 @@ function Upload({
   if (uploaded) return null;
   return (
     <>
+    <UploadSteps thing="geography" />
     <div className="up" role="group" aria-label="Upload a file">
       <input
         ref={input}
