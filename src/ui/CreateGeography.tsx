@@ -174,7 +174,7 @@ export function CreateGeography({
         name = countryAt(pin) ?? 'Pinned location';
         setCountry(name);
       }
-      if (!name) e.country = method === 'osm' ? 'Search for your country or pin your location on the map' : 'Enter the country’s name';
+      if (!name) e.country = method === 'osm' ? 'Search for your country, or move the map to put the pin on your location' : 'Enter the country’s name';
       else if (taken.some((s) => s.name.toLowerCase() === name.toLowerCase()))
         e.country = `${name} is already here. Search for it instead.`;
     }
@@ -228,7 +228,7 @@ export function CreateGeography({
       'Choose how to set up your geography data. Upload a file using the template for bulk setup, or open the map to select them visually.',
     country:
       method === 'osm'
-        ? 'Search for the country you serve, or pin your location on the map.'
+        ? 'Search for the country you serve, or move the map to put the pin on your location.'
         : 'Your geography starts here. Everything you add sits inside it.',
     levels: 'List the geography levels from largest to smallest, for example Country, Region, District. This will help us customize your template for bulk upload.',
     places:

@@ -4,11 +4,10 @@ import 'leaflet/dist/leaflet.css';
 import { Icon } from '../components/Icon';
 
 /**
- * An interactive OpenStreetMap that fills the step. A toolbar on top holds the
- * search (passed in) and the pin controls, so nothing needs scrolling. Either is
- * enough: the map follows the country they type, or they pin their location by
- * clicking the map. Keyboard: the map takes focus, the arrow keys pan and + / -
- * zoom, and "Pin map centre" drops the pin.
+ * A location picker, the way most map apps do it: the search floats on the map,
+ * the pin stays fixed in the centre, and they move the map (drag, scroll, arrow
+ * keys, or search) to put their place under it. "Use my location" jumps there.
+ * A card at the bottom says what's selected; Next confirms it.
  * Prototype: a short list of country outlines (west, south, east, north), not a geocoder.
  */
 const BOXES: Record<string, [number, number, number, number]> = {
@@ -45,7 +44,7 @@ const BOXES: Record<string, [number, number, number, number]> = {
   Zimbabwe: [25.2, -22.4, 33.1, -15.6],
 };
 
-/** The country (of the ones it knows) a pin falls in, smallest outline first. */
+/** The country (of the ones it knows) a point falls in, smallest outline first. */
 export function countryAt(p: { lat: number; lng: number }) {
   const hits = Object.entries(BOXES).filter(([, [w, s, e, n]]) => p.lng >= w && p.lng <= e && p.lat >= s && p.lat <= n);
   hits.sort((a, b) => (a[1][2] - a[1][0]) * (a[1][3] - a[1][1]) - (b[1][2] - b[1][0]) * (b[1][3] - b[1][1]));
@@ -60,9 +59,6 @@ function find(q: string) {
 
 export type Pin = { lat: number; lng: number };
 
-/** The pin: an orange drop, drawn in CSS so no image files are needed. */
-const PIN = L.divIcon({ className: 'osm-pin', html: '<span></span>', iconSize: [28, 28], iconAnchor: [14, 28] });
-
 export function OsmMap({
   id,
   query,
@@ -72,34 +68,43 @@ export function OsmMap({
 }: {
   id: string;
   query: string;
+  /** The selected point: the map centre, once they've moved the map or searched. */
   pin: Pin | null;
   onPin: (p: Pin | null) => void;
-  /** The search box, shown at the left of the toolbar. */
+  /** The search box, floating at the top left of the map. */
   search: React.ReactNode;
 }) {
   const box = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
-  const marker = useRef<L.Marker | null>(null);
   const onPinRef = useRef(onPin);
   onPinRef.current = onPin;
   const [shown, setShown] = useState(() => find(query));
+  const [locating, setLocating] = useState('');
 
-  // One map for the life of the step.
+  // One map for the life of the step. Wherever the map comes to rest is the selection.
   useEffect(() => {
     if (!box.current) return;
-    const m = L.map(box.current, { worldCopyJump: true, zoomControl: true }).setView([5, 20], 2);
+    const m = L.map(box.current, { worldCopyJump: true, zoomControl: false }).setView([5, 20], 2);
+    L.control.zoom({ position: 'topright' }).addTo(m);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(m);
-    m.on('click', (e: L.LeafletMouseEvent) => onPinRef.current({ lat: e.latlng.lat, lng: e.latlng.lng }));
     map.current = m;
-    // The map is the last thing laid out on the step; make sure it fills its box.
-    setTimeout(() => m.invalidateSize(), 0);
+    m.invalidateSize();
+    // From here on, wherever the map comes to rest (drag, zoom, keys, search, my location) is the selection.
+    const t = setTimeout(
+      () =>
+        m.on('moveend', () => {
+          const c = m.getCenter();
+          onPinRef.current({ lat: c.lat, lng: c.lng });
+        }),
+      300,
+    );
     return () => {
+      clearTimeout(t);
       m.remove();
       map.current = null;
-      marker.current = null;
     };
   }, []);
 
@@ -117,59 +122,58 @@ export function OsmMap({
     ]);
   }, [shown]);
 
-  // Keep the marker in step with the pin.
-  useEffect(() => {
-    if (!map.current) return;
-    if (!pin) {
-      marker.current?.remove();
-      marker.current = null;
-      return;
-    }
-    if (marker.current) marker.current.setLatLng([pin.lat, pin.lng]);
-    else marker.current = L.marker([pin.lat, pin.lng], { icon: PIN, keyboard: false, interactive: false }).addTo(map.current);
-  }, [pin]);
+  const useMyLocation = () => {
+    if (!navigator.geolocation) return setLocating('Your browser can’t share your location. Search or move the map instead.');
+    setLocating('Finding your location…');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocating('');
+        if (!map.current) return;
+            map.current.setView([pos.coords.latitude, pos.coords.longitude], 12);
+      },
+      () => setLocating('Couldn’t get your location. Search or move the map instead.'),
+      { timeout: 10000 },
+    );
+  };
 
+  const place = pin ? countryAt(pin) : null;
   const fmt = (n: number) => n.toFixed(4);
   return (
     <div className="osm-map">
-      <div className="osm-bar">
-        <div className="osm-search">{search}</div>
-        <div className="osm-pinbar">
-          <p className="osm-status" role="status">
-            {pin ? (
-              <>
-                <Icon name="LocationOn" size={18} />
-                Pinned at {fmt(pin.lat)}, {fmt(pin.lng)}
-              </>
-            ) : (
-              'Or click the map to pin your location.'
-            )}
+      <div className="osm-frame">
+        <div
+          ref={box}
+          id={id}
+          className="osm-canvas"
+          role="application"
+          aria-label="Map. Move it with the arrow keys, or drag it, to put your location under the pin in the centre."
+        />
+        {/* The pin never moves; the map moves under it. */}
+        <span className="osm-centre" aria-hidden="true">
+          <span className="osm-pin-mark" />
+        </span>
+        <div className="osm-float osm-float-search">{search}</div>
+        <button type="button" className="osm-mylocation" onClick={useMyLocation}>
+          <Icon name="MyLocation" size={18} />
+          Use my location
+        </button>
+        <div className="osm-float osm-selected">
+          <p role="status">
+            {locating ||
+              (pin ? (
+                <>
+                  <Icon name="LocationOn" size={18} />
+                  <strong>{place ?? 'Selected location'}</strong>
+                  <span className="osm-coords">
+                    {fmt(pin.lat)}, {fmt(pin.lng)}
+                  </span>
+                </>
+              ) : (
+                'Search for your country, or move the map to put the pin on your location.'
+              ))}
           </p>
-          <button
-            type="button"
-            className="osm-btn"
-            onClick={() => {
-              const c = map.current?.getCenter();
-              if (c) onPin({ lat: c.lat, lng: c.lng });
-            }}
-          >
-            <Icon name="LocationOn" size={18} />
-            Pin map centre
-          </button>
-          {pin && (
-            <button type="button" className="osm-btn" onClick={() => onPin(null)}>
-              Clear pin
-            </button>
-          )}
         </div>
       </div>
-      <div
-        ref={box}
-        id={id}
-        className="osm-canvas"
-        role="application"
-        aria-label={`Map${shown ? ` of ${shown}` : ''}. Click to pin your location, or use the arrow keys to move and Pin map centre.`}
-      />
     </div>
   );
 }
