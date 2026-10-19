@@ -71,7 +71,7 @@ export function HomeHeader({ ref }: { ref?: React.Ref<HTMLHeadingElement> }) {
 
 /** onFlow: tells Home when a setup flow takes over the page, so it can hide the products. */
 export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = {}) {
-  const { account } = useAccount();
+  const { account, answers } = useAccount();
   const todos = todosFor(account);
   // Only what's left: a finished step drops off, so they pick up where they left off.
   const open = todos.filter((t) => !todoDone(t.id, account));
@@ -148,7 +148,7 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
       {toastEl}
       <header className="as-head">
         <div className="as-wrap">
-          <p className="as-eyebrow">Welcome aboard</p>
+          <p className="as-eyebrow">Welcome aboard, {firstName(answers)}</p>
           <h1 ref={heading} tabIndex={-1}>
             Let’s complete <em>account setup</em>
           </h1>
