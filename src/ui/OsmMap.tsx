@@ -4,8 +4,8 @@ import 'leaflet/dist/leaflet.css';
 import { Icon } from '../components/Icon';
 
 /**
- * A location picker, the way most map apps do it: search above the map, the pin
- * stays fixed in the centre, and they move the map (drag, scroll, arrow
+ * A location picker, the way most map apps do it: search (and Use my location)
+ * floating at the top of the map, the pin fixed in the centre, zoom at the bottom right, and they move the map (drag, scroll, arrow
  * keys, or search) to put their place under it. "Use my location" jumps there.
  * A card at the bottom says what's selected; Next confirms it.
  * Prototype: a short list of country outlines (west, south, east, north), not a geocoder.
@@ -71,7 +71,7 @@ export function OsmMap({
   /** The selected point: the map centre, once they've moved the map or searched. */
   pin: Pin | null;
   onPin: (p: Pin | null) => void;
-  /** The search box, above the map. */
+  /** The search box, floating at the top left of the map. */
   search: React.ReactNode;
 }) {
   const box = useRef<HTMLDivElement>(null);
@@ -85,7 +85,7 @@ export function OsmMap({
   useEffect(() => {
     if (!box.current) return;
     const m = L.map(box.current, { worldCopyJump: true, zoomControl: false }).setView([5, 20], 2);
-    L.control.zoom({ position: 'topright' }).addTo(m);
+    L.control.zoom({ position: 'bottomright' }).addTo(m);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -140,7 +140,6 @@ export function OsmMap({
   const fmt = (n: number) => n.toFixed(4);
   return (
     <div className="osm-map">
-      <div className="osm-search-above">{search}</div>
       <div className="osm-frame">
         <div
           ref={box}
@@ -153,10 +152,14 @@ export function OsmMap({
         <span className="osm-centre" aria-hidden="true">
           <span className="osm-pin-mark" />
         </span>
-        <button type="button" className="osm-mylocation" onClick={useMyLocation}>
-          <Icon name="MyLocation" size={18} />
-          Use my location
-        </button>
+        {/* Search and Use my location float together at the top, like a delivery-app address picker */}
+        <div className="osm-float osm-float-search">
+          {search}
+          <button type="button" className="osm-mylocation" onClick={useMyLocation}>
+            <Icon name="MyLocation" size={18} />
+            Use my location
+          </button>
+        </div>
         <div className="osm-float osm-selected">
           <p role="status">
             {locating ||

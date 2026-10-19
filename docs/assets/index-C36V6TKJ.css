@@ -1738,6 +1738,18 @@ p { margin: 0; line-height: 1.5; }
 .leaflet-control-zoom.leaflet-bar a { width: 36px; height: 36px; line-height: 34px; border: 1px solid var(--c-primary); border-radius: 8px !important; background: #fff; color: #B8460C; font-size: 20px; }
 .leaflet-control-zoom.leaflet-bar a:hover { background: var(--c-primary-bg); color: #B8460C; }
 .leaflet-control-zoom.leaflet-bar a.leaflet-disabled { border-color: #C9C9C9; color: #8A8A8A; background: #F5F5F5; }
+
+/* OpenStreetMap step, v5: search + Use my location float together at the top left;
+   zoom at the bottom right; the selected card at the bottom left */
+.osm-frame .osm-canvas { height: max(360px, calc(100vh - 420px)); }
+.osm-float-search { display: flex; align-items: flex-start; gap: 8px; width: auto; max-width: calc(100% - 24px); padding: 6px; }
+.osm-float-search .osm-fld { width: min(380px, 50vw); }
+.osm-float-search .osm-mylocation { position: static; flex-shrink: 0; height: 44px; }
+.leaflet-bottom.leaflet-right .leaflet-control-zoom { margin: 0 10px 28px 0; }
+@media (max-width: 720px) {
+  .osm-float-search { flex-wrap: wrap; right: 12px; }
+  .osm-float-search .osm-fld { width: 100%; }
+}
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */
