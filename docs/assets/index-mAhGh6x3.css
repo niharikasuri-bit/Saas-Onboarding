@@ -1792,6 +1792,18 @@ p { margin: 0; line-height: 1.5; }
   .sh:has(.sh-nav.is-mini) .cg-bar { left: 72px; }
 }
 @media (prefers-reduced-motion: reduce) { .sh-nav { transition: none; } }
+
+/* Finish setting up your account, tidied: even padding, each step in a #FAFAFA box, the icon
+   aligned with the title, the button centred on the row */
+.pk-panel { padding: 24px 28px 28px; }
+.pk-panel .geo-bar { margin-bottom: 16px; }
+.pk-list { display: flex; flex-direction: column; gap: 12px; }
+.pk-row { align-items: start; padding: 18px 20px; border: 1px solid #E3E3E3; border-radius: 12px; background: #FAFAFA; }
+.pk-row + .pk-row { border-top: 1px solid #E3E3E3; }
+.pk-row > .pk-icon { margin-top: 2px; background: #fff; border: 1px solid #F3D9CC; }
+.pk-row > button { align-self: center; }
+.pk-text { gap: 6px; }
+.pk-what { line-height: 1.5; max-width: 860px; }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */
