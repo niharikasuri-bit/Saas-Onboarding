@@ -52,6 +52,8 @@ export function AccountSetup() {
   const { account, go } = useAccount();
   const todos = todosFor(account);
   const done = todos.filter((t) => todoDone(t.id, account)).length;
+  // Open steps first, in their usual order; finished ones move to the bottom.
+  const ordered = [...todos.filter((t) => !todoDone(t.id, account)), ...todos.filter((t) => todoDone(t.id, account))];
 
   return (
     <div className="as">
@@ -84,7 +86,7 @@ export function AccountSetup() {
 
       <section className="as-wrap" aria-label="What you need to do">
         <ol className="as-list">
-          {todos.map((t) => {
+          {ordered.map((t) => {
             const isDone = todoDone(t.id, account);
             const task = TASK[t.id];
             return (
