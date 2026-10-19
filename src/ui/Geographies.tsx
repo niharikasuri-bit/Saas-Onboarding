@@ -96,9 +96,19 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
   const [editing, setEditing] = useState(false);
   // Edits go into a draft: Save writes it to the account, Back throws it away.
   const [draft, setDraft] = useState<GeoRow[] | null>(null);
+  const [dirty, setDirty] = useState(false);
+  const change = (r: GeoRow[]) => {
+    setDraft(r);
+    setDirty(true);
+  };
   const [addingPlace, setAddingPlace] = useState(false);
+  // Where Edit was opened from: straight from the list, Back and Save return to the list.
+  const [editFromList, setEditFromList] = useState(false);
   const open = (id: string, edit: boolean) => {
-    setDraft(null);
+    const set = [...GEO_SETS, ...(account.geography.custom ?? [])].find((s) => s.id === id);
+    setDraft(edit && set ? rowsFor(account, set) : null);
+    setDirty(false);
+    setEditFromList(edit);
     setEditing(edit);
     setViewing(id);
   };
@@ -160,14 +170,19 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
     const rows = editable && draft ? draft : saved;
     const startEdit = () => {
       setDraft(saved);
+      setDirty(false);
+      setEditFromList(false);
       setEditing(true);
     };
     const stopEdit = () => {
       setDraft(null);
+      setDirty(false);
       setEditing(false);
+      if (editFromList) setViewing(null);
+      setEditFromList(false);
     };
     const leaveEdit = () => {
-      if (draft && draft !== saved && !window.confirm('Leave without saving? Your edits will be lost.')) return;
+      if (dirty && !window.confirm('Leave without saving? Your edits will be lost.')) return;
       stopEdit();
     };
     const save = () => {
@@ -219,7 +234,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
           root={viewing.country}
           levels={viewing.levels}
           rows={rows}
-          onChange={editable ? setDraft : undefined}
+          onChange={editable ? change : undefined}
           note={(v) =>
             editable ? (
               <SheetIntro action="Save" tree={v === 'tree'} />
@@ -231,11 +246,17 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
           }
         />
         {addingPlace && editable && (
-          <AddGeographyDialog levels={viewing.levels} rows={rows} onAdd={(r) => setDraft([...rows, r])} onClose={() => setAddingPlace(false)} />
+          <AddGeographyDialog levels={viewing.levels} rows={rows} onAdd={(r) => change([...rows, r])} onClose={() => setAddingPlace(false)} />
         )}
         {editable ? (
           <footer className="cg-bar">
-            <Button variation="secondary" icon="ArrowBack" label="Back" title={`Back to ${viewing.name} without saving`} onClick={leaveEdit} />
+            <Button
+              variation="secondary"
+              icon="ArrowBack"
+              label="Back"
+              title={editFromList ? 'Back to your geographies without saving' : `Back to ${viewing.name} without saving`}
+              onClick={leaveEdit}
+            />
             <Button variation="primary" label="Save" title={`Save changes to ${viewing.name}`} onClick={save} />
           </footer>
         ) : !isAdded ? (
@@ -402,7 +423,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                 ) : (
                   <div className="geo-pair">
                     <Button variation="secondary" icon="Visibility" label="View" title={`View ${s.name}`} onClick={() => open(s.id, false)} />
-                    <Button variation="secondary" icon="Edit" label="Edit" title={`Edit ${s.name}`} onClick={() => open(s.id, true)} />
+                    <Button variation="primary" icon="Edit" label="Edit" title={`Edit ${s.name}`} onClick={() => open(s.id, true)} />
                   </div>
                 )}
               </div>
@@ -447,7 +468,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                         onClick={() => open(s.id, false)}
                       />
                       {!adding && (
-                        <Button variation="secondary" size="small" icon="Edit" label="Edit" title={`Edit ${s.name}`} onClick={() => open(s.id, true)} />
+                        <Button variation="primary" size="small" icon="Edit" label="Edit" title={`Edit ${s.name}`} onClick={() => open(s.id, true)} />
                       )}
                       {!adding ? null : added.has(s.id) ? (
                         <p className="geo-added">
