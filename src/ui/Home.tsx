@@ -15,11 +15,11 @@ import { AccountSetup } from './AccountSetup';
  * 3. Other products, not in their plan yet, to add.
  */
 
-/** Prototype numbers for each product's card. */
+/** What each product does, in three highlights (prototype values). */
 const CARD: Record<Product, { stats: [string, string][] }> = {
-  cms: { stats: [['6', 'Templates'], ['5', 'Modules'], ['14', 'Features']] },
-  hcm: { stats: [['4+', 'Templates'], ['8', 'Modules'], ['12', 'Features']] },
-  lnp: { stats: [['3', 'Templates'], ['6', 'Modules'], ['10', 'Features']] },
+  cms: { stats: [['40+', 'Complaint types'], ['4', 'Ways to report'], ['5', 'Service templates']] },
+  hcm: { stats: [['8', 'Campaign templates'], ['Offline', 'Field app'], ['Live', 'Delivery dashboards']] },
+  lnp: { stats: [['20+', 'Licence types'], ['Online', 'Fee payment'], ['QR', 'Verified certificates']] },
 };
 
 export function Home() {
