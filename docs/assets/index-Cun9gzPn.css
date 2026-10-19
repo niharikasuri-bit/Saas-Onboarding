@@ -1436,6 +1436,31 @@ p { margin: 0; line-height: 1.5; }
 /* Dividers trail each item, so a wrapped line never starts with one */
 .pt-about-box li + li::before { content: none; }
 .pt-about-box li:not(:last-child)::after { content: '|'; margin: 0 10px; color: #B3A26A; }
+
+/* About the product holds the three numbers on one line, with dividers */
+.pt-about-box dl { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; row-gap: 4px; }
+.pt-about-box dl > div:not(:last-child)::after { content: '|'; margin: 0 12px; color: #B3A26A; }
+.pt-about-box dd { margin: 0; display: inline; font-size: 0.9375rem; color: var(--c-text); }
+.pt-about-box dd strong { font-size: 1.0625rem; color: var(--digitv2-lightTheme-primary-2); }
+
+/* About the product: the three numbers always share one line, split evenly with dividers */
+.pt-about-box dl { flex-wrap: nowrap; justify-content: space-between; }
+.pt-about-box dl > div { display: flex; align-items: baseline; flex: 1 1 0; justify-content: center; white-space: nowrap; }
+.pt-about-box dl > div:first-child { justify-content: flex-start; }
+.pt-about-box dl > div:last-child { justify-content: flex-end; }
+.pt-about-box dl > div:not(:last-child)::after { content: none; }
+.pt-about-box dl > div + div { border-left: 1px solid #D9C88E; }
+.pt-about-box dl > div:not(:first-child) { padding-left: 8px; }
+.pt-about-box dl > div:not(:last-child) { padding-right: 8px; }
+
+/* About the product, v2: the older orange tile colour; each number sits above its label */
+.pt-about-box { background: #FFF8EE; border-color: #F5DDBE; }
+.pt-about-box dl > div { flex-direction: column-reverse; align-items: center; justify-content: flex-start; padding: 2px 8px; white-space: normal; text-align: center; }
+.pt-about-box dl > div:first-child, .pt-about-box dl > div:last-child { justify-content: flex-start; }
+.pt-about-box dl > div + div { border-left-color: #EBCBA3; }
+.pt-about-box dd { font-size: 1.125rem; font-weight: 700; line-height: 1.3; color: var(--digitv2-lightTheme-primary-2); }
+.pt-about-box dt { font-size: 0.875rem; line-height: 1.3; color: var(--c-text-2); }
+.pt-about-box dl > div { flex: 1 1 auto; white-space: nowrap; }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */
