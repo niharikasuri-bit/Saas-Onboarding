@@ -410,6 +410,7 @@ export function AddGeographyDialog({
       ref={ref}
       className="ag"
       aria-labelledby={`${uid}-h`}
+      aria-describedby={`${uid}-d`}
       onCancel={(e) => {
         e.preventDefault();
         close();
@@ -425,9 +426,14 @@ export function AddGeographyDialog({
         }}
       >
         <div className="ag-top">
-          <h2 id={`${uid}-h`} ref={head} tabIndex={-1}>
-            Add a geography
-          </h2>
+          <div>
+            <h2 id={`${uid}-h`} ref={head} tabIndex={-1}>
+              Add a geography
+            </h2>
+            <p id={`${uid}-d`} className="ag-desc">
+              Add details about the geography you are adding.
+            </p>
+          </div>
           <button type="button" className="ag-x" aria-label="Close" onClick={close}>
             <Icon name="Close" size={22} />
           </button>
