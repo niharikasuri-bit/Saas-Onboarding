@@ -1640,6 +1640,8 @@ p { margin: 0; line-height: 1.5; }
 .geo-foot-cta { padding: 2px 4px; border: 0; border-radius: 4px; background: none; font: inherit; font-weight: 700; color: #B8460C; cursor: pointer; }
 .geo-foot-cta:hover { text-decoration: underline; text-underline-offset: 3px; }
 .geo-foot-cta:focus-visible { outline: none; box-shadow: var(--focus); }
+/* The list foot floats: a small white bar that sticks to the bottom of the screen while scrolling */
+.geo-foot { position: sticky; bottom: 16px; z-index: 4; width: fit-content; max-width: calc(100% - 32px); margin: var(--s5, 20px) auto 0; padding: 8px 16px; border: 1px solid #E3E3E3; border-top: 1px solid #E3E3E3; border-radius: 8px; background: #fff; box-shadow: 0 4px 16px rgb(16 24 40 / 0.12); font-size: 0.875rem; }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */
