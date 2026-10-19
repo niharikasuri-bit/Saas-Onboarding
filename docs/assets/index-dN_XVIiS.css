@@ -1050,6 +1050,19 @@ p { margin: 0; line-height: 1.5; }
 .lv { padding: 0; border: 0; border-radius: 0; background: none; }
 .lv-row { padding: 12px 12px 12px 8px; border: 1px solid #E3E3E3; border-radius: 12px; background: #FAFAFA; }
 .lv-add { margin-left: 0; }
+
+/* Footer bar for the create steps: Back left, Continue right, pinned to the bottom */
+.cg-page { padding-bottom: 0; }
+.cg-bar {
+  position: sticky; bottom: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: var(--s3);
+  margin: var(--s6) calc(-1 * clamp(24px, 4vw, 56px)) -120px; padding: 16px clamp(24px, 4vw, 56px);
+  background: #fff; border-top: 1px solid var(--c-divider); box-shadow: 0 -4px 16px rgb(16 24 40 / 0.06);
+}
+.cg-bar > button { height: 44px; min-width: 120px; padding: 0 22px; }
+.cg-bar > button .digit-button-label { font-size: 1rem; font-weight: 500; }
+
+.cg-toast:empty { display: none; }
+.cg-toast { position: fixed; left: 50%; bottom: 96px; z-index: 30; transform: translateX(-50%); }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */

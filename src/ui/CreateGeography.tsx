@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { Button } from '@egovernments/digit-ui-components';
+import { Button, Toast } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
 import { newId, type GeoRow, type GeoSet } from '../lib/model';
 import { Field, describedBy } from './StepFrame';
@@ -122,6 +122,12 @@ export function CreateGeography({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploaded, setUploaded] = useState('');
   const [fetched, setFetched] = useState(false);
+  const [toast, setToast] = useState('');
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(''), 5000);
+    return () => clearTimeout(t);
+  }, [toast]);
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     heading.current?.focus();
@@ -141,7 +147,15 @@ export function CreateGeography({
     setErrors({});
     setStep(s);
   };
-  const back = () => (n === 1 ? onCancel() : go(STEPS[n - 2]));
+  const back = () => {
+    // Going back from the uploaded places clears the file, so they can upload another.
+    if (step === 'places' && method === 'upload' && uploaded) {
+      setUploaded('');
+      setRows([blankRow(levels.length)]);
+    }
+    if (n === 1) onCancel();
+    else go(STEPS[n - 2]);
+  };
 
   const cleanLevels = levels.map((l) => l.trim());
   const filled = rows.filter((r) => r.some((c) => c.trim()));
@@ -206,10 +220,6 @@ export function CreateGeography({
 
   return (
     <div className={`cg-page${step === 'places' ? ' is-wide' : ''}`}>
-      <button type="button" className="geo-back" onClick={back}>
-        <Icon name="ArrowBack" size={20} />
-        Back<span className="ux-visually-hidden">{n === 1 ? ' to add your geographies' : ' to the previous step'}</span>
-      </button>
     <section className="cg" aria-labelledby={`${uid}-h`}>
       <h1 id={`${uid}-h`} ref={heading} tabIndex={-1}>
         {TITLES[step]}
@@ -293,6 +303,7 @@ export function CreateGeography({
                   setRows(r.length ? r.map((p) => fit(p, cleanLevels.length)) : [blankRow(cleanLevels.length)]);
                   setUploaded(file);
                   setErrors({});
+                  if (file) setToast(`${file} uploaded`);
                 }}
               />
             )}
@@ -349,11 +360,23 @@ export function CreateGeography({
           </div>
         )}
 
-        <div className="cg-foot">
-          <Button variation="primary" label={step === 'places' ? 'Create geography' : 'Continue'} submit onClick={() => {}} />
-        </div>
+        {/* Enter in a field moves on; the visible buttons are in the footer */}
+        <button type="submit" className="ux-visually-hidden" tabIndex={-1} aria-hidden="true" />
       </form>
     </section>
+      <div className="cg-toast" role="status" aria-live="polite">
+        {toast && <Toast type="success" label={toast} onClose={() => setToast('')} />}
+      </div>
+      <footer className="cg-bar">
+        <Button
+          variation="secondary"
+          icon="ArrowBack"
+          label="Back"
+          title={n === 1 ? 'Back to add your geographies' : 'Back to the previous step'}
+          onClick={back}
+        />
+        <Button variation="primary" label={step === 'places' ? 'Create geography' : 'Continue'} onClick={next} />
+      </footer>
     </div>
   );
 }
@@ -583,25 +606,8 @@ function Upload({
     onRows(data.slice(1), f.name);
   };
   const browse = () => input.current?.click();
-  // Once uploaded, only a slim line stays; the places below are what matters.
-  if (uploaded)
-    return (
-      <p className="up-done" role="status">
-        <Icon name="CheckCircle" size={18} />
-        <span>
-          <strong>{uploaded}</strong> uploaded.
-        </span>
-        <button
-          type="button"
-          className="up-browse"
-          onClick={() => {
-            onRows([], '');
-          }}
-        >
-          Upload a different file
-        </button>
-      </p>
-    );
+  // Once uploaded the box goes; a toast says so, and Back clears it to upload another.
+  if (uploaded) return null;
   return (
     <section className="up" aria-labelledby={`${uid}-up-h`}>
       <div className="up-head">
