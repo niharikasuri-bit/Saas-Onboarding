@@ -1854,6 +1854,19 @@ p { margin: 0; line-height: 1.5; }
 /* the last band runs to the bottom of the page */
 .hm-v5 > .hm-sec:last-child { margin-bottom: -96px; padding-bottom: 96px; }
 .hm-v5 .hm-sec.is-other .pt-card.is-off { background: #F9F9F9; }
+
+/* Home, v8: back to white containers for each section (no bands, no lines). The setup step is a
+   plain row inside its container, not a box within a box. */
+.hm-v5 .hm-sec.is-mine, .hm-v5 .hm-sec.is-other, .hm-v5 .pk .pk-sec {
+  margin: 0 0 24px; padding: 24px 28px 28px; border: 1px solid #EAEAEA; border-radius: 16px; background: #fff;
+  box-shadow: 0 1px 3px rgb(16 24 40 / 0.06), 0 10px 28px rgb(16 24 40 / 0.08);
+}
+.hm-v5 > .hm-sec:last-child { margin-bottom: 0; padding-bottom: 28px; }
+.hm-v5 .pk { margin-bottom: 24px; }
+.hm-v5 .pk .pk-head { margin-bottom: 24px; }
+.hm-v5 .pk .pk-sec { margin-bottom: 0; }
+.hm-v5 .pk-sec .pk-next { padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
+.hm-v5 .hm-sec.is-other .pt-card.is-off { background: #F7F7F7; }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */
