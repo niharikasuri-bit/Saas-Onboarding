@@ -86,29 +86,16 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
     ? `Your products are unlocked. ${open.length === 1 ? 'One step' : `${open.length} steps`} left, whenever you’re ready.`
     : 'Add your geographies to unlock your products. Notification channels and your team are optional for now.';
 
-  // After the first step: an orange header on their progress; what's left sits below as rows in one white panel.
+  // After the first step: an orange header greets them; what's left sits below as rows in one white panel.
   if (started) {
     return (
       <div className="pk">
         {toastEl}
         <header className="pk-head">
-          {/* Shown as soon as one step is done, so it speaks to their progress, not to coming back */}
           <h1 ref={heading} tabIndex={-1}>
-            {unlocked ? (
-              <>
-                Your products are <em>ready</em>
-              </>
-            ) : (
-              <>
-                Good start, <em>{firstName(answers)}</em>
-              </>
-            )}
+            Hi, <em>{firstName(answers)}</em>
           </h1>
-          <p>
-            {unlocked
-              ? `Open one below to get started. ${open.length === 1 ? 'One optional step' : `${open.length} optional steps`} left to finish your account.`
-              : 'Add your geographies next to unlock your products. Notification channels and your team are optional.'}
-          </p>
+          <p>Finish setting up your account and start using your products.</p>
         </header>
         <section className="hm-sec pk-panel" aria-labelledby="pk-h">
           <div className="geo-bar">
