@@ -1430,7 +1430,7 @@ p { margin: 0; line-height: 1.5; }
 /* About the product: a light orange panel. Small heading over a rule, then three
    equal columns: a big number, its label underneath, thin dividers between. */
 .pt-about-box { padding: 14px 16px 16px; border: 1px solid #F5DDBE; border-radius: 10px; background: #FFF8EE; }
-.pt-about-h { margin: 0 0 12px; padding-bottom: 10px; border-bottom: 1px solid #F5DDBE; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #8A3A00; }
+.pt-about-h { margin: 0 0 12px; padding-bottom: 10px; border-bottom: 1px solid #F5DDBE; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--c-text-2); }
 .pt-about-box dl { margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .pt-about-box dl > div { display: flex; flex-direction: column; justify-content: flex-start; gap: 6px; min-width: 0; padding: 0 12px; }
 .pt-about-box dl > div:first-child { padding-left: 0; }
