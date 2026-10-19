@@ -21,7 +21,7 @@ import { Crumbs } from './Crumbs';
 
 type Path = string[];
 type Step = 'country' | 'levels' | 'method' | 'places';
-type Method = 'manual' | 'upload' | 'osm';
+type Method = 'upload' | 'osm';
 const STEPS: Step[] = ['method', 'country', 'levels', 'places'];
 /** OpenStreetMap: search and fetch, then check. No levels step. */
 const OSM_STEPS: Step[] = ['method', 'country', 'places'];
@@ -126,6 +126,7 @@ export function CreateGeography({
   const [levels, setLevels] = useState<string[]>(['', '']);
   const [method, setMethod] = useState<Method | ''>('');
   const [view, setView] = useState<'table' | 'tree'>('table');
+  const [addingPlace, setAddingPlace] = useState(false);
   const [rows, setRows] = useState<Path[]>([blankRow(2), blankRow(2)]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploaded, setUploaded] = useState('');
@@ -216,12 +217,12 @@ export function CreateGeography({
 
   const LEADS: Record<Step, string> = {
     method:
-      'Choose how to set up your geography data. Upload a file using the template for bulk setup, add geographies manually one at a time, or open the map to select them visually.',
+      'Choose how to set up your geography data. Upload a file using the template for bulk setup, or open the map to select them visually.',
     country:
       method === 'osm'
         ? 'Search for the country or place you serve, then fetch its geographies.'
         : 'Your geography starts here. Everything you add sits inside it.',
-    levels: 'List the geography levels from largest to smallest — for example Country, Region, District.',
+    levels: 'List the geography levels from largest to smallest, for example Country, Region, District. This will help us customize your template for bulk upload.',
     places:
       method === 'osm'
         ? 'Review the fetched geographies and edit any row before you create them.'
@@ -290,7 +291,6 @@ export function CreateGeography({
             <div className="qz-tile-row">
               {(
                 [
-                  ['manual', 'AddCircle', 'Add Geographies Manually'],
                   ['upload', 'FileUpload', 'Bulk Upload Geography Data'],
                   ['osm', 'Public', 'Fetch from OpenStreetMap'],
                 ] as const
@@ -329,7 +329,7 @@ export function CreateGeography({
                 }}
               />
             )}
-            {(method === 'manual' || uploaded || method === 'osm') && (
+            {(uploaded || method === 'osm') && (
               <>
                 <div className="cg-places-bar">
                   <div className="pt-tabs" role="group" aria-label="View as">
@@ -342,7 +342,16 @@ export function CreateGeography({
                       Tree
                     </button>
                   </div>
+                  <Button variation="secondary" icon="Add" label="Add geography" onClick={() => setAddingPlace(true)} />
                 </div>
+                {addingPlace && (
+                  <AddGeographyDialog
+                    levels={cleanLevels}
+                    rows={places}
+                    onAdd={(r) => setRows([...toPaths([...places, r], cleanLevels.length), ...rows.filter((_, i) => problems[i])])}
+                    onClose={() => setAddingPlace(false)}
+                  />
+                )}
                 {errors.places && (
                   <p id={`${uid}-places`} className="fld-error" tabIndex={-1}>
                     <span className="ux-visually-hidden">Error: </span>
@@ -350,14 +359,13 @@ export function CreateGeography({
                   </p>
                 )}
                 <div className="pt-panel">
+                <SheetIntro action="Create geographies" tree={view === 'tree'} />
                 {view === 'table' ? (
                   <Grid
                     levels={cleanLevels}
                     rows={rows}
                     problems={problems}
                     onChange={setRows}
-                    places={places}
-                    onAdd={(r) => setRows([...toPaths([...places, r], cleanLevels.length), ...rows.filter((_, i) => problems[i])])}
                   />
                 ) : (
                   <GeoTree
@@ -391,7 +399,7 @@ export function CreateGeography({
         />
         <Button
           variation="primary"
-          label={step === 'places' ? 'Create geography' : step === 'country' && method === 'osm' ? 'Fetch' : 'Next'}
+          label={step === 'places' ? 'Create geographies' : step === 'country' && method === 'osm' ? 'Fetch' : 'Next'}
           icon={step === 'places' ? undefined : 'ArrowForward'}
           isSuffix
           onClick={next}
@@ -407,22 +415,15 @@ function Grid({
   rows,
   problems,
   onChange,
-  places,
-  onAdd,
 }: {
   levels: string[];
   rows: Path[];
   problems: string[];
   onChange: (r: Path[]) => void;
-  /** For the "Add geography" pop-up: the geographies so far, and what to do with a new one. */
-  places: GeoRow[];
-  onAdd: (r: GeoRow) => void;
 }) {
-  const [adding, setAdding] = useState(false);
   const set = (i: number, j: number, v: string) => onChange(rows.map((r, a) => (a === i ? r.map((c, b) => (b === j ? v : c)) : r)));
   return (
     <div className="cg-grid-wrap">
-      <SheetIntro />
       <table className="cg-grid is-sheet">
         <thead>
           <tr className="sheet-letters" aria-hidden="true">
@@ -491,10 +492,6 @@ function Grid({
           {problems.map((p, i) => (p ? <li key={i}>Row {i + 1}: {p}</li> : null))}
         </ul>
       )}
-      <div className="lv-add">
-        <Button variation="secondary" icon="Add" label="Add geography" onClick={() => setAdding(true)} />
-      </div>
-      {adding && <AddGeographyDialog levels={levels} rows={places} onAdd={onAdd} onClose={() => setAdding(false)} />}
     </div>
   );
 }

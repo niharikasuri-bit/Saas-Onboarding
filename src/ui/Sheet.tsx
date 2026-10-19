@@ -55,18 +55,30 @@ export function UploadSteps({ thing }: { thing: string }) {
   );
 }
 
-/** Above an editable sheet: what you can do here. */
-export function SheetIntro() {
+/** A light-blue note above a table or tree: an icon, a short title, one line of help. */
+export function InfoNote({ icon, title, children }: { icon: string; title: string; children: React.ReactNode }) {
   return (
     <div className="sh-intro">
       <p className="sh-note">
-        <Icon name="Edit" size={18} />
+        <Icon name={icon} size={18} />
         <span>
-          <strong>Editable</strong>
-          <span>Click any cell to change it. Nothing is saved until you finish.</span>
+          <strong>{title}</strong>
+          <span>{children}</span>
         </span>
       </p>
     </div>
+  );
+}
+
+/**
+ * Above an editable sheet or tree: what you can do here. `action` is the button that
+ * saves it; `tree` words it for the tree view.
+ */
+export function SheetIntro({ action, tree }: { action: string; tree?: boolean }) {
+  return (
+    <InfoNote icon="Edit" title={tree ? 'Editable tree' : 'Editable table'}>
+      {tree ? 'Click any geography to edit it.' : 'Click any cell to edit it.'} Your edits are not saved until you click {action}.
+    </InfoNote>
   );
 }
 

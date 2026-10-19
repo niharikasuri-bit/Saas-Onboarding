@@ -4,7 +4,8 @@ import { Icon } from '../components/Icon';
 import { useAccount } from '../lib/store';
 import { GEO_SETS, REFERENCE_AREAS, newId, type Account, type Area, type GeoRow, type GeoSet } from '../lib/model';
 import { CreateGeography } from './CreateGeography';
-import { PlacesTabs } from './GeoTree';
+import { AddGeographyDialog, PlacesTabs } from './GeoTree';
+import { InfoNote, SheetIntro } from './Sheet';
 import { Crumbs } from './Crumbs';
 import { usePageToast } from './PageToast';
 
@@ -93,7 +94,11 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
   const [viewingId, setViewing] = useState<string | null>(null);
   // View is read-only; Edit lets them rename, remove and add places.
   const [editing, setEditing] = useState(false);
+  // Edits go into a draft: Save writes it to the account, Back throws it away.
+  const [draft, setDraft] = useState<GeoRow[] | null>(null);
+  const [addingPlace, setAddingPlace] = useState(false);
   const open = (id: string, edit: boolean) => {
+    setDraft(null);
     setEditing(edit);
     setViewing(id);
   };
@@ -151,9 +156,28 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
   if (viewing) {
     const isAdded = added.has(viewing.id);
     const editable = isAdded && editing;
-    const rows = rowsFor(account, viewing);
+    const saved = rowsFor(account, viewing);
+    const rows = editable && draft ? draft : saved;
+    const startEdit = () => {
+      setDraft(saved);
+      setEditing(true);
+    };
+    const stopEdit = () => {
+      setDraft(null);
+      setEditing(false);
+    };
+    const leaveEdit = () => {
+      if (draft && draft !== saved && !window.confirm('Leave without saving? Your edits will be lost.')) return;
+      stopEdit();
+    };
+    const save = () => {
+      if (draft) update((a) => editSet(a, viewing, draft));
+      stopEdit();
+      showToast(`Changes to ${viewing.name} saved`);
+    };
+    const hasBar = editable || !isAdded;
     return (
-      <div className="geo is-detail">
+      <div className={`geo is-detail${hasBar ? ' has-bar' : ''}`}>
         <Crumbs
           items={[
             homeCrumb,
@@ -179,16 +203,44 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
               <span className="geo-tag">{viewing.levels.join(' › ')}</span>
             </p>
           </div>
-          {isAdded ? (
+          {editable ? (
+            <div className="geo-detail-actions">
+              <Button variation="secondary" icon="Add" label="Add geography" onClick={() => setAddingPlace(true)} />
+            </div>
+          ) : isAdded ? (
             <div className="geo-detail-actions">
               <Button variation="secondary" icon="FileDownload" label="Download geography data" onClick={() => download(viewing, rows)} />
-              {editable ? (
-                <Button variation="primary" icon="CheckCircle" label="Done editing" onClick={() => setEditing(false)} />
-              ) : (
-                <Button variation="primary" icon="Edit" label="Edit" title={`Edit ${viewing.name}`} onClick={() => setEditing(true)} />
-              )}
+              <Button variation="primary" icon="Edit" label="Edit" title={`Edit ${viewing.name}`} onClick={startEdit} />
             </div>
-          ) : (
+          ) : null}
+        </header>
+        {toastEl}
+        <PlacesTabs
+          root={viewing.country}
+          levels={viewing.levels}
+          rows={rows}
+          onChange={editable ? setDraft : undefined}
+          note={(v) =>
+            editable ? (
+              <SheetIntro action="Save" tree={v === 'tree'} />
+            ) : !isAdded ? (
+              <InfoNote icon="Info" title="Missed some boundaries?">
+                If we have missed some boundaries, you can add this geography to your account and edit it.
+              </InfoNote>
+            ) : null
+          }
+        />
+        {addingPlace && editable && (
+          <AddGeographyDialog levels={viewing.levels} rows={rows} onAdd={(r) => setDraft([...rows, r])} onClose={() => setAddingPlace(false)} />
+        )}
+        {editable ? (
+          <footer className="cg-bar">
+            <Button variation="secondary" icon="ArrowBack" label="Back" title={`Back to ${viewing.name} without saving`} onClick={leaveEdit} />
+            <Button variation="primary" label="Save" title={`Save changes to ${viewing.name}`} onClick={save} />
+          </footer>
+        ) : !isAdded ? (
+          <footer className="cg-bar">
+            <Button variation="secondary" icon="ArrowBack" label="Back" title="Back to add geographies" onClick={() => setViewing(null)} />
             <Button
               variation="primary"
               icon="Add"
@@ -198,16 +250,8 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                 add(viewing);
               }}
             />
-          )}
-        </header>
-        {toastEl}
-        <PlacesTabs
-          root={viewing.country}
-          levels={viewing.levels}
-          rows={rows}
-          onChange={editable ? (r) => update((a) => editSet(a, viewing, r)) : undefined}
-          aside={editable ? <p className="pt-saved">Changes save as you go</p> : undefined}
-        />
+          </footer>
+        ) : null}
       </div>
     );
   }

@@ -27,6 +27,7 @@ export function PlacesTabs({
   rows,
   onChange,
   aside,
+  note,
 }: {
   root: string;
   levels: string[];
@@ -35,6 +36,8 @@ export function PlacesTabs({
   onChange?: (rows: GeoRow[]) => void;
   /** Shown at the right of the tabs row. */
   aside?: ReactNode;
+  /** Shown at the top of the panel, worded for the view showing. */
+  note?: (view: 'table' | 'tree') => ReactNode;
 }) {
   const [view, setView] = useState<'table' | 'tree'>('tree');
   return (
@@ -53,6 +56,7 @@ export function PlacesTabs({
         {aside}
       </div>
       <div className="pt-panel">
+        {note?.(view)}
         {view === 'tree' ? (
           <GeoTree root={root} levels={levels} rows={rows} onChange={onChange} />
         ) : (
@@ -229,12 +233,11 @@ function pathsOf(rows: GeoRow[], depth: number) {
 /**
  * One column per geography level and one row per path, like the upload sheet.
  * A name repeated from the row above is shown lighter, so each group reads at a
- * glance. Editable: rename any cell (the place changes everywhere), remove the
- * row's last place, and add a geography.
+ * glance. Editable: rename any cell (the place changes everywhere) and remove the
+ * row's last place; Add geography sits in the page header.
  */
 function PlacesTable({ levels, rows, onChange }: { levels: string[]; rows: GeoRow[]; onChange?: (rows: GeoRow[]) => void }) {
   const paths = pathsOf(rows, levels.length);
-  const [adding, setAdding] = useState(false);
   return (
     <div className="cg-grid-wrap">
       <table className={`cg-grid pt-levels${onChange ? '' : ' is-read'}`}>
@@ -303,14 +306,6 @@ function PlacesTable({ levels, rows, onChange }: { levels: string[]; rows: GeoRo
           })}
         </tbody>
       </table>
-      {onChange && (
-        <div className="pt-add-btn">
-          <Button variation="secondary" icon="Add" label="Add geography" onClick={() => setAdding(true)} />
-        </div>
-      )}
-      {adding && onChange && (
-        <AddGeographyDialog levels={levels} rows={rows} onAdd={(r) => onChange([...rows, r])} onClose={() => setAdding(false)} />
-      )}
     </div>
   );
 }

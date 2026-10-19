@@ -1566,6 +1566,20 @@ p { margin: 0; line-height: 1.5; }
 /* Geography table: one column per level; a name repeated from the row above is lighter */
 .pt-levels td.is-same, .pt-levels td.is-same input { color: #6B7378; }
 .pt-levels td.is-empty { color: #6B7378; }
+/* The editable-table note runs the full width of the table */
+.sh-intro { display: block; }
+.sh-note { width: 100%; box-sizing: border-box; }
+/* Geography wizard: Add geography sits at the right end of the Table / Tree tabs row */
+.cg-places-bar > button { height: 40px; margin: 0 0 8px auto; padding: 0 16px; }
+.cg-places-bar > button .digit-button-label { font-size: 0.9375rem; font-weight: 500; }
+/* Geography detail with a footer (editing, or one not yet in the account): room for the bar,
+   and the toast sits above it */
+.geo.is-detail.has-bar { padding-bottom: 88px; }
+.geo.is-detail.has-bar .cg-toast { bottom: 96px; }
+
+/* How to proceed with upload: a #FAFAFA card, its three steps white inside it */
+.us { padding: 20px 24px 24px; border: 1px solid #E3E3E3; border-radius: 12px; background: #FAFAFA; }
+.us-step { background: #fff; }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */

@@ -453,7 +453,7 @@ function PeopleTable({
   const desc = (p: Person, k: string) => (errors[`${p.key}-${k}`] ? `${uid}-${p.key}-${k}-err` : undefined);
   return (
     <div className="cg-grid-wrap">
-      <SheetIntro />
+      <SheetIntro action="Send invites" />
       <table className="cg-grid tm-grid is-sheet">
         <thead>
           <tr className="sheet-letters" aria-hidden="true">
