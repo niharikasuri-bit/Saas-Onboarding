@@ -82,13 +82,15 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
 
   const catalogue = [...GEO_SETS, ...(account.geography.custom ?? [])];
   const all = adding ? catalogue : catalogue.filter((s) => added.has(s.id));
-  const status = (s: GeoSet) => (added.has(s.id) ? 'Active' : 'Inactive');
+  // A geography in the account turns active once a product using it is live.
+  const anyLive = (['hcm', 'cms', 'lnp'] as const).some((k) => account.products[k].enabled && account.products[k].live);
+  const status = (s: GeoSet) => (added.has(s.id) ? (anyLive ? 'Active' : 'Inactive') : '');
   const term = adding ? q.trim().toLowerCase() : '';
   const hits = all.filter(
     (s) =>
       !term ||
       [s.name, s.country, ...s.levels].some((x) => x.toLowerCase().includes(term)) ||
-      status(s).toLowerCase().startsWith(term),
+      (!!status(s) && status(s).toLowerCase().startsWith(term)),
   );
 
   /** After adding, go back to the account's geographies. */
@@ -124,17 +126,19 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
       ) : (
         <header className="geo-head">
           <h1 ref={heading} tabIndex={-1}>
-            Your geographies
+            Geographies
           </h1>
           <p className="geo-lead">
             Geographies are the places your organisation serves, from the largest area down to the smallest. Every
-            product uses them to know where things happen, so work reaches the right place.
+            product uses them to know where things happen, so work reaches the right place. A geography becomes
+            active once a product starts using it.
           </p>
           <Button variation="primary" icon="Add" label="Add geographies" onClick={() => setAdding(true)} />
         </header>
       )}
 
       <div className="geo-bar">
+        {!adding && <h2 className="geo-section-h">Your geographies</h2>}
         {adding && (
           <div className="geo-search">
             <label htmlFor={`${uid}-q`} className="ux-visually-hidden">
@@ -209,9 +213,9 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                 <span className="geo-icon" aria-hidden="true">
                   <Icon name="Public" size={20} />
                 </span>
-                <Status active={added.has(s.id)} />
+                <Status value={status(s)} />
               </div>
-              <h2>{s.name}</h2>
+              <CardHeading level={adding ? 2 : 3}>{s.name}</CardHeading>
               <p className="geo-stats">
                 <span>
                   <strong>{s.levels.length}</strong> {s.levels.length === 1 ? 'level' : 'levels'}
@@ -262,7 +266,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                   </td>
                   <td>{s.count.toLocaleString('en')}</td>
                   <td>
-                    <Status active={added.has(s.id)} />
+                    <Status value={status(s)} />
                   </td>
                   <td>
                     <div className="geo-row-actions">
@@ -301,8 +305,15 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
   );
 }
 
-function Status({ active }: { active: boolean }) {
-  return <span className={`geo-status${active ? ' is-active' : ''}`}>{active ? 'Active' : 'Inactive'}</span>;
+/** Card titles sit under "Your geographies" (h2) once added, so they drop a level. */
+function CardHeading({ level, children }: { level: 2 | 3; children: React.ReactNode }) {
+  return level === 2 ? <h2 className="geo-card-h">{children}</h2> : <h3 className="geo-card-h">{children}</h3>;
+}
+
+/** Active / Inactive for the account's geographies; nothing for ones not added. */
+function Status({ value }: { value: string }) {
+  if (!value) return null;
+  return <span className={`geo-status${value === 'Active' ? ' is-active' : ''}`}>{value}</span>;
 }
 
 /** Create a geography that isn't in the catalogue: its name, country and largest level. */
