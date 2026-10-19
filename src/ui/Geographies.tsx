@@ -85,7 +85,12 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
   // A geography in the account turns active once a product using it is live.
   const anyLive = (['hcm', 'cms', 'lnp'] as const).some((k) => account.products[k].enabled && account.products[k].live);
   const status = (s: GeoSet) => (added.has(s.id) ? (anyLive ? 'Active' : 'Inactive') : '');
-  const term = adding ? q.trim().toLowerCase() : '';
+  const term = q.trim().toLowerCase();
+  const startAdding = () => {
+    setQ('');
+    setMsg('');
+    setAdding(true);
+  };
   const hits = all.filter(
     (s) =>
       !term ||
@@ -124,7 +129,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
           )}
         </header>
       ) : (
-        <header className="geo-head">
+        <header className="geo-head geo-band">
           <h1 ref={heading} tabIndex={-1}>
             Geographies
           </h1>
@@ -133,14 +138,11 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
             product uses them to know where things happen, so work reaches the right place. A geography becomes
             active once a product starts using it.
           </p>
-          <Button variation="primary" icon="Add" label="Add geographies" onClick={() => setAdding(true)} />
         </header>
       )}
 
       <div className="geo-bar">
-        {!adding && <h2 className="geo-section-h">Your geographies</h2>}
-        {adding && (
-          <div className="geo-search">
+        <div className="geo-search">
             <label htmlFor={`${uid}-q`} className="ux-visually-hidden">
               Search geographies
             </label>
@@ -148,7 +150,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
             <input
               id={`${uid}-q`}
               type="search"
-              placeholder="Search by name, country, level or status"
+              placeholder={adding ? 'Search by name, country, level or status' : 'Search by country'}
               value={q}
               onChange={(e) => {
                 setQ(e.target.value);
@@ -157,7 +159,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
               }}
             />
           </div>
-        )}
+        {!adding && <Button variation="primary" icon="Add" label="Add your geographies" onClick={startAdding} />}
         <div className="geo-view" role="group" aria-label="View as">
           <button type="button" aria-pressed={view === 'cards'} onClick={() => setView('cards')}>
             <Icon name="GridView" size={18} />
@@ -170,7 +172,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
         </div>
       </div>
 
-      <p className={adding ? 'geo-count' : 'ux-visually-hidden'} role="status">
+      <p className={adding || term ? 'geo-count' : 'ux-visually-hidden'} role="status">
         {msg ||
           (term
             ? `${hits.length} ${hits.length === 1 ? 'geography' : 'geographies'} found`
@@ -201,7 +203,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
           ) : (
             <>
               <p>None of your geographies match “{q.trim()}”. Try another search, or add more geographies.</p>
-              <Button variation="primary" icon="Add" label="Add geographies" onClick={() => setAdding(true)} />
+              <Button variation="primary" icon="Add" label="Add your geographies" onClick={startAdding} />
             </>
           )}
         </div>
