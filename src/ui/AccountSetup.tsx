@@ -55,8 +55,10 @@ const TASK: Record<
 export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = {}) {
   const { account, go } = useAccount();
   const todos = todosFor(account);
-  // Open steps first, in their usual order; finished ones move to the bottom.
-  const ordered = [...todos.filter((t) => !todoDone(t.id, account)), ...todos.filter((t) => todoDone(t.id, account))];
+  // Only what's left: a finished step drops off, so they pick up where they left off.
+  const open = todos.filter((t) => !todoDone(t.id, account));
+  const started = open.length < todos.length;
+  const unlocked = todoDone('geography', account);
   // Adding geographies happens right here on Home, not on the Geographies page.
   const [addingGeo, setAddingGeo] = useState(false);
   const [addingSender, setAddingSender] = useState(false);
@@ -83,17 +85,21 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
       {toastEl}
       <header className="as-head">
         <div className="as-wrap">
-          <p className="as-eyebrow">Welcome aboard</p>
+          <p className="as-eyebrow">{started ? 'Welcome back' : 'Welcome aboard'}</p>
           <h1 ref={heading} tabIndex={-1}>
             Let’s complete <em>account setup</em>
           </h1>
-          <p className="as-lead">Add your geographies to unlock your products. Notification channels and your team are optional for now.</p>
+          <p className="as-lead">
+            {unlocked
+              ? `Your products are unlocked. ${open.length === 1 ? 'One step' : `${open.length} steps`} left, whenever you’re ready.`
+              : 'Add your geographies to unlock your products. Notification channels and your team are optional for now.'}
+          </p>
         </div>
       </header>
 
       <section className="as-wrap" aria-label="What you need to do">
-        <ol className="as-list">
-          {ordered.map((t) => {
+        <ol className="as-list" style={{ '--as-n': open.length } as React.CSSProperties}>
+          {open.map((t) => {
             const isDone = todoDone(t.id, account);
             const task = TASK[t.id];
             return (
