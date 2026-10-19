@@ -160,18 +160,15 @@ function ProductTile({ p, locked, opening }: { p: Product; locked: boolean; open
   );
 }
 
-/** A product that isn't in their plan: lighter, dashed, with Add for admins. */
+/** A product that isn't in their plan yet: the same white card, with Add for admins. */
 function OffTile({ p, admin }: { p: Product; admin: boolean }) {
   const { update } = useAccount();
   const meta = PRODUCTS[p];
   return (
     <li className="pt-card is-off">
-      <div className="pt-head">
-        <span className="pt-icon" aria-hidden="true">
-          <Icon name={meta.icon} size={26} />
-        </span>
-        <span className="pt-tag is-off">Not in your plan</span>
-      </div>
+      <span className="pt-icon" aria-hidden="true">
+        <Icon name={meta.icon} size={26} />
+      </span>
       <h3>{meta.name}</h3>
       <p className="pt-about">{meta.about}</p>
       <About p={p} />
@@ -180,8 +177,8 @@ function OffTile({ p, admin }: { p: Product; admin: boolean }) {
           <Button
             variation="secondary"
             icon="Add"
-            label="Add to my products"
-            title={`Add ${meta.name} to my products`}
+            label="Add product to account"
+            title={`Add ${meta.name} to account`}
             onClick={() => update((a) => ({ ...a, products: { ...a.products, [p]: { ...a.products[p], enabled: true } } }))}
           />
         ) : (

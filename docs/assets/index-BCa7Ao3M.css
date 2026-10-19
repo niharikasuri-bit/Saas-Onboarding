@@ -1372,8 +1372,7 @@ p { margin: 0; line-height: 1.5; }
 .pt-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr)); gap: var(--s5, 20px); }
 .pt-card { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 12px; padding: 24px 28px; border: 1px solid #EAEAEA; border-radius: 14px; background: #fff; box-shadow: 0 1px 2px rgb(16 24 40 / 0.04), 0 6px 18px rgb(16 24 40 / 0.05); }
 .pt-tag { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; font-size: 0.875rem; font-weight: 500; color: #8A3A00; background: #FFE9D6; }
-.pt-card:nth-child(2n) .pt-tag:not(.is-off) { color: #5B2A86; background: #EFE4FA; }
-.pt-tag.is-off { color: var(--c-text-2); background: #EEEEEE; }
+.pt-card:nth-child(2n) .pt-tag { color: #5B2A86; background: #EFE4FA; }
 .pt-card h3 { font-size: 1.5rem; font-weight: 700; line-height: 1.25; color: var(--digitv2-lightTheme-primary-2); }
 .pt-about { color: var(--c-text-2); line-height: 1.5; }
 .pt-stats { margin: 4px 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
@@ -1405,9 +1404,6 @@ p { margin: 0; line-height: 1.5; }
 }
 
 /* Not in their plan: lighter and dashed */
-.pt-card.is-off { background: #FAFAFA; border-style: dashed; box-shadow: none; }
-.pt-card.is-off .pt-stats > div { background: #F0F0F0; }
-.pt-card.is-off .pt-actions > button { background: #fff; }
 /* The lock sits in the card's top-right corner, clear of the content */
 .pt-lock { inset: 18px 18px auto auto; display: block; }
 .pt-lock svg { width: 30px; height: 30px; padding: 10px; }
@@ -1415,7 +1411,6 @@ p { margin: 0; line-height: 1.5; }
 /* Product cards: product icon, cards stretch to fill the row */
 .pt-list { grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); }
 .pt-icon { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 12px; background: var(--c-primary-bg); color: var(--c-primary); }
-.pt-card.is-off .pt-icon { background: #EEEEEE; color: #505A5F; }
 .pt-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); }
 .pt-card .pt-actions > button { width: auto; min-width: 200px; }
 /* No progress bar: the lead line closes the header */
@@ -1438,9 +1433,6 @@ p { margin: 0; line-height: 1.5; }
 .pt-about-box dl > div + div { border-left: 1px solid #EBCBA3; }
 .pt-about-box dd { order: -1; margin: 0; font-size: 1.25rem; font-weight: 700; line-height: 1.1; color: var(--digitv2-lightTheme-primary-2); }
 .pt-about-box dt { font-size: 0.8125rem; font-weight: 500; line-height: 1.3; color: var(--c-text-2); }
-.pt-card.is-off .pt-about-box { background: #F3F3F3; border-color: #E3E3E3; }
-.pt-card.is-off .pt-about-h { color: var(--c-text-2); border-color: #E3E3E3; }
-.pt-card.is-off .pt-about-box dl > div + div { border-color: #DDDDDD; }
 
 /* Home setup band, compact: the three steps sit side by side (stacking on narrow screens),
    with a tighter header, so the band takes about a third of the height it used to. */
@@ -1499,7 +1491,10 @@ p { margin: 0; line-height: 1.5; }
 .hm-v5 .geo-section-h { font-size: 1.5rem; }
 .hm-v5 .pt-card h3 { font-size: 1.375rem; }
 /* Locked card: one quiet line where the button will be (the corner lock says the rest) */
-.pt-card.is-locked .pt-lock-cta { background: none; border: 1px dashed #C9C9C9; font-weight: 400; }
+
+/* Locked: the corner lock in primary orange; the note sits in a soft orange strip */
+.pt-lock { color: var(--c-primary); }
+.pt-card.is-locked .pt-lock-cta { height: auto; min-height: 44px; padding: 10px 14px; border: 1px solid #F5D0BC; border-radius: 8px; background: var(--c-primary-bg); color: #8A3A00; font-weight: 500; text-align: center; }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */
