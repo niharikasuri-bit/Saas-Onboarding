@@ -578,8 +578,9 @@ export const TODOS: { id: TodoId; label: string; unlocks: string }[] = [
   { id: 'users', label: 'Invite users', unlocks: 'This unlocks assigning people.' },
 ];
 
-export const todosFor = (a: Account) =>
-  TODOS.filter((t) => t.id !== 'sender' || a.products.cms.enabled || a.products.lnp.enabled);
+/** Every account sets up all three: geographies, notification channels and its team. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const todosFor = (_a: Account) => TODOS;
 
 export const todoDone = (id: TodoId, a: Account) =>
   id === 'geography' ? hasGeography(a) : id === 'users' ? a.users.length > 0 : senderReady(a);
