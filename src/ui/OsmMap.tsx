@@ -1,10 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { Icon } from '../components/Icon';
 
 /**
- * A live OpenStreetMap view under the country field. It follows what they type:
- * once the name matches a country it knows, the map moves there; otherwise it
- * shows the world. Prototype: a short list of country outlines (west, south,
- * east, north), not a geocoder.
+ * An interactive OpenStreetMap under the country search. It follows what they
+ * type (once the name matches a country it knows, the map moves there), and they
+ * pin their location by clicking the map. Keyboard: the map takes focus, the
+ * arrow keys pan and + / - zoom, and "Pin map centre" drops the pin.
+ * Prototype: a short list of country outlines (west, south, east, north), not a geocoder.
  */
 const BOXES: Record<string, [number, number, number, number]> = {
   Bangladesh: [88.0, 20.7, 92.7, 26.6],
@@ -28,6 +32,7 @@ const BOXES: Record<string, [number, number, number, number]> = {
   Nigeria: [2.7, 4.2, 14.7, 13.9],
   Pakistan: [60.9, 23.7, 77.8, 37.1],
   Philippines: [116.9, 4.6, 126.6, 21.1],
+  Portugal: [-9.6, 36.9, -6.1, 42.2],
   Rwanda: [28.8, -2.9, 30.9, -1.0],
   Senegal: [-17.6, 12.3, -11.3, 16.7],
   'Sierra Leone': [-13.3, 6.9, -10.3, 10.0],
@@ -38,7 +43,6 @@ const BOXES: Record<string, [number, number, number, number]> = {
   Zambia: [21.9, -18.1, 33.7, -8.2],
   Zimbabwe: [25.2, -22.4, 33.1, -15.6],
 };
-const WORLD: [number, number, number, number] = [-170, -58, 180, 78];
 
 function find(q: string) {
   const t = q.trim().toLowerCase();
@@ -46,23 +50,125 @@ function find(q: string) {
   return Object.keys(BOXES).find((n) => n.toLowerCase() === t) ?? Object.keys(BOXES).find((n) => n.toLowerCase().startsWith(t)) ?? null;
 }
 
-export function OsmMap({ query }: { query: string }) {
-  // Wait for a pause in typing before moving the map.
+export type Pin = { lat: number; lng: number };
+
+/** The pin: an orange drop, drawn in CSS so no image files are needed. */
+const PIN = L.divIcon({ className: 'osm-pin', html: '<span></span>', iconSize: [28, 28], iconAnchor: [14, 28] });
+
+export function OsmMap({
+  id,
+  query,
+  pin,
+  onPin,
+  error,
+}: {
+  id: string;
+  query: string;
+  pin: Pin | null;
+  onPin: (p: Pin | null) => void;
+  error?: string;
+}) {
+  const box = useRef<HTMLDivElement>(null);
+  const map = useRef<L.Map | null>(null);
+  const marker = useRef<L.Marker | null>(null);
+  const onPinRef = useRef(onPin);
+  onPinRef.current = onPin;
   const [shown, setShown] = useState(() => find(query));
+
+  // One map for the life of the step.
+  useEffect(() => {
+    if (!box.current) return;
+    const m = L.map(box.current, { worldCopyJump: true, zoomControl: true }).setView([5, 20], 2);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(m);
+    m.on('click', (e: L.LeafletMouseEvent) => onPinRef.current({ lat: e.latlng.lat, lng: e.latlng.lng }));
+    map.current = m;
+    // The map is the last thing laid out on the step; make sure it fills its box.
+    setTimeout(() => m.invalidateSize(), 0);
+    return () => {
+      m.remove();
+      map.current = null;
+      marker.current = null;
+    };
+  }, []);
+
+  // Move to the country after a pause in typing.
   useEffect(() => {
     const t = setTimeout(() => setShown(find(query)), 400);
     return () => clearTimeout(t);
   }, [query]);
-  const [w, s, e, n] = shown ? BOXES[shown] : WORLD;
+  useEffect(() => {
+    if (!map.current || !shown) return;
+    const [w, s, e, n] = BOXES[shown];
+    map.current.fitBounds([
+      [s, w],
+      [n, e],
+    ]);
+  }, [shown]);
+
+  // Keep the marker in step with the pin.
+  useEffect(() => {
+    if (!map.current) return;
+    if (!pin) {
+      marker.current?.remove();
+      marker.current = null;
+      return;
+    }
+    if (marker.current) marker.current.setLatLng([pin.lat, pin.lng]);
+    else marker.current = L.marker([pin.lat, pin.lng], { icon: PIN, keyboard: false, interactive: false }).addTo(map.current);
+  }, [pin]);
+
+  const fmt = (n: number) => n.toFixed(4);
   return (
-    <figure className="osm-map">
-      <iframe
-        title={shown ? `Map of ${shown}` : 'World map'}
-        src={`https://www.openstreetmap.org/export/embed.html?bbox=${w},${s},${e},${n}&layer=mapnik`}
-        loading="lazy"
+    <div className={`osm-map${error ? ' has-error' : ''}`}>
+      {error && (
+        <p className="fld-error" id={`${id}-err`}>
+          <span className="ux-visually-hidden">Error: </span>
+          {error}
+        </p>
+      )}
+      <div
+        ref={box}
+        id={id}
+        className="osm-canvas"
+        role="application"
+        aria-label={`Map${shown ? ` of ${shown}` : ''}. Click to pin your location, or use the arrow keys to move and Pin map centre.`}
+        aria-describedby={error ? `${id}-err` : undefined}
       />
-      {/* The embed carries OpenStreetMap's own credit line. */}
-      <figcaption>{shown ? `Showing ${shown}` : 'Type a country to see it on the map.'}</figcaption>
-    </figure>
+      <div className="osm-bar">
+        <p className="osm-status" role="status">
+          {pin ? (
+            <>
+              <Icon name="LocationOn" size={18} />
+              Pinned at {fmt(pin.lat)}, {fmt(pin.lng)}
+            </>
+          ) : shown ? (
+            `Showing ${shown}. Click the map to pin your location.`
+          ) : (
+            'Search for your country, then click the map to pin your location.'
+          )}
+        </p>
+        <div className="osm-actions">
+          <button
+            type="button"
+            className="osm-btn"
+            onClick={() => {
+              const c = map.current?.getCenter();
+              if (c) onPin({ lat: c.lat, lng: c.lng });
+            }}
+          >
+            <Icon name="LocationOn" size={18} />
+            Pin map centre
+          </button>
+          {pin && (
+            <button type="button" className="osm-btn" onClick={() => onPin(null)}>
+              Clear pin
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

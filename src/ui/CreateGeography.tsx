@@ -4,7 +4,7 @@ import { Icon } from '../components/Icon';
 import { newId, type GeoRow, type GeoSet } from '../lib/model';
 import { Field, describedBy } from './StepFrame';
 import { AddGeographyDialog, GeoTree } from './GeoTree';
-import { OsmMap } from './OsmMap';
+import { OsmMap, type Pin } from './OsmMap';
 import { SheetIntro, UploadSteps, colLetter } from './Sheet';
 import { Crumbs } from './Crumbs';
 
@@ -128,6 +128,8 @@ export function CreateGeography({
   const [method, setMethod] = useState<Method | ''>('');
   const [view, setView] = useState<'table' | 'tree'>('tree');
   const [addingPlace, setAddingPlace] = useState(false);
+  // OpenStreetMap: where they pinned their location.
+  const [pin, setPin] = useState<Pin | null>(null);
   const [rows, setRows] = useState<Path[]>([blankRow(2), blankRow(2)]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploaded, setUploaded] = useState('');
@@ -167,9 +169,10 @@ export function CreateGeography({
     const e: Record<string, string> = {};
     if (step === 'country') {
       const name = country.trim();
-      if (!name) e.country = method === 'osm' ? 'Enter a place to search for' : 'Enter the country’s name';
+      if (!name) e.country = method === 'osm' ? 'Enter the country to search for' : 'Enter the country’s name';
       else if (taken.some((s) => s.name.toLowerCase() === name.toLowerCase()))
         e.country = `${name} is already here. Search for it instead.`;
+      if (method === 'osm' && !pin) e.pin = 'Pin your location on the map';
     }
     if (step === 'levels') {
       cleanLevels.forEach((l, i) => {
@@ -221,7 +224,7 @@ export function CreateGeography({
       'Choose how to set up your geography data. Upload a file using the template for bulk setup, or open the map to select them visually.',
     country:
       method === 'osm'
-        ? 'Search for the country you serve, then fetch its geographies.'
+        ? 'Search for the country you serve, then pin your location on the map.'
         : 'Your geography starts here. Everything you add sits inside it.',
     levels: 'List the geography levels from largest to smallest, for example Country, Region, District. This will help us customize your template for bulk upload.',
     places:
@@ -236,7 +239,7 @@ export function CreateGeography({
   const reviewing = step === 'places' && (!!uploaded || method === 'osm');
 
   return (
-    <div className={`cg-page${step === 'places' ? ' is-wide' : ''}`}>
+    <div className={`cg-page${step === 'places' || (step === 'country' && method === 'osm') ? ' is-wide' : ''}`}>
       <Crumbs items={[...trail, { label: 'Create a geography' }]} />
     <section className={`cg${reviewing ? ' is-bare' : ''}`} aria-labelledby={`${uid}-h`}>
       {reviewing ? (
@@ -303,7 +306,18 @@ export function CreateGeography({
               );
             })()}
           </Field>
-          {method === 'osm' && <OsmMap query={country} />}
+          {method === 'osm' && (
+            <OsmMap
+              id={`${uid}-pin`}
+              query={country}
+              pin={pin}
+              onPin={(p) => {
+                setPin(p);
+                if (p && errors.pin) setErrors(({ pin: _gone, ...rest }) => rest);
+              }}
+              error={errors.pin}
+            />
+          )}
           </div>
         )}
 
@@ -428,7 +442,7 @@ export function CreateGeography({
         />
         <Button
           variation="primary"
-          label={step === 'places' ? 'Create geographies' : step === 'country' && method === 'osm' ? 'Fetch' : 'Next'}
+          label={step === 'places' ? 'Create geographies' : 'Next'}
           icon={step === 'places' ? undefined : 'ArrowForward'}
           isSuffix
           onClick={next}

@@ -1658,3 +1658,23 @@ p { margin: 0; line-height: 1.5; }
 .cg-split.is-stacked > .fld > label { align-self: flex-start; text-align: left; }
 .cg .cg-split > .fld .cg-osm-search { flex: none; display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 16px; border-radius: 8px; }
 .cg .cg-split > .fld .cg-osm-search input { flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; outline: none; font-size: 1.0625rem; }
+
+/* OpenStreetMap step: a big, stretched map to search and pin on */
+.cg-split.is-stacked > .fld { max-width: 560px; }
+.cg-split.is-stacked > .osm-map { max-width: none; margin: var(--s4) 0 0; }
+.osm-canvas { height: min(520px, 60vh); min-height: 320px; border: 1px solid #E3E3E3; border-radius: 12px; background: #EAEFF2; overflow: hidden; z-index: 0; }
+.osm-canvas:focus-visible { outline: none; box-shadow: var(--focus); }
+.osm-map.has-error .osm-canvas { border-color: var(--digitv2-lightTheme-alert-error); }
+.osm-map .fld-error { margin-bottom: 8px; }
+.osm-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s2) var(--s4); margin-top: 10px; }
+.osm-status { display: inline-flex; align-items: center; gap: 6px; font-size: 0.9375rem; color: var(--c-text-2); }
+.osm-status .ux-icon { color: var(--c-primary); }
+.osm-actions { display: flex; gap: var(--s2); }
+.osm-btn { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 14px; border: 1px solid var(--c-primary); border-radius: 6px; background: #fff; font: inherit; font-size: 0.9375rem; font-weight: 500; color: #B8460C; cursor: pointer; }
+.osm-btn:hover { background: var(--c-primary-bg); }
+.osm-btn:focus-visible { outline: none; box-shadow: var(--focus); }
+/* the pin: an orange drop with a white dot */
+.osm-pin span { position: absolute; left: 2px; top: 0; width: 24px; height: 24px; border-radius: 50% 50% 50% 0; background: var(--c-primary); transform: rotate(-45deg); box-shadow: 0 2px 6px rgb(0 0 0 / 0.35); }
+.osm-pin span::after { content: ''; position: absolute; left: 7px; top: 7px; width: 10px; height: 10px; border-radius: 50%; background: #fff; }
+.leaflet-container { font: inherit; }
+.leaflet-control-zoom a:focus-visible { outline: none; box-shadow: var(--focus); }

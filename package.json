@@ -12,12 +12,14 @@
     "@egovernments/digit-ui-components": "react-19",
     "@egovernments/digit-ui-components-css": "react-19",
     "@tanstack/react-query": "^5.62.16",
+    "leaflet": "^1.9.4",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "6.25.1",
     "styled-components": "^5.3.11"
   },
   "devDependencies": {
+    "@types/leaflet": "1.9",
     "@types/node": "^24.0.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
