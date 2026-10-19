@@ -1029,7 +1029,9 @@ p { margin: 0; line-height: 1.5; }
 
 /* Full width, no boxed column: the create flow sits straight on the page */
 .cg-page, .cg-page.is-wide { max-width: none; }
-.cg { padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
+/* The white container stays, stretched to the full width */
+.cg { padding: 40px 44px 36px; border: 1px solid #EAEAEA; border-radius: 20px; background: #fff; box-shadow: 0 1px 2px rgb(16 24 40 / 0.04), 0 12px 32px rgb(16 24 40 / 0.06); }
+@media (max-width: 720px) { .cg { padding: 24px 18px; } }
 .cg-sub { max-width: none; }
 .cg-split > .fld { grid-template-columns: minmax(160px, 280px) minmax(0, 720px); }
 .geo:not(.is-overview), .geo.is-detail { max-width: none; }
