@@ -575,11 +575,11 @@ p { margin: 0; line-height: 1.5; }
 .sh-nav-foot { margin-top: auto; }
 
 
-/* Account setup: leads Home until done. A centred 720px column, one brand colour.
+/* Account setup: leads Home until done. A centred 920px column, one brand colour.
    Type scale: page title 44 → step title 20 → body 16 → note 14 → labels 12. */
 .hm.is-setup { max-width: none; }
 .as { margin-bottom: var(--s8); }
-.as-wrap { max-width: 720px; margin: 0 auto; }
+.as-wrap { max-width: 920px; margin: 0 auto; }
 .as-head {
   /* Continues the strip above it across the full width: a warm tint fading into the page */
   margin: calc(-1 * var(--s8)) calc(-1 * clamp(24px, 4vw, 56px)) var(--s6);
@@ -599,7 +599,8 @@ p { margin: 0; line-height: 1.5; }
 .as-bar { height: 14px; margin-bottom: 0; border-radius: 7px; background: #E4E4E4; overflow: hidden; }
 .as-bar span { display: block; height: 100%; border-radius: 7px; background: var(--c-success); transition: width 0.5s ease; }
 
-.as-list { list-style: none; margin: var(--s8) 0 0; padding: 0; display: grid; gap: var(--s4); }
+.as-list { list-style: none; margin: var(--s8) 0 0; padding: 0; display: grid; grid-auto-rows: 1fr; gap: var(--s4); }
+.as-list > li { display: flex; }
 .as-card.digit-card-component {
   display: flex; flex-direction: column; gap: 0; width: 100%; margin: 0; padding: 24px 28px;
   border: 1px solid var(--c-divider); border-radius: 16px; background: #fff;
@@ -611,7 +612,7 @@ p { margin: 0; line-height: 1.5; }
 .as-top { display: flex; align-items: center; justify-content: space-between; gap: var(--s4); }
 .as-icon { flex-shrink: 0; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 8px; background: var(--c-primary-bg); color: var(--c-primary); }
 .as-card.is-done .as-icon { border-radius: 50%; background: var(--c-success); color: #fff; }
-.as-body { min-width: 0; }
+.as-body { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 .as-top h3 { display: flex; align-items: center; gap: 12px; font-size: 1.25rem; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; color: var(--digitv2-lightTheme-primary-2); }
 .as-what { margin-top: 10px; font-size: 1rem; line-height: 1.5; color: var(--c-text); }
 .as-why {
@@ -620,7 +621,7 @@ p { margin: 0; line-height: 1.5; }
 }
 .as-why .ux-icon { flex-shrink: 0; margin-top: 1px; color: var(--digitv2-lightTheme-alert-info); }
 .as-result { margin-top: 6px; font-size: 1rem; font-weight: 500; color: var(--c-success); }
-.as-foot { display: flex; align-items: center; justify-content: flex-end; gap: var(--s4); margin-top: 20px; }
+.as-foot { display: flex; align-items: center; justify-content: flex-start; gap: var(--s4); margin-top: auto; padding-top: 20px; }
 .as-time { display: inline-flex; align-items: center; gap: 6px; font-size: 0.875rem; font-weight: 500; color: #505A5F; }
 .as-time .ux-icon { color: var(--digitv2-lightTheme-primary-2); }
 .as-foot > button { height: 40px; padding: 0 20px; }
