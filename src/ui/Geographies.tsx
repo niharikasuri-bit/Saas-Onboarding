@@ -81,7 +81,8 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
   }, [adding]);
 
   const catalogue = [...GEO_SETS, ...(account.geography.custom ?? [])];
-  const all = adding ? catalogue : catalogue.filter((s) => added.has(s.id));
+  // Adding shows only what isn't in the account yet; the overview shows only what is.
+  const all = catalogue.filter((s) => (adding ? !added.has(s.id) : added.has(s.id)));
   // A geography in the account turns active once a product using it is live.
   const anyLive = (['hcm', 'cms', 'lnp'] as const).some((k) => account.products[k].enabled && account.products[k].live);
   const status = (s: GeoSet) => (added.has(s.id) ? (anyLive ? 'Active' : 'Inactive') : '');
@@ -113,6 +114,13 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
 
   return (
     <div className={`geo${adding ? '' : ' is-overview'}`}>
+      {adding && (embedded || !!added.size) && (
+        <button type="button" className="geo-back" onClick={() => (embedded ? onDone?.() : done(''))}>
+          <Icon name="ArrowBack" size={20} />
+          Back
+          <span className="ux-visually-hidden">{embedded ? ' to account setup' : ' to your geographies'}</span>
+        </button>
+      )}
       {adding ? (
         <header className="geo-head">
           <h1 ref={heading} tabIndex={-1}>
@@ -122,27 +130,31 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
             Add the places you’ll serve, wherever your team sits. Every product uses your geographies to know where
             things happen, so work reaches the right place.
           </p>
-          {embedded ? (
-            <Button variation="link" label="Back to account setup" onClick={() => onDone?.()} />
-          ) : (
-            !!added.size && <Button variation="link" label="Back to your geographies" onClick={() => done('')} />
-          )}
         </header>
       ) : (
         <header className="geo-head geo-band">
-          <h1 ref={heading} tabIndex={-1}>
-            Geographies
-          </h1>
-          <p className="geo-lead">
-            Geographies are the places your organisation serves, from the largest area down to the smallest. Every
-            product uses them to know where things happen, so work reaches the right place. A geography becomes
-            active once a product starts using it.
-          </p>
+          <div className="geo-band-text">
+            <h1 ref={heading} tabIndex={-1}>
+              Geographies
+            </h1>
+            <p className="geo-lead">
+              Geographies are the places your organisation serves, from the largest area down to the smallest. Every
+              product uses them to know where things happen, so work reaches the right place. A geography becomes
+              active once a product starts using it.
+            </p>
+          </div>
+          <Button variation="primary" icon="Add" label="Add your geographies" onClick={startAdding} />
         </header>
       )}
 
       <div className="geo-bar">
-        <div className="geo-search">
+        {!adding && (
+          <h2 className="geo-section-h">
+            Your geographies <span className="geo-section-n">{all.length}</span>
+          </h2>
+        )}
+        <div className="geo-tools">
+          <div className="geo-search">
             <label htmlFor={`${uid}-q`} className="ux-visually-hidden">
               Search geographies
             </label>
@@ -159,16 +171,16 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
               }}
             />
           </div>
-        {!adding && <Button variation="primary" icon="Add" label="Add your geographies" onClick={startAdding} />}
-        <div className="geo-view" role="group" aria-label="View as">
-          <button type="button" aria-pressed={view === 'cards'} onClick={() => setView('cards')}>
-            <Icon name="GridView" size={18} />
-            Cards
-          </button>
-          <button type="button" aria-pressed={view === 'list'} onClick={() => setView('list')}>
-            <Icon name="List" size={18} />
-            List
-          </button>
+          <div className="geo-view" role="group" aria-label="View as">
+            <button type="button" aria-pressed={view === 'cards'} onClick={() => setView('cards')}>
+              <Icon name="GridView" size={18} />
+              Cards
+            </button>
+            <button type="button" aria-pressed={view === 'list'} onClick={() => setView('list')}>
+              <Icon name="List" size={18} />
+              List
+            </button>
+          </div>
         </div>
       </div>
 
@@ -177,14 +189,14 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
           (term
             ? `${hits.length} ${hits.length === 1 ? 'geography' : 'geographies'} found`
             : adding
-              ? `${all.length} geographies`
+              ? `${all.length} ${all.length === 1 ? 'geography' : 'geographies'} you can add`
               : `${all.length} ${all.length === 1 ? 'geography' : 'geographies'} in your account`)}
       </p>
 
       {creating !== null ? (
         <CreateGeography
           initial={creating}
-          taken={all}
+          taken={catalogue}
           onCancel={() => setCreating(null)}
           onCreate={(s) => {
             update((a) => addSet({ ...a, geography: { ...a.geography, custom: [...(a.geography.custom ?? []), s] } }, s));
@@ -194,8 +206,13 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
       ) : !hits.length ? (
         <div className="geo-empty">
           <EmptyGlobe />
-          <h2>No geographies found</h2>
-          {adding ? (
+          <h2>{term ? 'No geographies found' : 'Nothing left to add'}</h2>
+          {adding && !term ? (
+            <>
+              <p>Every geography DIGIT holds is already in your account. Create your own if one is missing.</p>
+              <Button variation="primary" icon="Add" label="Create a geography" onClick={() => setCreating('')} />
+            </>
+          ) : adding ? (
             <>
               <p>Nothing matches “{q.trim()}”. Try another search, or create this geography yourself.</p>
               <Button variation="primary" icon="Add" label={`Create “${q.trim()}”`} onClick={() => setCreating(q.trim())} />
