@@ -2816,6 +2816,9 @@ label.ec-btn { cursor: pointer; }
 /* Language step: Continue sits in the card with the field, no footer bar */
 .qz-card.is-single .qz-form { padding-bottom: 40px; }
 .qz-card.is-single .qz-actions { position: static; margin: var(--s6) 0 0; padding: 0; border-top: 0; box-shadow: none; background: none; }
+/* Add team member (invite step): a secondary button, orange text and border on white */
+.qz-add-row { gap: 6px; min-height: 40px; padding: 0 16px; border: 1px solid var(--c-primary); border-radius: 4px; background: #fff; color: var(--c-primary); font-weight: 500; }
+.qz-add-row:hover { box-shadow: none; background: #FBEEE8; color: #B8460C; }
 /* required styles */
 
 .leaflet-pane,
