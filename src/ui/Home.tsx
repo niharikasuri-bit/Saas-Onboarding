@@ -8,21 +8,11 @@ import {
   cardState,
   nextRow,
   percent,
-  todoDone,
-  todoResult,
-  todosFor,
   type Product,
-  type TodoId,
 } from '../lib/model';
 import { firstName } from '../setup/steps';
 import { setupDone } from '../lib/model';
 import { AccountSetup } from './AccountSetup';
-
-const TODO_ACTION: Record<TodoId, [string, string]> = {
-  geography: ['Add Geographies', 'View Geographies'],
-  users: ['Invite Users', 'Invite More'],
-  sender: ['Set Up Notification Channels', 'View Notification Channels'],
-};
 
 /**
  * Home: a Primary 1 bg hero with the admin's account to-do, then a card for
@@ -66,58 +56,14 @@ export function Home() {
   );
 }
 
+/** Once the account is set up, Home just greets them; the products follow. */
 function Hero({ name, admin }: { name: string; admin: boolean }) {
-  const { account, params, openModal } = useAccount();
-  const todos = todosFor(account);
-  const left = todos.filter((t) => !todoDone(t.id, account)).length;
-
-  const open = (id: TodoId) =>
-    openModal(id === 'geography' ? { kind: 'geography' } : id === 'users' ? { kind: 'users' } : { kind: 'sender' });
-
   return (
     <section className="hero" aria-labelledby="hero-h">
       <h1 id="hero-h" tabIndex={-1}>
-        Hey {name} <span aria-hidden="true">👋</span>
+        Hi {name}
       </h1>
-      {admin ? (
-        <>
-          <p className="hero-lead">
-            {left
-              ? `Your account needs ${left === 1 ? 'one more thing' : `${left} things`}. Each one unlocks something in your products.`
-              : 'Your account is set up. Everything in your products is unlocked.'}
-          </p>
-          <ul className="todo-list">
-            {todos.map((t) => {
-              const done = todoDone(t.id, account);
-              return (
-                <li
-                  key={t.id}
-                  className={`todo-row${done ? ' is-done' : ''}${params.highlight === t.id ? ' is-lit' : ''}`}
-                >
-                  <span className="todo-mark" aria-hidden="true">
-                    {done && <Icon name="Check" size={14} />}
-                  </span>
-                  <span className="todo-text">
-                    <span className="todo-name">
-                      {t.label}
-                      {done && <span className="ux-visually-hidden"> (done)</span>}
-                    </span>
-                    <span className="todo-why">{done ? todoResult(t.id, account) : t.unlocks}</span>
-                  </span>
-                  <Button
-                    variation={done ? 'link' : 'secondary'}
-                    size="medium"
-                    label={TODO_ACTION[t.id][done ? 1 : 0]}
-                    onClick={() => open(t.id)}
-                  />
-                </li>
-              );
-            })}
-          </ul>
-        </>
-      ) : (
-        <p className="hero-lead">Here are the products your team is working on.</p>
-      )}
+      <p className="hero-lead">{admin ? 'Pick a product below to start using it.' : 'Here are the products your team is working on.'}</p>
     </section>
   );
 }

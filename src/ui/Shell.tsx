@@ -16,7 +16,10 @@ import { HelpPanel } from './HelpPanel';
 import { LOGO } from '../logo';
 
 /** The account's own pages. The side nav shows where things live, not their status.
- * Product health does nothing when clicked for now. */
+ * Product health, Integrations, Branding and Language do nothing when clicked for now. */
+/** Not built yet: these do nothing when clicked, for now. */
+const INERT: PageId[] = ['health', 'integrations', 'branding', 'languages'];
+
 const ACCOUNT_NAV: { id: PageId; label: string; icon: string }[] = [
   { id: 'home', label: 'Home', icon: 'Home' },
   { id: 'health', label: 'Product health', icon: 'Analytics' },
@@ -104,7 +107,7 @@ export function Shell({ children }: { children: ReactNode }) {
           ) : (
             <ul>
               {ACCOUNT_NAV.filter((n) => match(n.label)).map((n) => (
-                <NavItem key={n.id} label={n.label} icon={n.icon} current={page === n.id} onClick={() => n.id !== 'health' && go(n.id)} />
+                <NavItem key={n.id} label={n.label} icon={n.icon} current={page === n.id} onClick={() => !INERT.includes(n.id) && go(n.id)} />
               ))}
             </ul>
           )}
