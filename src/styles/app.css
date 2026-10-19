@@ -648,7 +648,7 @@ p { margin: 0; line-height: 1.5; }
 }
 
 /* Geographies page: definition, one search, cards or a list (like a file browser), empty state */
-.geo { max-width: 1120px; }
+.geo { max-width: 1320px; }
 .geo-head h1 { font-size: 2.25rem; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; color: var(--digitv2-lightTheme-primary-2); margin-bottom: var(--s2); }
 .geo-lead { max-width: 720px; margin-bottom: var(--s6); font-size: 1.0625rem; line-height: 1.55; color: var(--c-text-2); }
 .geo-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s4); margin-bottom: var(--s2); }
@@ -696,14 +696,16 @@ p { margin: 0; line-height: 1.5; }
 .geo-table { width: 100%; table-layout: auto; border-collapse: collapse; font-size: 0.9375rem; }
 .geo-table th, .geo-table td { width: auto; min-width: 0; }
 .geo-table .geo-tag, .geo-table td:nth-child(2), .geo-table td:nth-child(3), .geo-table td:nth-child(5) { white-space: nowrap; }
-.geo-table th, .geo-table td { padding: 12px; text-align: left; vertical-align: middle; border-top: 1px solid var(--c-divider); }
+/* Numbers (Levels, Geographies) line up on the right */
+.geo-table thead th:nth-child(3), .geo-table thead th:nth-child(5), .geo-table td:nth-child(3), .geo-table td:nth-child(5) { text-align: right; font-variant-numeric: tabular-nums; }
+.geo-table th, .geo-table td { padding: 12px 10px; text-align: left; vertical-align: middle; border-top: 1px solid var(--c-divider); }
 .geo-table thead th { border-top: 0; font-size: 0.8125rem; font-weight: 700; color: var(--c-text-2); background: #FAFAFA; white-space: nowrap; }
 .geo-table tbody th { font-weight: 700; color: var(--digitv2-lightTheme-primary-2); background: none; }
 .geo-table tbody tr:hover { background: #FAFAFA; }
 .geo-row-actions { display: flex; align-items: center; gap: var(--s2); white-space: nowrap; }
 .geo-row-actions > button { height: 36px; padding: 0 12px; }
 .geo-row-actions > button .digit-button-label { font-size: 0.9375rem; font-weight: 500; }
-.geo-row-actions .geo-added, .geo-row-actions > button:first-child { min-width: 124px; }
+.geo-row-actions .geo-added { min-width: 136px; justify-content: center; }
 .geo-row-actions .geo-added { height: 36px; padding: 0 12px; }
 .geo-table tbody th { min-width: 140px; }
 
@@ -719,3 +721,5 @@ p { margin: 0; line-height: 1.5; }
 .geo-create-lead { margin: 4px 0 var(--s4); color: var(--c-text-2); }
 .geo-create form { display: flex; flex-direction: column; gap: var(--s4); }
 @media (prefers-reduced-motion: reduce) { .geo-card { transition: none; } }
+.geo-table th:first-child { padding-left: 16px; }
+.geo-table td:last-child { padding-right: 16px; }

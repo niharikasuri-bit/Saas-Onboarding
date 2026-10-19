@@ -211,12 +211,29 @@ export function Geographies() {
                   </td>
                   <td>
                     <div className="geo-row-actions">
+                      <Button
+                        variation="secondary"
+                        size="small"
+                        icon="FileDownload"
+                        label="Download"
+                        title={`Download ${s.name} data`}
+                        onClick={() => download(s)}
+                      />
                       {added.has(s.id) ? (
-                        <p className="geo-added">Added</p>
+                        <p className="geo-added">
+                          <Icon name="CheckCircle" size={16} />
+                          Added
+                        </p>
                       ) : (
-                        <Button variation="primary" size="small" label="Add to account" title={`Add ${s.name} to your account`} onClick={() => add(s)} />
+                        <Button
+                          variation="primary"
+                          size="small"
+                          icon="Add"
+                          label="Add to account"
+                          title={`Add ${s.name} to your account`}
+                          onClick={() => add(s)}
+                        />
                       )}
-                      <Button variation="secondary" size="small" label="Download" title={`Download ${s.name} data`} onClick={() => download(s)} />
                     </div>
                   </td>
                 </tr>
