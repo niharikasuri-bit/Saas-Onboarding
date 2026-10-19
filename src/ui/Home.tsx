@@ -28,29 +28,42 @@ export function Home() {
   // Until the account to-do is done it leads Home; the products sit below it.
   const setup = !setupDone(account);
 
-  return (
-    <div className={`hm${setup ? ' is-setup' : ''}`}>
-      {setup ? <AccountSetup /> : <Hero name={firstName(answers)} admin={admin} />}
+  if (setup)
+    return (
+      <div className="hm is-setup">
+        <AccountSetup />
+      </div>
+    );
 
-      {/* products appear once the account to-do is done */}
-      {!setup && (
-      <section aria-labelledby={`${uid}-p`} className="pc-wrap">
-        <h2 id={`${uid}-p`} className="tg-h">
-          Your products
-        </h2>
-        <ul className="pc-list">
+  // Set up: the same band as the other pages, then their products, then the rest to enable.
+  return (
+    <div className="geo is-overview hm-done">
+      <Hero name={firstName(answers)} admin={admin} />
+      <section aria-labelledby={`${uid}-p`} className="hm-sec">
+        <div className="geo-bar">
+          <h2 id={`${uid}-p`} className="geo-section-h">
+            Your products <span className="geo-section-n">{on.length}</span>
+          </h2>
+        </div>
+        <ul className="pc-list hm-row">
           {on.map((p) => (
             <ProductCard key={p} p={p} />
           ))}
         </ul>
-        {off.length > 0 && (
-          <ul className="pc-off" aria-label="Not enabled">
+      </section>
+      {off.length > 0 && (
+        <section aria-labelledby={`${uid}-o`} className="hm-sec">
+          <div className="geo-bar">
+            <h2 id={`${uid}-o`} className="geo-section-h">
+              Other products
+            </h2>
+          </div>
+          <ul className="pc-list hm-row">
             {off.map((p) => (
               <OffCard key={p} p={p} />
             ))}
           </ul>
-        )}
-      </section>
+        </section>
       )}
     </div>
   );
@@ -59,12 +72,14 @@ export function Home() {
 /** Once the account is set up, Home just greets them; the products follow. */
 function Hero({ name, admin }: { name: string; admin: boolean }) {
   return (
-    <section className="hero" aria-labelledby="hero-h">
-      <h1 id="hero-h" tabIndex={-1}>
-        Hi {name}
-      </h1>
-      <p className="hero-lead">{admin ? 'Pick a product below to start using it.' : 'Here are the products your team is working on.'}</p>
-    </section>
+    <header className="geo-head geo-band">
+      <div className="geo-band-text">
+        <h1 id="hero-h" tabIndex={-1}>
+          Hi {name}
+        </h1>
+        <p className="geo-lead">{admin ? 'Pick a product below to start using it.' : 'Here are the products your team is working on.'}</p>
+      </div>
+    </header>
   );
 }
 
@@ -158,29 +173,34 @@ const liveMetrics = (p: Product): [string, string][] =>
       ? [['Applications today', '0'], ['Waiting for review', '0'], ['Fees collected', '0']]
       : [['Coverage', '0%'], ['Households reached', '0'], ['Field workers active', '0']];
 
+/** A product that isn't on yet: shown greyed out, with Enable for admins. */
 function OffCard({ p }: { p: Product }) {
   const { account, update } = useAccount();
   const admin = account.ui.viewAs === 'admin';
+  const meta = PRODUCTS[p];
   return (
-    <li className="pc-small">
-      <Icon name={PRODUCTS[p].icon} size={20} />
-      <span className="pc-small-name">{PRODUCTS[p].name}</span>
-      <span className="pc-small-state">Not enabled</span>
-      {admin && (
-        <>
-          <span aria-hidden="true">·</span>
-          <button
-            type="button"
-            className="lnk"
-            aria-label={`Add ${PRODUCTS[p].name}`}
-            onClick={() =>
-              update((a) => ({ ...a, products: { ...a.products, [p]: { ...a.products[p], enabled: true } } }))
-            }
-          >
-            Add
-          </button>
-        </>
-      )}
+    <li className="pc is-off">
+      <div className="pc-head">
+        <span className="pc-icon" aria-hidden="true">
+          <Icon name={meta.icon} size={26} />
+        </span>
+        <h3>{meta.name}</h3>
+        <span className="tag is-not-started">Not enabled</span>
+      </div>
+      <p className="pc-about">{meta.about}</p>
+      <div className="pc-actions">
+        {admin ? (
+          <Button
+            variation="secondary"
+            icon="Add"
+            label="Enable product"
+            title={`Enable ${meta.name}`}
+            onClick={() => update((a) => ({ ...a, products: { ...a.products, [p]: { ...a.products[p], enabled: true } } }))}
+          />
+        ) : (
+          <p className="pc-note">Ask an admin to enable it.</p>
+        )}
+      </div>
     </li>
   );
 }
