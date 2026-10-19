@@ -100,18 +100,18 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
 
   const start = (id: TodoId) => (id === 'geography' ? setAddingGeo(true) : id === 'sender' ? setAddingSender(true) : setAddingTeam(true));
 
-  // After the first step: the orange header greets them and holds what's left, as one white strip.
+  // After the first step: the orange header greets them; what's left is its own section, the step as a card.
   if (started) {
     return (
       <div className="pk">
         {toastEl}
-        {/* What's left sits right in the orange header, as one white strip: the next step and its button */}
-        <HomeHeader ref={heading}>
-          <section className="pk-next" aria-labelledby="pk-h">
-            <h2 id="pk-h" className="pk-eyebrow">
+        <HomeHeader ref={heading} />
+        {/* What's left: its own section under the header, like the product sections, the step as a card */}
+        <section className="hm-sec pk-sec" aria-labelledby="pk-h">
+            <h2 id="pk-h" className="geo-section-h pk-sec-h">
               Finish setting up your account <span className="geo-section-n">{open.length} left</span>
             </h2>
-            <ul className="pk-next-list">
+            <ul className="pk-next-list pk-next">
               {open.map((t) => {
                 const task = TASK[t.id];
                 return (
@@ -136,8 +136,7 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
                 );
               })}
             </ul>
-          </section>
-        </HomeHeader>
+        </section>
       </div>
     );
   }
