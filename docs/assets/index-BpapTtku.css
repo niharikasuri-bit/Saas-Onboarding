@@ -600,16 +600,16 @@ p { margin: 0; line-height: 1.5; }
     linear-gradient(180deg, var(--c-primary-bg) 0%, rgb(251 238 232 / 0.5) 100%);
 }
 .sh-content:has(.as-head) .sh-sub { border-bottom: 0; background: var(--c-primary-bg); }
-.as-eyebrow { margin-bottom: var(--s2); font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--c-primary); }
+.as-eyebrow { margin-bottom: var(--s2); font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--digitv2-lightTheme-primary-2); }
 .as h1 { font-size: 2.75rem; font-weight: 400; line-height: 1.15; letter-spacing: -0.02em; color: var(--digitv2-lightTheme-primary-2); margin-bottom: var(--s3); }
 .as h1 em { font-style: normal; font-weight: 700; color: var(--c-primary); }
-.as-lead { font-size: 1.125rem; line-height: 1.5; color: #505A5F; }
+.as-lead { margin-bottom: var(--s8); font-size: 1.125rem; line-height: 1.5; color: #505A5F; }
 
 .as-progress { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s4); margin-bottom: var(--s2); }
 .as-progress > p:first-child { font-size: 0.9375rem; font-weight: 700; color: var(--c-text); }
 .as-count { font-size: 0.875rem; color: #505A5F; white-space: nowrap; }
 .as-count strong { margin-right: 2px; font-size: 1.25rem; font-weight: 700; color: var(--c-text); }
-.as-bar { height: 8px; margin-bottom: 40px; border-radius: 4px; background: rgb(255 255 255 / 0.9); box-shadow: inset 0 0 0 1px var(--c-divider); overflow: hidden; }
+.as-bar { height: 8px; margin-bottom: 0; border-radius: 4px; background: rgb(255 255 255 / 0.9); box-shadow: inset 0 0 0 1px var(--c-divider); overflow: hidden; }
 .as-bar span { display: block; height: 100%; border-radius: 4px; background: var(--c-success); transition: width 0.5s ease; }
 .as-list-h { margin-bottom: var(--s4); font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #505A5F; }
 

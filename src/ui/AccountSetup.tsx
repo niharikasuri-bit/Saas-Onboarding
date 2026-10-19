@@ -5,7 +5,7 @@ import { todoDone, todoResult, todosFor, type PageId, type TodoId } from '../lib
 
 /**
  * The account to-do, leading Home until it's done. A centred column: a header,
- * the progress and the welcome, then one DIGIT Card per step with its title, what
+ * the welcome, the progress, then one DIGIT Card per step with its title, what
  * to do, why it matters, the time it takes (an info tag) and a primary button.
  */
 
@@ -53,6 +53,11 @@ export function AccountSetup() {
     <div className="as">
       <header className="as-head">
         <div className="as-wrap">
+          <p className="as-eyebrow">Welcome aboard</p>
+          <h1 tabIndex={-1}>
+            Let’s complete <em>account setup</em>
+          </h1>
+          <p className="as-lead">Finish these {COUNT[todos.length] ?? todos.length} things to unlock your products.</p>
           <div className="as-progress">
             <p id="as-progress-l">Your account setup</p>
             <p className="as-count">
@@ -70,11 +75,6 @@ export function AccountSetup() {
           >
             <span style={{ width: `${(done / todos.length) * 100}%` }} />
           </div>
-          <p className="as-eyebrow">Welcome aboard</p>
-          <h1 tabIndex={-1}>
-            Let’s complete <em>account setup</em>
-          </h1>
-          <p className="as-lead">Finish these {COUNT[todos.length] ?? todos.length} things to unlock your products.</p>
         </div>
       </header>
 
