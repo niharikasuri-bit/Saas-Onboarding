@@ -6,7 +6,8 @@ import { Geographies } from './Geographies';
 import { Channels } from './Channels';
 import { Team } from './Team';
 import { usePageToast } from './PageToast';
-import { todoDone, todoResult, todosFor, type PageId, type TodoId } from '../lib/model';
+import { firstName } from '../setup/steps';
+import { todoDone, todosFor, type PageId, type TodoId } from '../lib/model';
 
 /**
  * The account to-do, leading Home until it's done. A centred column: a header,
@@ -53,7 +54,7 @@ const TASK: Record<
 
 /** onFlow: tells Home when a setup flow takes over the page, so it can hide the products. */
 export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = {}) {
-  const { account, go } = useAccount();
+  const { account, answers } = useAccount();
   const todos = todosFor(account);
   // Only what's left: a finished step drops off, so they pick up where they left off.
   const open = todos.filter((t) => !todoDone(t.id, account));
@@ -80,70 +81,92 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
   if (addingSender) return <Channels embedded onDone={back(setAddingSender)} />;
   if (addingTeam) return <Team embedded onDone={() => setAddingTeam(false)} />;
 
+  const start = (id: TodoId) => (id === 'geography' ? setAddingGeo(true) : id === 'sender' ? setAddingSender(true) : setAddingTeam(true));
+  const lead = unlocked
+    ? `Your products are unlocked. ${open.length === 1 ? 'One step' : `${open.length} steps`} left, whenever you’re ready.`
+    : 'Add your geographies to unlock your products. Notification channels and your team are optional for now.';
+
+  // Coming back: a plain greeting, then what's left as rows in one white panel, like the product panels below.
+  if (started) {
+    return (
+      <div className="pk">
+        {toastEl}
+        <header className="pk-head">
+          <h1 ref={heading} tabIndex={-1}>
+            Welcome back, {firstName(answers)}
+          </h1>
+          <p>{lead}</p>
+        </header>
+        <section className="hm-sec pk-panel" aria-labelledby="pk-h">
+          <div className="geo-bar">
+            <h2 id="pk-h" className="geo-section-h">
+              Finish setting up <span className="geo-section-n">{open.length} left</span>
+            </h2>
+          </div>
+          <ul className="pk-list">
+            {open.map((t, i) => {
+              const task = TASK[t.id];
+              return (
+                <li key={t.id} className="pk-row">
+                  <span className="pk-icon" aria-hidden="true">
+                    <Icon name={task.icon} size={20} />
+                  </span>
+                  <span className="pk-text">
+                    <strong className="pk-title">{task.title}</strong>
+                    <span className="pk-what">{task.what}</span>
+                  </span>
+                  <span className="pk-time">
+                    <Icon name="Schedule" size={16} />
+                    {task.minutes} min
+                  </span>
+                  <Button variation={i === 0 ? 'primary' : 'secondary'} label={task.action} icon="ArrowForward" isSuffix onClick={() => start(t.id)} />
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      </div>
+    );
+  }
+
   return (
-    <div className="as is-band">
+    <div className="as">
       {toastEl}
       <header className="as-head">
         <div className="as-wrap">
-          <p className="as-eyebrow">{started ? 'Welcome back' : 'Welcome aboard'}</p>
+          <p className="as-eyebrow">Welcome aboard</p>
           <h1 ref={heading} tabIndex={-1}>
-            {started ? (
-              <>
-                Pick up where you <em>left off</em>
-              </>
-            ) : (
-              <>
-                Let’s complete <em>account setup</em>
-              </>
-            )}
+            Let’s complete <em>account setup</em>
           </h1>
-          <p className="as-lead">
-            {unlocked
-              ? `Your products are unlocked. ${open.length === 1 ? 'One step' : `${open.length} steps`} left, whenever you’re ready.`
-              : 'Add your geographies to unlock your products. Notification channels and your team are optional for now.'}
-          </p>
+          <p className="as-lead">{lead}</p>
         </div>
       </header>
 
       <section className="as-wrap" aria-label="What you need to do">
-        <ol className={`as-list${started ? ' is-pickup' : ' is-first'}`} style={{ '--as-n': open.length } as React.CSSProperties}>
+        <ol className="as-list">
           {open.map((t) => {
-            const isDone = todoDone(t.id, account);
             const task = TASK[t.id];
             return (
               <li key={t.id}>
-                <Card className={`as-card${isDone ? ' is-done' : ''}`}>
+                <Card className="as-card">
                   <div className="as-top">
                     <h2>
                       <span className="as-icon" aria-hidden="true">
-                        <Icon name={isDone ? 'Check' : task.icon} size={18} />
+                        <Icon name={task.icon} size={18} />
                       </span>
                       {task.title}
                     </h2>
-                    {isDone ? (
-                      <p className="as-result">{todoResult(t.id, account)}</p>
-                    ) : (
-                      <p className="as-time">
-                        <Icon name="Schedule" size={16} />
-                        {task.minutes} min
-                      </p>
-                    )}
+                    <p className="as-time">
+                      <Icon name="Schedule" size={16} />
+                      {task.minutes} min
+                    </p>
                   </div>
                   <div className="as-body">
-                    {/* Coming back, they've read these: just the step and its button */}
-                    {!started && (
-                      <p className="as-what">
-                        {task.what} {task.why}
-                      </p>
-                    )}
+                    <p className="as-what">
+                      {task.what} {task.why}
+                    </p>
                     <div className="as-foot">
-                      <Button
-                        variation={isDone ? 'secondary' : 'primary'}
-                        label={isDone ? task.view : task.action}
-                        icon="ArrowForward"
-                        isSuffix
-                        onClick={() => (isDone ? go(task.page) : t.id === 'geography' ? setAddingGeo(true) : t.id === 'sender' ? setAddingSender(true) : t.id === 'users' ? setAddingTeam(true) : go(task.page))}
-                      />
+                      <Button variation="primary" label={task.action} icon="ArrowForward" isSuffix onClick={() => start(t.id)} />
                     </div>
                   </div>
                 </Card>

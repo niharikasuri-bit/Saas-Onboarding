@@ -1518,6 +1518,30 @@ p { margin: 0; line-height: 1.5; }
 .hm-v5 .as-list.is-pickup .as-time, .hm-v5 .as-list.is-pickup .as-result { grid-column: 1; grid-row: 2; margin: 0 0 0 44px; }
 .hm-v5 .as-list.is-pickup .as-foot { grid-column: 2; grid-row: 1 / span 2; align-self: center; margin: 0; }
 .hm-v5 .as.is-band .as-head { margin-bottom: var(--s5, 20px); }
+
+/* Coming back: a plain greeting, then the steps left as rows in a white panel like the product panels */
+.pk { margin-bottom: var(--s8); }
+.pk-head { margin-bottom: var(--s6); }
+.pk-head h1 { font-size: 2rem; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; color: var(--digitv2-lightTheme-primary-2); }
+.pk-head p { margin-top: 6px; font-size: 1.125rem; color: var(--c-text-2); }
+.pk-panel { margin: 0; padding: 24px 28px 12px; border: 1px solid #EAEAEA; border-radius: 16px; background: #fff; box-shadow: 0 1px 3px rgb(16 24 40 / 0.06), 0 10px 28px rgb(16 24 40 / 0.08); }
+.pk-panel .geo-bar { margin-top: 0; }
+.pk-list { list-style: none; margin: 0; padding: 0; }
+.pk-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; column-gap: 20px; padding: 16px 0; }
+.pk-row + .pk-row { border-top: 1px solid var(--c-divider); }
+.pk-icon { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 10px; background: var(--c-primary-bg); color: var(--c-primary); }
+.pk-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pk-title { font-size: 1.125rem; font-weight: 700; color: var(--digitv2-lightTheme-primary-2); }
+.pk-what { color: var(--c-text-2); }
+.pk-time { display: inline-flex; align-items: center; gap: 6px; font-size: 0.875rem; font-weight: 500; white-space: nowrap; color: var(--c-text-2); }
+.pk-time .ux-icon { color: var(--digitv2-lightTheme-primary-2); }
+.pk-row > button { min-width: 0; height: 40px; padding: 0 18px; }
+.pk-row > button .digit-button-label { font-size: 1rem; font-weight: 500; white-space: nowrap; }
+@media (max-width: 760px) {
+  .pk-row { grid-template-columns: auto minmax(0, 1fr); row-gap: 12px; }
+  .pk-time { grid-column: 2; }
+  .pk-row > button { grid-column: 1 / -1; width: 100%; }
+}
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */
