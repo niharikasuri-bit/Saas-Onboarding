@@ -1176,6 +1176,11 @@ p { margin: 0; line-height: 1.5; }
 .ch-fields-form { display: flex; flex-direction: column; gap: var(--s3); }
 .ch-sec .cg-split > .fld input, .ch-sec .cg-split > .fld select { width: 100%; height: 48px; padding: 0 16px; border: 1px solid var(--digitv2-lightTheme-text-secondary); border-radius: 10px; background: #fff; font: inherit; font-size: 1rem; }
 .ch-sec .cg-split > .fld select:focus, .ch-sec .cg-split > .fld input:focus { outline: none; border-color: var(--digitv2-lightTheme-primary-2); box-shadow: var(--focus); }
+
+/* Channel tiles: exactly the "What will you use DIGIT for?" tiles, left-aligned */
+.ch-tiles .qz-tile-row { justify-content: start; }
+/* Add your geographies: no white container, just left-aligned */
+.geo:not(.is-overview):not(.is-creating) > .geo-head { padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */

@@ -202,7 +202,7 @@ function ChannelFlow({
           }}
         >
           {step === 0 && (
-            <fieldset className={`qz-tiles cg-tiles${errors.pick ? ' has-error' : ''}`} aria-describedby={errors.pick ? `${uid}-pick-error` : undefined}>
+            <fieldset className={`qz-tiles ch-tiles${errors.pick ? ' has-error' : ''}`} aria-describedby={errors.pick ? `${uid}-pick-error` : undefined}>
               <legend className="ux-visually-hidden">Which channels do you want to set up?</legend>
               {errors.pick && (
                 <p id={`${uid}-pick-error`} className="fld-error">
@@ -224,13 +224,15 @@ function ChannelFlow({
                           setErrors({});
                         }}
                       />
-                      <span className={`ch-box${on ? ' is-on' : ''}`} aria-hidden="true">
-                        {on && <Icon name="Check" size={14} />}
-                      </span>
                       <span className="cg-tile-icon" aria-hidden="true">
-                        <Icon name={ICON[c.id]} size={28} />
+                        <Icon name={ICON[c.id]} size={36} />
                       </span>
                       <span className="qz-tile-label">{TILE[c.id]}</span>
+                      {on && (
+                        <span className="qz-tile-tick" aria-hidden="true">
+                          <Icon name="Check" size={12} />
+                        </span>
+                      )}
                     </label>
                   );
                 })}
