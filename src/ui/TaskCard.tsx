@@ -44,10 +44,14 @@ export function TaskBody({ id, headingId, onStart }: { id: TodoId; headingId: st
         <Icon name={t.icon} size={24} />
       </span>
       <div className="lp-task-text">
-        <h2 id={headingId}>{t.title}</h2>
-        <p>
-          You’ll need {t.needs}. About {t.minutes} minutes.
-        </p>
+        <div className="lp-task-title">
+          <h2 id={headingId}>{t.title}</h2>
+          <span className="lp-time">
+            <Icon name="Schedule" size={16} />
+            {t.minutes} min
+          </span>
+        </div>
+        <p>You’ll need {t.needs}.</p>
         <button type="button" className="lp-link" onClick={() => setWhy(true)}>
           Why complete this?
         </button>

@@ -2563,6 +2563,10 @@ input.geo-check:focus-visible { outline: none; box-shadow: var(--focus); }
 /* First landing: the task cards take the column's full width */
 .as-list > li { width: 100%; }
 .lp-task.as-task { width: 100%; box-sizing: border-box; }
+/* Task card: the time as a tag beside the title */
+.lp-task-title { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.lp-time { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 999px; background: #F3F4F5; font-size: 0.8125rem; font-weight: 500; color: #505A5F; white-space: nowrap; }
+.lp-time .ux-icon { color: #505A5F; }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */
