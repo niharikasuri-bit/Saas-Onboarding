@@ -144,12 +144,8 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
     setMsg('');
     setAdding(true);
   };
-  const hits = all.filter(
-    (s) =>
-      !term ||
-      [s.name, ...s.levels].some((x) => x.toLowerCase().includes(term)) ||
-      (!!status(s) && status(s).toLowerCase().startsWith(term)),
-  );
+  // Search is by name only
+  const hits = all.filter((s) => !term || s.name.toLowerCase().includes(term));
 
   /** After adding, go back to the account's geographies. */
   const done = (m: string) => {
@@ -351,7 +347,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
             <input
               id={`${uid}-q`}
               type="search"
-              placeholder="Search by name, level or status"
+              placeholder="Search by name"
               value={q}
               onChange={(e) => {
                 setQ(e.target.value);
