@@ -430,10 +430,8 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                 togglePick(s.id);
               }}
             >
-              <div className="geo-card-top">
-                <span className="geo-icon" aria-hidden="true">
-                  <Icon name="Public" size={20} />
-                </span>
+              <div className="geo-card-top geo-pick-top">
+                <CardHeading level={2}>{s.name}</CardHeading>
                 {added.has(s.id) ? (
                   <span className="geo-status is-active">Added</span>
                 ) : (
@@ -443,7 +441,6 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                   </label>
                 )}
               </div>
-              <CardHeading level={2}>{s.name}</CardHeading>
               <p className="geo-stats">
                 <span>
                   <strong>{s.levels.length}</strong> {s.levels.length === 1 ? 'level' : 'levels'}
