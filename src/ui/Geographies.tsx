@@ -166,7 +166,8 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
   };
   // Picking from DIGIT's list: one geography at a time, then add it.
   const [picked, setPicked] = useState<string[]>([]);
-  const togglePick = (id: string) => setPicked([id]);
+  // A checkbox, one at a time: ticking another moves the tick; ticking the same one again clears it
+  const togglePick = (id: string) => setPicked((x) => (x.includes(id) ? [] : [id]));
   const addPicked = () => {
     const sets = catalogue.filter((x) => picked.includes(x.id) && !added.has(x.id));
     update((a) => sets.reduce((acc, x) => addSet(acc, x), a));
@@ -437,7 +438,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                   <span className="geo-status is-active">Added</span>
                 ) : (
                   <label className="geo-pick">
-                    <input type="radio" name="geo-pick" checked={picked.includes(s.id)} onChange={() => togglePick(s.id)} />
+                    <input type="checkbox" checked={picked.includes(s.id)} onChange={() => togglePick(s.id)} />
                     <span className="ux-visually-hidden">Select {s.name}</span>
                   </label>
                 )}
@@ -523,7 +524,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                       {added.has(s.id) ? (
                         <span className="geo-status is-active">Added</span>
                       ) : (
-                        <input type="radio" name="geo-pick-row" aria-label={`Select ${s.name}`} checked={picked.includes(s.id)} onChange={() => togglePick(s.id)} />
+                        <input type="checkbox" aria-label={`Select ${s.name}`} checked={picked.includes(s.id)} onChange={() => togglePick(s.id)} />
                       )}
                     </td>
                   )}
