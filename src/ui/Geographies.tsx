@@ -459,10 +459,6 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
               {/* Details as label / value rows, like the channel cards */}
               <dl className="ch-fields is-geo">
                 <div>
-                  <dt>Country</dt>
-                  <dd>{s.country}</dd>
-                </div>
-                <div>
                   <dt>Levels</dt>
                   <dd>{s.levels.length}</dd>
                 </div>
