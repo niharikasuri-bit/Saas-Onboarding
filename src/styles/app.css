@@ -1925,3 +1925,32 @@ select:focus, textarea:focus {
 .geo-own-top .geo-card-h { min-width: 0; overflow-wrap: anywhere; }
 .geo-card.is-own .geo-actions { margin-top: auto; padding-top: 4px; }
 .geo-card.is-own .geo-edit { margin: 0 0 0 -8px; }
+/* Card header: the name wraps in the space left; the action keeps its size, aligned to the first line */
+.geo-own-top { align-items: flex-start; }
+.geo-own-top .geo-card-h { flex: 1 1 0; }
+.geo-own-top .geo-edit { flex-shrink: 0; margin: 0 -8px 0 0; white-space: nowrap; }
+/* Your geographies cards, v3: name on its own line (wraps between words only); status left, Edit right */
+.geo-own-top .geo-card-h { overflow-wrap: normal; word-break: normal; }
+.geo-own-meta { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); flex-wrap: wrap; }
+.geo-own-meta .geo-edit { margin: 0 -8px 0 auto; white-space: nowrap; }
+.geo-own-meta { gap: 8px; flex-wrap: nowrap; }
+.geo-own-meta .geo-edit { gap: 4px; padding: 0 6px; margin-right: -6px; font-size: 0.875rem; }
+.geo-own-meta .geo-edit .ux-icon svg { width: 16px; height: 16px; }
+
+/* Your geographies card, redesigned: header (name + status), numbers, level path, footer action */
+.geo-card.gc { display: flex; flex-direction: column; gap: 0; padding: 0; overflow: hidden; }
+.gc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 20px 14px; }
+.gc-title { min-width: 0; }
+.gc-name { margin: 0; font-size: 1.1875rem; font-weight: 700; line-height: 1.3; color: var(--digitv2-lightTheme-primary-2); overflow-wrap: break-word; }
+.gc-country { margin-top: 2px; font-size: 0.875rem; color: var(--c-text-2); }
+.gc-head .geo-status { flex-shrink: 0; margin-top: 2px; }
+.gc-stats { display: grid; grid-template-columns: 1fr 1fr; margin: 0 20px; border: 1px solid #ECECEC; border-radius: 10px; }
+.gc-stats > div { display: flex; flex-direction: column-reverse; gap: 2px; padding: 10px 14px; }
+.gc-stats > div + div { border-left: 1px solid #ECECEC; }
+.gc-stats dt { font-size: 0.8125rem; color: var(--c-text-2); }
+.gc-stats dd { margin: 0; font-size: 1.25rem; font-weight: 700; line-height: 1.2; color: var(--digitv2-lightTheme-primary-2); }
+.gc-path { display: flex; flex-wrap: wrap; gap: 4px 6px; margin: 14px 20px 18px; font-size: 0.875rem; font-weight: 500; color: var(--c-text); }
+.gc-step { display: inline-flex; align-items: center; gap: 6px; }
+.gc-sep { color: #8A9399; }
+.gc-foot { margin-top: auto; padding: 8px 12px; border-top: 1px solid var(--c-divider); }
+.gc-foot .geo-edit { margin: 0; }

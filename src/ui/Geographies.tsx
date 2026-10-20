@@ -411,31 +411,15 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
       ) : view === 'cards' ? (
         <ul className="geo-cards">
           {hits.map((s) => (
-            <li key={s.id} className={`geo-card${adding ? '' : ' is-own'}`}>
-              {adding ? (
-                <>
-                  <div className="geo-card-top">
-                    <span className="geo-icon" aria-hidden="true">
-                      <Icon name="Public" size={20} />
-                    </span>
-                    <Status value={status(s)} />
-                  </div>
-                  <CardHeading level={2}>{s.name}</CardHeading>
-                </>
-              ) : (
-                // Their own geography: no icon; the name (it opens the data), the status, then Edit geography data
-                <>
-                  <div className="geo-own-top">
-                    <CardHeading level={3}>
-                      {/* The name opens the geography's data */}
-                      <button type="button" className="geo-name-link" onClick={() => open(s.id, false)}>
-                        {s.name}
-                      </button>
-                    </CardHeading>
-                  </div>
-                  <Status value={status(s)} />
-                </>
-              )}
+            adding ? (
+            <li key={s.id} className="geo-card">
+              <div className="geo-card-top">
+                <span className="geo-icon" aria-hidden="true">
+                  <Icon name="Public" size={20} />
+                </span>
+                <Status value={status(s)} />
+              </div>
+              <CardHeading level={2}>{s.name}</CardHeading>
               <p className="geo-stats">
                 <span>
                   <strong>{s.levels.length}</strong> {s.levels.length === 1 ? 'level' : 'levels'}
@@ -448,23 +432,61 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                 <span className="geo-tag">{s.levels.join(' › ')}</span>
               </p>
               <div className="geo-actions">
-                {adding && added.has(s.id) && (
+                {added.has(s.id) && (
                   <p className="geo-added">
                     <Icon name="CheckCircle" size={18} />
                     Added to your account
                   </p>
                 )}
-                {adding ? (
-                  <Button variation="secondary" icon="Visibility" label="View geography data" title={`View ${s.name} geography data`} onClick={() => open(s.id, false)} />
-                ) : (
-                  // At the foot of the card, so a long name keeps the full width
-                  <button type="button" className="geo-edit" aria-label={`Edit geography data for ${s.name}`} onClick={() => open(s.id, true)}>
-                    <Icon name="Edit" size={18} />
-                    Edit geography data
-                  </button>
-                )}
+                <Button variation="secondary" icon="Visibility" label="View geography data" title={`View ${s.name} geography data`} onClick={() => open(s.id, false)} />
               </div>
             </li>
+            ) : (
+            // Their own geography: header (name, which opens the data, and status), the numbers and
+            // level path, then a footer with Edit Geography Data
+            <li key={s.id} className="geo-card gc">
+              <div className="gc-head">
+                <div className="gc-title">
+                  <h3 className="gc-name">
+                    <button type="button" className="geo-name-link" onClick={() => open(s.id, false)}>
+                      {s.name}
+                    </button>
+                  </h3>
+                  <p className="gc-country">{s.country}</p>
+                </div>
+                <Status value={status(s)} />
+              </div>
+              <dl className="gc-stats">
+                <div>
+                  <dt>{s.levels.length === 1 ? 'Level' : 'Levels'}</dt>
+                  <dd>{s.levels.length}</dd>
+                </div>
+                <div>
+                  <dt>{countOf(s) === 1 ? 'Geography' : 'Geographies'}</dt>
+                  <dd>{countOf(s).toLocaleString('en')}</dd>
+                </div>
+              </dl>
+              <p className="gc-path">
+                <span className="ux-visually-hidden">Levels: </span>
+                {s.levels.map((l, i) => (
+                  <span key={l} className="gc-step">
+                    {i > 0 && (
+                      <span className="gc-sep" aria-hidden="true">
+                        ›
+                      </span>
+                    )}
+                    {l}
+                  </span>
+                ))}
+              </p>
+              <div className="gc-foot">
+                <button type="button" className="geo-edit" aria-label={`Edit Geography Data for ${s.name}`} onClick={() => open(s.id, true)}>
+                  <Icon name="Edit" size={18} />
+                  Edit Geography Data
+                </button>
+              </div>
+            </li>
+            )
           ))}
         </ul>
       ) : (
