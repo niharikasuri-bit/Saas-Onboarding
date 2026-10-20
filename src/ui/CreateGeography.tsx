@@ -1,11 +1,12 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { Button, Toast } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
 import { newId, type GeoRow, type GeoSet } from '../lib/model';
 import { Field, describedBy } from './StepFrame';
 import { AddGeographyDialog, GeoTree } from './GeoTree';
 import { OsmMap, countryAt, type Pin } from './OsmMap';
-import { SheetIntro, UploadSteps, colLetter } from './Sheet';
+import { InfoNote, SheetIntro, UploadSteps, colLetter } from './Sheet';
 import { Crumbs } from './Crumbs';
 
 /**
@@ -155,11 +156,6 @@ export function CreateGeography({
     setStep(s);
   };
   const back = () => {
-    // Going back from the uploaded places clears the file, so they can upload another.
-    if (step === 'places' && method === 'upload' && uploaded) {
-      setUploaded('');
-      setRows([blankRow(levels.length)]);
-    }
     if (n === 1) onCancel();
     else go(steps[n - 2]);
   };
@@ -190,7 +186,8 @@ export function CreateGeography({
     }
     if (step === 'method' && !method) e.method = `Choose how you’d like to ${verb} your geographies`;
     if (step === 'places') {
-      if (!places.length) e.places = `Add at least one ${cleanLevels[0] || 'geography'}`;
+      if (method === 'upload' && !uploaded) e.places = 'Upload your filled-in template';
+      else if (!places.length) e.places = `Add at least one ${cleanLevels[0] || 'geography'}`;
       else if (problems.some(Boolean)) e.places = 'Some rows have gaps. Fix the highlighted rows.';
     }
     setErrors(e);
@@ -219,9 +216,7 @@ export function CreateGeography({
     method: `How would you like to ${verb} your geographies?`,
     places:
       method === 'upload'
-        ? uploaded
-          ? 'View and edit uploaded geography data'
-          : 'Upload geography data'
+        ? 'Upload geography data'
         : method === 'osm'
           ? 'View and edit fetched geography data'
           : 'Add geography data',
@@ -238,13 +233,12 @@ export function CreateGeography({
     places:
       method === 'osm'
         ? 'Review the fetched geographies and edit any row before you create them.'
-        : method === 'upload' && uploaded
-          ? 'Review the geographies from your file and edit any row before you create them.'
-          : '',
+        : '',
   };
 
-  // Reviewing uploaded or fetched geographies: no white card, the table takes the page.
-  const reviewing = step === 'places' && (!!uploaded || method === 'osm');
+  // Reviewing fetched geographies: no white card, the table takes the page.
+  // (An uploaded file is reviewed in a popup over the upload step instead.)
+  const reviewing = step === 'places' && method === 'osm';
 
   return (
     <div className={`cg-page${step === 'places' || (step === 'country' && method === 'osm') ? ' is-wide' : ''}`}>
@@ -265,7 +259,7 @@ export function CreateGeography({
         <h1 id={`${uid}-h`} ref={heading} tabIndex={-1}>
           {TITLES[step]}
         </h1>
-        {step === 'places' && method === 'upload' && !uploaded && (
+        {step === 'places' && method === 'upload' && (
           <Button variation="secondary" icon="FileDownload" label="Download template" onClick={() => downloadTemplate(country.trim(), cleanLevels)} />
         )}
       </div>
@@ -391,15 +385,24 @@ export function CreateGeography({
                 uid={uid}
                 levels={cleanLevels}
                 uploaded={uploaded}
+                rows={rows}
+                problems={problems}
+                count={places.length}
+                error={errors.places}
                 onRows={(r, file) => {
                   setRows(r.length ? r.map((p) => fit(p, cleanLevels.length)) : [blankRow(cleanLevels.length)]);
                   setUploaded(file);
                   setErrors({});
-                  if (file) setToast(`${file} uploaded`);
                 }}
+                onRemove={() => {
+                  setUploaded('');
+                  setRows([blankRow(cleanLevels.length)]);
+                  setToast('File removed');
+                }}
+                onCreate={next}
               />
             )}
-            {(uploaded || method === 'osm') && (
+            {method === 'osm' && (
               <>
                 <div className="cg-places-bar">
                   <div className="pt-tabs" role="group" aria-label="View as">
@@ -689,20 +692,36 @@ function LevelsEditor({
   );
 }
 
-/** Bulk upload: a box with the template on the right, a drop area, and the uploaded file. */
+/**
+ * Bulk upload: a drop area, or once a file is in, the file (View data, Re-upload, remove).
+ * Uploading opens a popup with the data about to be created, so they never leave this step.
+ */
 function Upload({
   uid,
   levels,
   uploaded,
+  rows,
+  problems,
+  count,
+  error: stepError,
   onRows,
+  onRemove,
+  onCreate,
 }: {
   uid: string;
   levels: string[];
   uploaded: string;
+  rows: Path[];
+  problems: string[];
+  count: number;
+  error?: string;
   onRows: (rows: Path[], file: string) => void;
+  onRemove: () => void;
+  onCreate: () => void;
 }) {
   const [error, setError] = useState('');
   const [over, setOver] = useState(false);
+  const [showing, setShowing] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   const take = async (f: File | undefined) => {
     if (!f) return;
@@ -714,13 +733,49 @@ function Upload({
     }
     setError('');
     onRows(data.slice(1), f.name);
+    setShowing(true);
   };
   const browse = () => input.current?.click();
-  // Once uploaded the box goes; a toast says so, and Back clears it to upload another.
-  if (uploaded) return null;
+  const remove = () => {
+    setShowing(false);
+    setError('');
+    onRemove();
+    requestAnimationFrame(() => document.getElementById(`${uid}-browse`)?.focus());
+  };
+  const file = (inDialog: boolean) => (
+    <div className={`up-file${inDialog ? ' is-dialog' : ''}`}>
+      <span className="up-file-badge" aria-hidden="true">
+        {fileExt(uploaded)}
+      </span>
+      <span className="up-file-name">{uploaded}</span>
+      <span className="up-file-tags">
+        <span className="geo-tag">
+          {count.toLocaleString('en')} {count === 1 ? 'geography' : 'geographies'}
+        </span>
+        <span className="geo-tag">
+          {levels.length} {levels.length === 1 ? 'level' : 'levels'}
+        </span>
+      </span>
+      <span className="up-file-acts">
+        {!inDialog && (
+          <button type="button" id={`${uid}-view`} className="up-file-btn" onClick={() => setShowing(true)}>
+            <Icon name="Visibility" size={18} />
+            View data
+          </button>
+        )}
+        <button type="button" className="up-file-btn" onClick={browse}>
+          <Icon name="FileUpload" size={18} />
+          Re-upload
+        </button>
+        <button type="button" className="ag-x is-sm up-file-x" aria-label={`Remove ${uploaded}`} onClick={remove}>
+          <Icon name="Close" size={20} />
+        </button>
+      </span>
+    </div>
+  );
   return (
     <>
-    <UploadSteps thing="geography" />
+    <UploadSteps thing="geography" preview />
     <div className="up" role="group" aria-label="Upload a file">
       <input
         ref={input}
@@ -735,7 +790,9 @@ function Upload({
           e.target.value = '';
         }}
       />
-      {(
+      {uploaded ? (
+        file(false)
+      ) : (
         <div
           className={`up-drop${over ? ' is-over' : ''}`}
           onDragOver={(e) => {
@@ -752,19 +809,143 @@ function Upload({
           <Icon name="FileUpload" size={40} />
           <p>
             Drag and drop your file or{' '}
-            <button type="button" className="up-browse" onClick={browse}>
+            <button type="button" id={`${uid}-browse`} className="up-browse" onClick={browse}>
               Browse in my files
             </button>
           </p>
         </div>
       )}
-      {error && (
-        <p className="fld-error" role="alert">
-          {error}
+      {(error || stepError) && !showing && (
+        <p id={`${uid}-places`} className="fld-error" role="alert" tabIndex={-1}>
+          {error || stepError}
         </p>
       )}
     </div>
+    {showing && uploaded && (
+      <UploadPreview
+        levels={levels}
+        rows={rows}
+        problems={problems}
+        file={file(true)}
+        error={error || stepError}
+        onClose={() => {
+          setShowing(false);
+          requestAnimationFrame(() => document.getElementById(`${uid}-view`)?.focus());
+        }}
+        onCreate={onCreate}
+      />
+    )}
     </>
+  );
+}
+
+const fileExt = (name: string) => '.' + (name.split('.').pop() || 'csv').toLowerCase();
+
+/** The popup after uploading: the file, then its rows as a read-only sheet, then Create geographies. */
+function UploadPreview({
+  levels,
+  rows,
+  problems,
+  file,
+  error,
+  onClose,
+  onCreate,
+}: {
+  levels: string[];
+  rows: Path[];
+  problems: string[];
+  file: ReactNode;
+  error?: string;
+  onClose: () => void;
+  onCreate: () => void;
+}) {
+  const uid = useId();
+  const ref = useRef<HTMLDialogElement>(null);
+  const head = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    ref.current?.showModal();
+    requestAnimationFrame(() => head.current?.focus());
+  }, []);
+  const close = () => {
+    ref.current?.close();
+    onClose();
+  };
+  const shown = rows.filter((r) => r.some((c) => c.trim()));
+  const bad = problems.map((_, i) => (problems[i] ? i : -1)).filter((i) => i >= 0);
+  // Rows as they sit in the file: row 1 is the header, so data starts at row 2
+  const rowNo = (r: Path) => rows.indexOf(r) + 2;
+  return createPortal(
+    <dialog
+      ref={ref}
+      className="ag upv"
+      aria-labelledby={`${uid}-h`}
+      onCancel={(e) => {
+        e.preventDefault();
+        close();
+      }}
+    >
+      <div className="upv-top">
+        <div className="upv-title">
+          <h2 id={`${uid}-h`} ref={head} tabIndex={-1}>
+            Review uploaded geography data
+          </h2>
+          {file}
+        </div>
+        <button type="button" className="ag-x" aria-label="Close" onClick={close}>
+          <Icon name="Close" size={22} />
+        </button>
+      </div>
+      <div className="upv-body">
+        <InfoNote icon="Info" title="Need to make changes?">
+          Edit your file in Excel, then re-upload it here.
+        </InfoNote>
+        {(error || bad.length > 0) && (
+          <p className="fld-error" role="alert">
+            <span className="ux-visually-hidden">Error: </span>
+            {bad.length
+              ? `${bad.length === 1 ? 'Row' : 'Rows'} ${bad.map((i) => i + 2).join(', ')} ${bad.length === 1 ? 'has' : 'have'} gaps. Fix ${bad.length === 1 ? 'it' : 'them'} in your file and re-upload it.`
+              : error}
+          </p>
+        )}
+        <div className="upv-sheet" tabIndex={0} role="region" aria-label="Data in your file">
+          <table className="cg-grid is-sheet is-read">
+            <thead>
+              <tr className="sheet-letters" aria-hidden="true">
+                <td className="cg-grid-n" />
+                {levels.map((l, j) => (
+                  <td key={l}>{colLetter(j)}</td>
+                ))}
+              </tr>
+              <tr>
+                <th scope="col" className="cg-grid-n">
+                  1<span className="ux-visually-hidden"> Row</span>
+                </th>
+                {levels.map((l) => (
+                  <th key={l} scope="col">
+                    {l}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {shown.map((r) => (
+                <tr key={rowNo(r)} className={problems[rows.indexOf(r)] ? 'has-error' : undefined}>
+                  <td className="cg-grid-n">{rowNo(r)}</td>
+                  {r.map((c, j) => (
+                    <td key={j}>{c || (problems[rows.indexOf(r)] && j < r.map((x) => x.trim()).findLastIndex(Boolean) ? <span className="upv-gap">Missing</span> : '')}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div className="ag-foot">
+        <Button variation="secondary" label="Cancel" onClick={close} />
+        <Button variation="primary" label="Create geographies" onClick={onCreate} />
+      </div>
+    </dialog>,
+    document.body,
   );
 }
 

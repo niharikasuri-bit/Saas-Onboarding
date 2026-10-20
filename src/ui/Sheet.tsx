@@ -3,7 +3,8 @@ import { Icon } from '../components/Icon';
 /** Shared pieces for every bulk upload: the three-step guide, and the spreadsheet look. */
 
 /** "How to proceed with upload?": download, fill in, upload and check. `thing` is one row's noun. */
-export function UploadSteps({ thing }: { thing: string }) {
+/** `preview`: the upload opens a read-only popup (fixes go in the file), rather than an editable sheet. */
+export function UploadSteps({ thing, preview }: { thing: string; preview?: boolean }) {
   const steps: [string, string, React.ReactNode][] = [
     [
       'FileDownload',
@@ -23,7 +24,15 @@ export function UploadSteps({ thing }: { thing: string }) {
       'FileUpload',
       'Upload and check',
       <>
-        Drop the file below. You’ll see every row and can fix anything before you <strong>save</strong>.
+        {preview ? (
+          <>
+            Drop the file below. You’ll see every row before you <strong>create</strong> them.
+          </>
+        ) : (
+          <>
+            Drop the file below. You’ll see every row and can fix anything before you <strong>save</strong>.
+          </>
+        )}
       </>,
     ],
   ];
