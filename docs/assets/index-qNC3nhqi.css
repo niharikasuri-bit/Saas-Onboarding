@@ -2519,6 +2519,10 @@ input.geo-check:focus-visible { outline: none; box-shadow: var(--focus); }
 .lp-art { background: #FAFAFA; }
 /* The orange header leads the page; the task card sits right under it */
 .lp > .pk-head { margin-bottom: 0; }
+/* Home header: blue on a light-blue fade; the Help bar above runs into it in the same light blue */
+.lp > .pk-head { background: linear-gradient(180deg, var(--c-info-bg) 0%, rgb(222 239 255 / 0.6) 55%, rgb(222 239 255 / 0) 100%); }
+.lp > .pk-head h1 em { color: var(--digitv2-lightTheme-primary-2); }
+.sh-content:has(.lp) .sh-sub { border-bottom: 0; background: var(--c-info-bg); }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */
