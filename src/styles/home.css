@@ -183,3 +183,6 @@
 .lp-task-top.as-progress { margin: 0; padding: 18px 24px 8px; align-items: baseline; }
 .lp-task-bar.as-bar { height: 14px; border-radius: 7px; }
 .lp-task-bar.as-bar > span { border-radius: 7px; }
+/* Explore cards stretch to fill the row, wide enough for the three tags on one line */
+.lp-explore-grid { grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr)); }
+.lp-ex-tags li { white-space: nowrap; }
