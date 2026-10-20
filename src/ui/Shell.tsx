@@ -16,9 +16,9 @@ import { HelpPanel } from './HelpPanel';
 import { LOGO } from '../logo';
 
 /** The account's own pages. The side nav shows where things live, not their status.
- * Product health, Integrations, Branding and Language do nothing when clicked for now. */
+ * Product health, Integrations and Language do nothing when clicked for now. */
 /** Not built yet: these do nothing when clicked, for now. */
-const INERT: PageId[] = ['health', 'integrations', 'branding', 'languages'];
+const INERT: PageId[] = ['health', 'integrations', 'languages'];
 
 const ACCOUNT_NAV: { id: PageId; label: string; icon: string }[] = [
   { id: 'home', label: 'Home', icon: 'Home' },

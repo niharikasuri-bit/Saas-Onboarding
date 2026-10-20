@@ -28,6 +28,16 @@ export function Icon({ name, size = 20 }: { name: string; size?: number }) {
       </span>
     );
   }
+  // Nor a type glyph: "Aa" for typography.
+  if (name === 'Typography') {
+    return (
+      <span className="ux-icon" aria-hidden="true">
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+          <path d="M7.6 5h2l4.6 13h-2.2l-1.1-3.2H5.6L4.5 18H2.3L7.6 5Zm-1.4 8h4.2L8.6 7.6 6.2 13Zm12.3-4.2c2.1 0 3.4 1.1 3.4 3.1V18h-1.9l-.1-1.1c-.6.8-1.6 1.3-2.8 1.3-1.8 0-3-1-3-2.6 0-1.8 1.5-2.8 4-2.8h1.7v-.6c0-1-.6-1.6-1.6-1.6-.9 0-1.6.4-1.8 1.2l-1.8-.4c.4-1.6 1.9-2.6 3.9-2.6Zm1.4 5.3h-1.6c-1.4 0-2.1.5-2.1 1.3 0 .7.5 1.1 1.4 1.1 1.3 0 2.3-.8 2.3-2.1v-.3Z" />
+        </svg>
+      </span>
+    );
+  }
   // Nor a plus in a circle.
   if (name === 'AddCircle') {
     return (

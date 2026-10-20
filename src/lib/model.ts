@@ -362,9 +362,22 @@ export type ProductState = {
   data: ProductData;
 };
 
+/** How their app looks: colours (from a ready-made theme or their own), type, corners, footer. */
+export type BrandTheme = {
+  preset: string;
+  primary: string;
+  header: string;
+  background: string;
+  font: 'roboto' | 'system' | 'serif';
+  scale: 'small' | 'default' | 'large';
+  radius: 'sharp' | 'rounded' | 'soft';
+  footer: string;
+  poweredBy: boolean;
+};
+
 export type Account = {
   admin: { name: string; email: string };
-  branding: { name: string; logo: string; colour: string; saved: boolean };
+  branding: { name: string; logo: string; colour: string; saved: boolean; theme?: BrandTheme };
   users: User[];
   /** sets: catalogue geographies added to the account; custom: ones they created. */
   geography: { areas: Area[]; sets?: string[]; custom?: GeoSet[]; edited?: Record<string, GeoRow[]> };
