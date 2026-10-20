@@ -443,7 +443,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
             </li>
             ) : (
             // Their own geography, laid out like a channel card: icon and status, the name (it opens the
-            // data), the numbers and levels, then Edit Geography Data
+            // data), its details as label / value rows, then Edit Geography Data
             <li key={s.id} className="geo-card">
               <div className="geo-card-top">
                 <span className="geo-icon" aria-hidden="true">
@@ -456,17 +456,25 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                   {s.name}
                 </button>
               </CardHeading>
-              <p className="geo-stats">
-                <span>
-                  <strong>{s.levels.length}</strong> {s.levels.length === 1 ? 'level' : 'levels'}
-                </span>
-                <span>
-                  <strong>{countOf(s).toLocaleString('en')}</strong> {countOf(s) === 1 ? 'geography' : 'geographies'}
-                </span>
-              </p>
-              <p className="geo-levels">
-                <span className="geo-tag">{s.levels.join(' › ')}</span>
-              </p>
+              {/* Details as label / value rows, like the channel cards */}
+              <dl className="ch-fields is-geo">
+                <div>
+                  <dt>Country</dt>
+                  <dd>{s.country}</dd>
+                </div>
+                <div>
+                  <dt>Levels</dt>
+                  <dd>{s.levels.length}</dd>
+                </div>
+                <div>
+                  <dt>Geographies</dt>
+                  <dd>{countOf(s).toLocaleString('en')}</dd>
+                </div>
+                <div>
+                  <dt>Level names</dt>
+                  <dd>{s.levels.join(' › ')}</dd>
+                </div>
+              </dl>
               <div className="geo-actions is-edit">
                 <Button variation="secondary" icon="Edit" label="Edit Geography Data" title={`Edit ${s.name} geography data`} onClick={() => open(s.id, true)} />
               </div>

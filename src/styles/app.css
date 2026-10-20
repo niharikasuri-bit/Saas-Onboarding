@@ -1993,3 +1993,6 @@ select:focus, textarea:focus {
 .geo-card .geo-actions.is-edit > button .digit-button-label { line-height: 32px; font-size: 0.9375rem; }
 .geo-card .geo-actions.is-edit > button svg { width: 18px; height: 18px; }
 .geo-card .geo-actions.is-edit > button .digit-button-label { line-height: 1.2; }
+.ch-fields.is-geo dd { word-break: normal; overflow-wrap: break-word; }
+.geo-card .ch-fields.is-geo { margin-bottom: var(--s2); }
+.ch-fields dt { white-space: nowrap; }
