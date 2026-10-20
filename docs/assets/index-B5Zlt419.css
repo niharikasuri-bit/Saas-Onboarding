@@ -1930,6 +1930,10 @@ select:focus, textarea:focus {
 .geo-name-link:hover { text-decoration-color: currentColor; }
 .geo-name-link:focus-visible { outline: none; box-shadow: var(--focus); border-radius: 2px; }
 .geo-card.is-own .geo-actions:empty { display: none; }
+/* Your geographies cards: the name takes the full width and wraps; Edit geography data sits at the foot */
+.geo-own-top .geo-card-h { min-width: 0; overflow-wrap: anywhere; }
+.geo-card.is-own .geo-actions { margin-top: auto; padding-top: 4px; }
+.geo-card.is-own .geo-edit { margin: 0 0 0 -8px; }
 /* ---------- Branding: sections | settings | live phone preview ---------- */
 .br { padding-bottom: 88px; }
 .br-head { margin-bottom: var(--s6); }

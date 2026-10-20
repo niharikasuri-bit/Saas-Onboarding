@@ -423,7 +423,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                   <CardHeading level={2}>{s.name}</CardHeading>
                 </>
               ) : (
-                // Their own geography: no icon; the name with Edit beside it, the status under the name
+                // Their own geography: no icon; the name (it opens the data), the status, then Edit geography data
                 <>
                   <div className="geo-own-top">
                     <CardHeading level={3}>
@@ -432,10 +432,6 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                         {s.name}
                       </button>
                     </CardHeading>
-                    <button type="button" className="geo-edit" aria-label={`Edit ${s.name}`} onClick={() => open(s.id, true)}>
-                      <Icon name="Edit" size={18} />
-                      Edit
-                    </button>
                   </div>
                   <Status value={status(s)} />
                 </>
@@ -458,8 +454,14 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                     Added to your account
                   </p>
                 )}
-                {adding && (
+                {adding ? (
                   <Button variation="secondary" icon="Visibility" label="View geography data" title={`View ${s.name} geography data`} onClick={() => open(s.id, false)} />
+                ) : (
+                  // At the foot of the card, so a long name keeps the full width
+                  <button type="button" className="geo-edit" aria-label={`Edit geography data for ${s.name}`} onClick={() => open(s.id, true)}>
+                    <Icon name="Edit" size={18} />
+                    Edit geography data
+                  </button>
                 )}
               </div>
             </li>
