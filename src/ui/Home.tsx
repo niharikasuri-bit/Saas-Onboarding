@@ -8,7 +8,7 @@ import { Geographies } from './Geographies';
 import { Channels } from './Channels';
 import { HealthStack } from './Integrations';
 import { usePageToast } from './PageToast';
-import { HomeHeader } from './AccountSetup';
+import { AccountSetup, HomeHeader } from './AccountSetup';
 import cmsArt from '../assets/undraw/cms.svg?raw';
 import hcmArt from '../assets/undraw/hcm.svg?raw';
 import lnpArt from '../assets/undraw/lnp.svg?raw';
@@ -82,6 +82,14 @@ export function Home() {
     setFlow(null);
     if (message) showToast(message);
   };
+  // First landing, until geographies are in: the original setup page, unchanged
+  // (Welcome aboard, Let’s set up your account, the progress bar and every task).
+  if (!started)
+    return (
+      <div className="geo is-overview hm-first">
+        <AccountSetup />
+      </div>
+    );
   if (flow === 'geography') return <Geographies embedded onDone={back} />;
   if (flow === 'sender') return <Channels embedded onDone={back} />;
 
