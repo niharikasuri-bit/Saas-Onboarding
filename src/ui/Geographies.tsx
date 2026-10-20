@@ -369,6 +369,8 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
         <CreateGeography
           trail={addTrail}
           initial={createVal ?? ''}
+          // Opened by Add geographies (no list to pick from) rather than by Create new geography
+          verb={creating === null ? 'add' : 'create'}
           taken={catalogue}
           onCancel={() => {
             setCreating(null);

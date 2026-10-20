@@ -113,9 +113,12 @@ export function CreateGeography({
   taken,
   onCancel,
   onCreate,
+  verb = 'create',
 }: {
   /** Breadcrumbs before "Create a geography". */
   trail: { label: string; onClick?: () => void }[];
+  /** How they got here: Create new geography ("create") or Add geographies without the list ("add"). */
+  verb?: 'create' | 'add';
   initial: string;
   taken: GeoSet[];
   onCancel: () => void;
@@ -184,7 +187,7 @@ export function CreateGeography({
         else if (cleanLevels.findIndex((x) => x.toLowerCase() === l.toLowerCase()) !== i) e[`level-${i}`] = `${l} is already a level`;
       });
     }
-    if (step === 'method' && !method) e.method = 'Choose how you’d like to create your geographies';
+    if (step === 'method' && !method) e.method = `Choose how you’d like to ${verb} your geographies`;
     if (step === 'places') {
       if (!places.length) e.places = `Add at least one ${cleanLevels[0] || 'geography'}`;
       else if (problems.some(Boolean)) e.places = 'Some rows have gaps. Fix the highlighted rows.';
@@ -212,7 +215,7 @@ export function CreateGeography({
   const TITLES: Record<Step, string> = {
     country: 'What is the name of your country?',
     levels: `How is ${country.trim() || 'it'} divided?`,
-    method: 'How would you like to create your geographies?',
+    method: `How would you like to ${verb} your geographies?`,
     places:
       method === 'upload'
         ? uploaded
@@ -244,7 +247,7 @@ export function CreateGeography({
 
   return (
     <div className={`cg-page${step === 'places' || (step === 'country' && method === 'osm') ? ' is-wide' : ''}`}>
-      <Crumbs items={[...trail, { label: 'Create a geography' }]} />
+      <Crumbs items={[...trail, { label: verb === 'add' ? 'Add geographies' : 'Create a geography' }]} />
     <section className={`cg${reviewing ? ' is-bare' : ''}`} aria-labelledby={`${uid}-h`}>
       {reviewing ? (
         <header className="rv-head">
@@ -346,7 +349,7 @@ export function CreateGeography({
 
         {step === 'method' && (
           <fieldset className={`qz-tiles cg-tiles${errors.method ? ' has-error' : ''}`} aria-describedby={errors.method ? `${uid}-method-error` : undefined}>
-            <legend className="ux-visually-hidden">How would you like to create your geographies?</legend>
+            <legend className="ux-visually-hidden">How would you like to {verb} your geographies?</legend>
             {errors.method && (
               <p id={`${uid}-method-error`} className="fld-error">
                 <span className="ux-visually-hidden">Error: </span>
