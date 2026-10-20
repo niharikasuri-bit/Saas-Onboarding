@@ -133,6 +133,7 @@ export function CreateGeography({
   const [addingPlace, setAddingPlace] = useState(false);
   // OpenStreetMap: where they pinned their location.
   const [pin, setPin] = useState<Pin | null>(null);
+  const osmApi = useRef<{ locate: () => void } | null>(null);
   const [rows, setRows] = useState<Path[]>([blankRow(2), blankRow(2)]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploaded, setUploaded] = useState('');
@@ -267,6 +268,9 @@ export function CreateGeography({
         {step === 'places' && method === 'upload' && !uploaded && (
           <Button variation="secondary" icon="FileDownload" label="Download template" onClick={() => downloadTemplate(country.trim(), cleanLevels)} />
         )}
+        {step === 'country' && method === 'osm' && (
+          <Button variation="secondary" icon="MyLocation" label="Use my location" onClick={() => osmApi.current?.locate()} />
+        )}
       </div>
       )}
       {reviewing ? null : LEADS[step] ? (
@@ -290,6 +294,7 @@ export function CreateGeography({
           // OpenStreetMap: search for the country or pin a location; either is enough.
           <OsmMap
             id={`${uid}-pin`}
+            apiRef={osmApi}
             query={country}
             pin={pin}
             onPin={(p) => {

@@ -65,6 +65,7 @@ export function OsmMap({
   pin,
   onPin,
   search,
+  apiRef,
 }: {
   id: string;
   query: string;
@@ -73,6 +74,8 @@ export function OsmMap({
   onPin: (p: Pin | null) => void;
   /** The search box, above the map. */
   search: React.ReactNode;
+  /** Lets the page put Use my location wherever it likes (it sits in the title row). */
+  apiRef?: React.MutableRefObject<{ locate: () => void } | null>;
 }) {
   const box = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
@@ -136,18 +139,12 @@ export function OsmMap({
     );
   };
 
+  if (apiRef) apiRef.current = { locate: useMyLocation };
   const place = pin ? countryAt(pin) : null;
   const fmt = (n: number) => n.toFixed(4);
   return (
     <div className="osm-map">
-      {/* Search and Use my location sit together above the map */}
-      <div className="osm-above">
-        {search}
-        <button type="button" className="osm-mylocation" onClick={useMyLocation}>
-          <Icon name="MyLocation" size={18} />
-          Use my location
-        </button>
-      </div>
+      <div className="osm-above">{search}</div>
       <div className="osm-frame">
         <div
           ref={box}
