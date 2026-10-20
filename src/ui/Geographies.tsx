@@ -424,20 +424,18 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
             <li
               key={s.id}
               className={`geo-card is-pick${picked.includes(s.id) ? ' is-picked' : ''}${added.has(s.id) ? ' is-added' : ''}`}
-              onClick={(e) => {
-                // The card ticks its checkbox; its own buttons and the checkbox keep their own clicks
-                if (added.has(s.id) || (e.target as HTMLElement).closest('button, input, label')) return;
-                togglePick(s.id);
-              }}
             >
               <div className="geo-card-top geo-pick-top">
                 <CardHeading level={2}>{s.name}</CardHeading>
                 {added.has(s.id) ? (
                   <span className="geo-status is-active">Added</span>
                 ) : (
+                  // Only the checkbox selects; View geography data opens it
                   <label className="geo-pick">
                     <input type="checkbox" checked={picked.includes(s.id)} onChange={() => togglePick(s.id)} />
-                    <span className="ux-visually-hidden">Select {s.name}</span>
+                    <span>
+                      Select<span className="ux-visually-hidden"> {s.name}</span>
+                    </span>
                   </label>
                 )}
               </div>

@@ -2017,3 +2017,9 @@ select:focus, textarea:focus {
 .geo-pick-top .geo-card-h { flex: 1 1 0; min-width: 0; margin: 0; font-size: 1.125rem; font-weight: 700; line-height: 1.3; color: var(--digitv2-lightTheme-primary-2); }
 .geo-pick-top .geo-status { flex-shrink: 0; }
 .geo-card .geo-pick-top { margin-bottom: 0; min-height: 0; }
+/* Select cards aren't clickable: the labelled checkbox selects, View geography data opens */
+.geo-card.is-pick { cursor: default; }
+.geo-card.is-pick:hover { box-shadow: 0 1px 2px rgb(16 24 40 / 0.04), 0 6px 18px rgb(16 24 40 / 0.05); }
+.geo-card.is-pick.is-picked:hover { box-shadow: 0 0 0 1px var(--c-primary), 0 6px 18px rgb(200 76 14 / 0.12); }
+.geo-pick { display: inline-flex; flex-shrink: 0; align-items: center; gap: 8px; width: auto; height: 32px; margin: -4px -6px 0 0; padding: 0 6px; border-radius: 6px; font-size: 0.9375rem; font-weight: 500; color: var(--c-text); cursor: pointer; }
+.geo-pick:hover { background: var(--c-primary-bg); }
