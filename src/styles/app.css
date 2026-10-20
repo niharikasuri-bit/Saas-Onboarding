@@ -2050,3 +2050,5 @@ select:focus, textarea:focus {
 .geo-pick-count { gap: 6px; }
 .geo:has(.geo-pick-bar) { padding-bottom: 88px; }
 .geo-pick-bar { justify-content: flex-end; }
+.geo-selline { display: flex; align-items: center; gap: 14px; margin: 0 0 12px; font-size: 0.9375rem; color: var(--c-text); }
+.geo-selline strong { color: var(--digitv2-lightTheme-primary-2); }

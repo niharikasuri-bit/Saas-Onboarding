@@ -375,6 +375,18 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
 
       {countLine}
 
+      {/* What's ticked, just above the list; the footer has the action */}
+      {createVal === null && adding && picked.length > 0 && (
+        <p className="geo-selline">
+          <span>
+            <strong>{picked.length}</strong> selected
+          </span>
+          <button type="button" className="br-link" onClick={() => setPicked([])}>
+            Clear selection
+          </button>
+        </p>
+      )}
+
 
       {createVal !== null ? (
         <CreateGeography
@@ -567,7 +579,6 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
       {/* While geographies are ticked, the footer adds them; the Didn't find bar steps aside */}
       {createVal === null && adding && picked.length > 0 && (
         <footer className="cg-bar geo-pick-bar">
-          {/* The count is for screen readers; the ticked cards show it on screen */}
           <p className="ux-visually-hidden" role="status">
             {picked.length} selected
           </p>
