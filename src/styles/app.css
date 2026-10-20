@@ -1996,3 +1996,19 @@ select:focus, textarea:focus {
 .ch-fields.is-geo dd { word-break: normal; overflow-wrap: break-word; }
 .geo-card .ch-fields.is-geo { margin-bottom: var(--s2); }
 .ch-fields dt { white-space: nowrap; }
+
+/* Select your geographies: tick cards, then add them from the footer */
+.geo-card.is-pick { cursor: pointer; }
+.geo-card.is-pick.is-added { cursor: default; }
+.geo-card.is-picked { border-color: var(--c-primary); box-shadow: 0 0 0 1px var(--c-primary), 0 6px 18px rgb(200 76 14 / 0.12); }
+.geo-pick { display: inline-grid; place-items: center; width: 32px; height: 32px; margin: -4px -4px 0 0; border-radius: 6px; cursor: pointer; }
+.geo-pick input, .geo-pick-col input { width: 20px; height: 20px; margin: 0; accent-color: var(--c-primary); cursor: pointer; }
+.geo-pick:has(input:focus-visible) { box-shadow: var(--focus); }
+.geo-table .geo-pick-col { width: 48px; text-align: center; }
+.geo-table tr.is-picked td, .geo-table tr.is-picked th { background: var(--c-primary-bg); }
+.geo-pick-bar { z-index: 6; }
+.geo-pick-count { display: flex; align-items: center; gap: 14px; margin: 0; font-size: 1rem; color: var(--c-text); }
+.geo-pick-count strong { font-size: 1.125rem; color: var(--digitv2-lightTheme-primary-2); }
+/* With the footer up, the floating Can't find bar sits above it */
+.geo:has(.geo-pick-bar) .geo-foot { bottom: 96px; }
+.geo:has(.geo-pick-bar) { padding-bottom: 88px; }
