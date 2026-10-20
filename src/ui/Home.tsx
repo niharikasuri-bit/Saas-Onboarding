@@ -27,10 +27,10 @@ const CARD: Record<Product, { stats: [string, string][]; tint: string; art: Art;
   lnp: { stats: [['3', 'Licence templates'], ['6', 'Modules'], ['10', 'Features']], tint: '#FDF0E7', art: 'doc', tag: 'Revenue' },
 };
 
-const TASK: Record<TodoId, { title: string; needs: string[]; why: string; minutes: number; icon: string; action: string }> = {
+const TASK: Record<TodoId, { title: string; needs: string; why: string; minutes: number; icon: string; action: string }> = {
   geography: {
     title: 'Add your geographies',
-    needs: ['Your country', 'Its levels', 'The places in it'],
+    needs: 'your country, its levels and the places in it',
     why: 'Every product uses your geographies to know where things happen, so work reaches the right place. Your products unlock once they’re in.',
     minutes: 5,
     icon: 'Public',
@@ -38,7 +38,7 @@ const TASK: Record<TodoId, { title: string; needs: string[]; why: string; minute
   },
   sender: {
     title: 'Set up notification channels',
-    needs: ['SMS', 'Email', 'Sender details'],
+    needs: 'SMS, email and sender details',
     why: 'Updates go out in your organisation’s name, so your products need your services and sender details before they go live.',
     minutes: 5,
     icon: 'Email',
@@ -46,7 +46,7 @@ const TASK: Record<TodoId, { title: string; needs: string[]; why: string; minute
   },
   users: {
     title: 'Invite your team',
-    needs: ['Work emails', 'Roles'],
+    needs: 'work emails and roles',
     why: 'Once your team is in, you can give each person a role and assign them work.',
     minutes: 2,
     icon: 'Group',
@@ -93,25 +93,21 @@ export function Home() {
 
       {task ? (
         <section className="lp-task" aria-labelledby={`${uid}-t`}>
-          <span className="lp-task-icon" aria-hidden="true">
-            <Icon name={TASK[task.id].icon} size={24} />
-          </span>
-          <div className="lp-task-text">
-            <p className="lp-task-meta">
-              <span className="lp-eyebrow">Your task</span>
-              <span className="lp-pill">Pending</span>
-              <span>
-                Step {todos.length - open.length + 1} of {todos.length}
-              </span>
-              <span aria-hidden="true">·</span>
-              <span>About {TASK[task.id].minutes} min</span>
-            </p>
-            <h2 id={`${uid}-t`}>{TASK[task.id].title}</h2>
-            <ul className="lp-needs" aria-label="You’ll need">
-              {TASK[task.id].needs.map((n) => (
-                <li key={n}>{n}</li>
-              ))}
-            </ul>
+          <div className="lp-task-main">
+            <span className="lp-task-icon" aria-hidden="true">
+              <Icon name={TASK[task.id].icon} size={24} />
+            </span>
+            <div className="lp-task-text">
+              <p className="lp-task-meta">
+                <span className="lp-eyebrow">Your task</span>
+                <span className="lp-pill">Pending</span>
+                <span className="lp-task-when">
+                  Step {todos.length - open.length + 1} of {todos.length} · About {TASK[task.id].minutes} min
+                </span>
+              </p>
+              <h2 id={`${uid}-t`}>{TASK[task.id].title}</h2>
+              <p className="lp-needs">You’ll need {TASK[task.id].needs}</p>
+            </div>
           </div>
           <div className="lp-task-acts">
             <button type="button" className="lp-link" onClick={() => setWhy(true)}>
