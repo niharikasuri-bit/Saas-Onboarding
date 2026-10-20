@@ -176,3 +176,9 @@
   .lp-task-acts > button:not(.lp-link) { width: 100%; justify-content: center; }
   .lp-task-acts .lp-link { align-self: center; }
 }
+/* unDraw illustrations: the accent follows the theme's primary colour */
+.lp-undraw { display: block; color: var(--c-primary); }
+.lp-undraw svg { display: block; width: auto; height: 150px; max-width: 100%; }
+.lp-art { min-height: 0; padding: 18px; }
+.lp-ex-art { height: 150px; padding: 14px; }
+.lp-ex-art .lp-undraw svg { height: 120px; width: auto; }

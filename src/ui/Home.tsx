@@ -9,6 +9,9 @@ import { Channels } from './Channels';
 import { HealthStack } from './Integrations';
 import { usePageToast } from './PageToast';
 import { HomeHeader } from './AccountSetup';
+import cmsArt from '../assets/undraw/cms.svg?raw';
+import hcmArt from '../assets/undraw/hcm.svg?raw';
+import lnpArt from '../assets/undraw/lnp.svg?raw';
 
 /**
  * Home, laid out like an admin portal's landing page:
@@ -445,44 +448,8 @@ function ExploreCard({ p, admin, onAdded }: { p: Product; admin: boolean; onAdde
 }
 
 type Art = 'chat' | 'health' | 'doc';
-/** Flat illustrations in the DIGIT colours, decorative. */
+const ART: Record<Art, string> = { chat: cmsArt, health: hcmArt, doc: lnpArt };
+/** unDraw illustrations (free to use), their accent in the theme colour; decorative. */
 function Illustration({ art }: { art: Art }) {
-  if (art === 'chat')
-    return (
-      <svg viewBox="0 0 200 120" width="200" height="120">
-        <ellipse cx="100" cy="110" rx="70" ry="6" fill="#0B4B66" opacity="0.08" />
-        <rect x="40" y="18" width="96" height="62" rx="12" fill="#fff" stroke="#0B4B66" strokeWidth="3" />
-        <path d="M60 80 l-6 18 22-18" fill="#fff" stroke="#0B4B66" strokeWidth="3" strokeLinejoin="round" />
-        <rect x="56" y="34" width="64" height="7" rx="3.5" fill="#0B4B66" opacity="0.8" />
-        <rect x="56" y="49" width="44" height="7" rx="3.5" fill="#0B4B66" opacity="0.35" />
-        <rect x="112" y="46" width="56" height="40" rx="10" fill="#C84C0E" />
-        <path d="M150 86 l10 14 -2-14z" fill="#C84C0E" />
-        <path d="M128 66 l8 8 16-16" fill="none" stroke="#fff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    );
-  if (art === 'health')
-    return (
-      <svg viewBox="0 0 200 120" width="200" height="120">
-        <ellipse cx="100" cy="110" rx="70" ry="6" fill="#0B4B66" opacity="0.08" />
-        <path d="M30 100 V60 l40-26 40 26 v40z" fill="#fff" stroke="#0B4B66" strokeWidth="3" strokeLinejoin="round" />
-        <rect x="60" y="74" width="20" height="26" rx="2" fill="#0B4B66" opacity="0.8" />
-        <circle cx="140" cy="54" r="30" fill="#00703C" />
-        <rect x="134" y="38" width="12" height="32" rx="2" fill="#fff" />
-        <rect x="124" y="48" width="32" height="12" rx="2" fill="#fff" />
-        <path d="M120 96 c10-14 30-14 40 0" fill="none" stroke="#C84C0E" strokeWidth="4" strokeLinecap="round" />
-        <circle cx="140" cy="100" r="5" fill="#C84C0E" />
-      </svg>
-    );
-  return (
-    <svg viewBox="0 0 200 120" width="200" height="120">
-      <ellipse cx="100" cy="110" rx="70" ry="6" fill="#0B4B66" opacity="0.08" />
-      <rect x="62" y="12" width="76" height="94" rx="8" fill="#fff" stroke="#0B4B66" strokeWidth="3" />
-      <rect x="76" y="30" width="48" height="7" rx="3.5" fill="#0B4B66" opacity="0.8" />
-      <rect x="76" y="46" width="36" height="6" rx="3" fill="#0B4B66" opacity="0.35" />
-      <rect x="76" y="60" width="42" height="6" rx="3" fill="#0B4B66" opacity="0.35" />
-      <circle cx="132" cy="86" r="22" fill="#C84C0E" />
-      <circle cx="132" cy="86" r="14" fill="none" stroke="#fff" strokeWidth="3" />
-      <path d="M126 86 l5 5 9-10" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+  return <span className="lp-undraw" dangerouslySetInnerHTML={{ __html: ART[art] }} />;
 }
