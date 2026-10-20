@@ -442,44 +442,33 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
               </div>
             </li>
             ) : (
-            // Their own geography: header (name, which opens the data, and status), the numbers and
-            // level path, then a footer with Edit Geography Data
-            <li key={s.id} className="geo-card gc">
-              <div className="gc-head">
-                <div className="gc-title">
-                  <h3 className="gc-name">
-                    <button type="button" className="geo-name-link" onClick={() => open(s.id, false)}>
-                      {s.name}
-                    </button>
-                  </h3>
-                  <p className="gc-country">
-                    <Icon name="LocationOn" size={16} />
-                    {s.country}
-                  </p>
-                </div>
+            // Their own geography, laid out like a channel card: icon and status, the name (it opens the
+            // data), the numbers and levels, then Edit Geography Data
+            <li key={s.id} className="geo-card">
+              <div className="geo-card-top">
+                <span className="geo-icon" aria-hidden="true">
+                  <Icon name="Public" size={20} />
+                </span>
                 <Status value={status(s)} />
               </div>
-              <div className="gc-body">
-                <p className="gc-stats">
-                  <span>
-                    <strong>{s.levels.length}</strong> {s.levels.length === 1 ? 'level' : 'levels'}
-                  </span>
-                  <span className="gc-dot" aria-hidden="true" />
-                  <span>
-                    <strong>{countOf(s).toLocaleString('en')}</strong> {countOf(s) === 1 ? 'geography' : 'geographies'}
-                  </span>
-                </p>
-                <ol className="gc-path" aria-label="Levels, largest first">
-                  {s.levels.map((l) => (
-                    <li key={l}>{l}</li>
-                  ))}
-                </ol>
-              </div>
-              <div className="gc-foot">
-                <button type="button" className="geo-edit" aria-label={`Edit Geography Data for ${s.name}`} onClick={() => open(s.id, true)}>
-                  <Icon name="Edit" size={18} />
-                  Edit Geography Data
+              <CardHeading level={3}>
+                <button type="button" className="geo-name-link" onClick={() => open(s.id, false)}>
+                  {s.name}
                 </button>
+              </CardHeading>
+              <p className="geo-stats">
+                <span>
+                  <strong>{s.levels.length}</strong> {s.levels.length === 1 ? 'level' : 'levels'}
+                </span>
+                <span>
+                  <strong>{countOf(s).toLocaleString('en')}</strong> {countOf(s) === 1 ? 'geography' : 'geographies'}
+                </span>
+              </p>
+              <p className="geo-levels">
+                <span className="geo-tag">{s.levels.join(' › ')}</span>
+              </p>
+              <div className="geo-actions is-edit">
+                <Button variation="secondary" icon="Edit" label="Edit Geography Data" title={`Edit ${s.name} geography data`} onClick={() => open(s.id, true)} />
               </div>
             </li>
             )

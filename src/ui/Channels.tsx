@@ -142,7 +142,7 @@ export function Channels({ embedded, onDone }: { embedded?: boolean; onDone?: (m
                 </dl>
               )}
               {st.state !== 'none' && (
-                <div className="geo-actions">
+                <div className="geo-actions is-edit">
                   <Button
                     variation="secondary"
                     icon="Edit"
