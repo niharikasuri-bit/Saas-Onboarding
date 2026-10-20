@@ -1894,3 +1894,7 @@ select:focus, textarea:focus {
 /* First landing: the progress bar under the description */
 .hm-first .as-head .as-lead { margin-bottom: 24px; }
 .hm-first .as-head .as-bar { max-width: none; }
+/* OpenStreetMap: search left, Use my location right, in the row above the map */
+.osm-above { justify-content: space-between; align-items: flex-end; }
+.osm-above > button { flex-shrink: 0; height: 44px; padding: 0 18px; }
+.osm-above > button .digit-button-label { font-size: 1rem; font-weight: 500; }

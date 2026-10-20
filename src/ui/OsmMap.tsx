@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { Button } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
 
 /**
@@ -144,7 +145,11 @@ export function OsmMap({
   const fmt = (n: number) => n.toFixed(4);
   return (
     <div className="osm-map">
-      <div className="osm-above">{search}</div>
+      {/* Search on the left, Use my location on the right, just above the map */}
+      <div className="osm-above">
+        {search}
+        <Button variation="secondary" icon="MyLocation" label="Use my location" onClick={useMyLocation} />
+      </div>
       <div className="osm-frame">
         <div
           ref={box}

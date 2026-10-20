@@ -268,9 +268,6 @@ export function CreateGeography({
         {step === 'places' && method === 'upload' && !uploaded && (
           <Button variation="secondary" icon="FileDownload" label="Download template" onClick={() => downloadTemplate(country.trim(), cleanLevels)} />
         )}
-        {step === 'country' && method === 'osm' && (
-          <Button variation="secondary" icon="MyLocation" label="Use my location" onClick={() => osmApi.current?.locate()} />
-        )}
       </div>
       )}
       {reviewing ? null : LEADS[step] ? (
