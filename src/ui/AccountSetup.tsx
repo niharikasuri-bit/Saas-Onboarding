@@ -148,7 +148,7 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
         <div className="as-wrap">
           <p className="as-eyebrow">Welcome aboard, {firstName(answers)}</p>
           <h1 ref={heading} tabIndex={-1}>
-            Let’s complete <em>account setup</em>
+            Let’s set up your <em>account</em>
           </h1>
           <p className="as-lead">Complete the following tasks to set up your account and get your products ready to use.</p>
         </div>
