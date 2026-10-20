@@ -251,7 +251,7 @@ export function CreateGeography({
       method === 'osm'
         ? 'Review the fetched geographies and edit any row before you create them.'
         : editingFile
-          ? 'Edit any row from your file before you upload it.'
+          ? 'Edit any row from your file before you confirm it.'
           : '',
   };
 
@@ -456,7 +456,7 @@ export function CreateGeography({
                   </p>
                 )}
                 <div className="pt-panel">
-                <SheetIntro action={editingFile ? 'Upload data' : 'Create geographies'} tree={view === 'tree'} />
+                <SheetIntro action={editingFile ? 'Confirm geography data' : 'Create geographies'} tree={view === 'tree'} />
                 {view === 'table' ? (
                   <Grid
                     levels={cleanLevels}
@@ -502,7 +502,7 @@ export function CreateGeography({
         />
         <Button
           variation="primary"
-          label={step === 'places' ? (editingFile ? 'Upload data' : 'Create geographies') : 'Next'}
+          label={step === 'places' ? (editingFile ? 'Confirm geography data' : 'Create geographies') : 'Next'}
           icon={step === 'places' ? undefined : 'ArrowForward'}
           isSuffix
           onClick={next}
@@ -983,7 +983,7 @@ function UploadPreview({
       </div>
       <div className="upv-body">
         <InfoNote icon="Info" title="Need to make changes?">
-          Select Edit data to change any row before you upload it.
+          Select Edit data to change any row before you confirm it.
         </InfoNote>
         {(error || bad.length > 0) && (
           <p className="fld-error" role="alert">
