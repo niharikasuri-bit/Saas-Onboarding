@@ -145,7 +145,11 @@
 .lp-art { background: #FAFAFA; }
 /* The orange header leads the page; the task card sits right under it */
 .lp > .pk-head { margin-bottom: 0; }
-/* Home header: blue on a light-blue fade; the Help bar above runs into it in the same light blue */
-.lp > .pk-head { background: linear-gradient(180deg, var(--c-info-bg) 0%, rgb(222 239 255 / 0.6) 55%, rgb(222 239 255 / 0) 100%); }
-.lp > .pk-head h1 em { color: var(--digitv2-lightTheme-primary-2); }
-.sh-content:has(.lp) .sh-sub { border-bottom: 0; background: var(--c-info-bg); }
+/* Home header: the orange fade, starting in the Help bar above so the two read as one; a bit larger */
+.sh-content:has(.lp) .sh-sub { border-bottom: 0; background: var(--c-primary-bg); }
+.lp > .pk-head h1 { font-size: 3.25rem; }
+.lp > .pk-head p { margin-top: 10px; font-size: 1.3125rem; max-width: none; }
+@media (max-width: 720px) { .lp > .pk-head h1 { font-size: 2.5rem; } .lp > .pk-head p { font-size: 1.125rem; } }
+/* Metric tiles in light blue */
+.lp-stats > div, .lp-glance dl > div { background: var(--c-info-bg); border-color: #C9E2F8; }
+.lp-glance-icon { background: #fff; }
