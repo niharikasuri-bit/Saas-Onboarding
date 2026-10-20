@@ -214,7 +214,7 @@ export function CreateGeography({
   };
 
   const TITLES: Record<Step, string> = {
-    country: 'What is the name of your country?',
+    country: method === 'osm' ? 'Find your location on the map' : 'What is the name of your country?',
     levels: `How is ${country.trim() || 'it'} divided?`,
     method: `How would you like to ${verb} your geographies?`,
     places:
@@ -232,7 +232,7 @@ export function CreateGeography({
       'Choose how to set up your geography data. Upload a file using the template for bulk setup, or open the map to select them visually.',
     country:
       method === 'osm'
-        ? 'Search for the country you serve, or move the map to put the pin on your location.'
+        ? 'Search for your country or use your location, then move the map so the pin sits where you work. We’ll fetch the geographies for that area from OpenStreetMap.'
         : 'Your geography starts here. Everything you add sits inside it.',
     levels: 'List the geography levels from largest to smallest, for example Country, Region, District. This will help us customize your template for bulk upload.',
     places:
