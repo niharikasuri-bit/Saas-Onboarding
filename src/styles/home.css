@@ -173,3 +173,10 @@
   .lp-task-body { grid-template-columns: minmax(0, 1fr); }
   .lp-task-icon { display: none; }
 }
+/* Task card: the orange edge on the left; the green progress bar from the first landing */
+.lp-task { border-left: 4px solid var(--c-primary); }
+.lp-task-bar.as-bar { height: 10px; margin: 0 24px; border-radius: 5px; background: #E4E4E4; }
+.lp-task-bar.as-bar > span { border-radius: 5px; background: var(--c-success); }
+.lp-task-step.as-count { font-size: 0.9375rem; }
+/* Explore cards: the three numbers as tags */
+.lp-ex-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 0; padding: 0; list-style: none; }

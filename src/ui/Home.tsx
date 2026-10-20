@@ -98,12 +98,12 @@ export function Home() {
         <section className="lp-task" aria-labelledby={`${uid}-t`}>
           <div className="lp-task-top">
             <p className="lp-eyebrow" id={`${uid}-step`}>Your next task</p>
-            <p className="lp-task-step">
-              Step {todos.length - open.length + 1} of {todos.length}
+            <p className="lp-task-step as-count">
+              <strong>{todos.length - open.length}</strong> of {todos.length} done
             </p>
           </div>
           <div
-            className="lp-task-bar"
+            className="lp-task-bar as-bar"
             role="progressbar"
             aria-labelledby={`${uid}-step`}
             aria-valuemin={0}
@@ -430,12 +430,13 @@ function ExploreCard({ p, admin, onAdded }: { p: Product; admin: boolean; onAdde
       <div className="lp-ex-body">
         <h3>{meta.name}</h3>
         <p>{meta.about}</p>
-        <p className="lp-ex-meta">
-          {CARD[p].stats
-            .slice(1)
-            .map(([n, l]) => `${n} ${l.toLowerCase()}`)
-            .join(' · ')}
-        </p>
+        <ul className="lp-ex-tags" aria-label="About the product">
+          {CARD[p].stats.map(([n, l]) => (
+            <li key={l} className="geo-tag">
+              {n} {l.toLowerCase()}
+            </li>
+          ))}
+        </ul>
         <div className="lp-ex-foot">
           {admin ? (
             <Button
