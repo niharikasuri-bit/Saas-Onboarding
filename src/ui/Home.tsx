@@ -96,9 +96,10 @@ export function Home() {
 
       {task ? (
         <section className="lp-task" aria-labelledby={`${uid}-t`}>
-          <div className="lp-task-top">
-            <p className="lp-eyebrow" id={`${uid}-step`}>Your next task</p>
-            <p className="lp-task-step as-count">
+          {/* The same progress row as the first landing: Your progress, x of y done, the green bar */}
+          <div className="lp-task-top as-progress">
+            <p id={`${uid}-step`}>Your progress</p>
+            <p className="as-count">
               <strong>{todos.length - open.length}</strong> of {todos.length} done
             </p>
           </div>
