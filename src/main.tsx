@@ -9,6 +9,7 @@ import './styles/app.css';
 import './styles/branding.css';
 import './styles/product-home.css';
 import './styles/integrations.css';
+import './styles/home.css';
 import './styles/flow.css';
 import './styles/v4.css';
 import App from './App';

@@ -31,7 +31,8 @@ export function Integrations() {
 }
 
 /** The map and one row per system, with Connect / Disconnect. Shared by Home and Integrations. */
-export function HealthStack() {
+/** tiles: on Home, the systems as tiles under the map (logo, name, what it's for, action). */
+export function HealthStack({ tiles }: { tiles?: boolean } = {}) {
   const { account, update } = useAccount();
   const on = Object.fromEntries(SYSTEMS.map((s) => [s.id, !!account.integrations?.[s.id]])) as Record<SystemId, boolean>;
   const [toastEl, showToast] = usePageToast();
@@ -44,7 +45,7 @@ export function HealthStack() {
   return (
     <>
       <HubMap on={on} count={count} />
-      <ul className="ig-list">
+      <ul className={`ig-list${tiles ? ' is-tiles' : ''}`}>
         {SYSTEMS.map((s) => (
           <li key={s.id} className={`ig-item${on[s.id] ? ' is-on' : ''}`}>
             <span className="ig-logo" style={{ background: s.color }} aria-hidden="true">
