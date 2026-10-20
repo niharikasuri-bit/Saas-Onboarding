@@ -2058,6 +2058,7 @@ select:focus, textarea:focus {
 .geo:has(.geo-selbar) { padding-bottom: 0; }
 .geo-pick-count { gap: 6px; }
 .geo:has(.geo-pick-bar) { padding-bottom: 88px; }
+.geo-pick-bar { justify-content: flex-end; }
 /* ---------- Branding: sections | settings | live phone preview ---------- */
 .br { padding-bottom: 88px; }
 .br-head { margin-bottom: var(--s6); }

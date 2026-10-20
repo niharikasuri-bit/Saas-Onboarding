@@ -441,9 +441,9 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                   </label>
                 )}
                 <CardHeading level={2}>{s.name}</CardHeading>
-                <button type="button" className="geo-preview" aria-label={`Preview ${s.name}`} onClick={() => open(s.id, false)}>
+                <button type="button" className="geo-preview" aria-label={`View ${s.name}`} onClick={() => open(s.id, false)}>
                   <Icon name="Visibility" size={18} />
-                  Preview
+                  View
                 </button>
               </div>
               <p className="geo-stats">
@@ -567,8 +567,9 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
       {/* While geographies are ticked, the footer adds them; the Didn't find bar steps aside */}
       {createVal === null && adding && picked.length > 0 && (
         <footer className="cg-bar geo-pick-bar">
-          <p className="geo-pick-count" role="status">
-            <strong>{picked.length}</strong> selected
+          {/* The count is for screen readers; the ticked cards show it on screen */}
+          <p className="ux-visually-hidden" role="status">
+            {picked.length} selected
           </p>
           <Button variation="primary" icon="Add" label="Add geographies to account" onClick={addPicked} />
         </footer>
