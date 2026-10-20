@@ -389,6 +389,8 @@ export type Account = {
   mapping: Record<string, string>;
   items: Record<DataItem, ItemMeta>;
   ui: { viewAs: 'admin' | 'member' };
+  /** Health systems connected on Integrations (DHIS2, eLMIS, MOSIP). */
+  integrations?: Record<string, boolean>;
 };
 
 const META = (): ItemMeta => ({ imported: 0, pending: [] });

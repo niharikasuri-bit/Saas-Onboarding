@@ -21,7 +21,17 @@
 .ig-text { grid-area: text; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .ig-text strong { font-size: 1rem; color: var(--c-text); }
 .ig-text span { font-size: 0.875rem; color: var(--c-text-2); }
-.ig-name { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.ig-name { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
 .ig-item > button { grid-area: btn; justify-self: end; height: 32px; padding: 0 14px; }
 .ig-item > button .digit-button-label { font-size: 0.875rem; font-weight: 500; }
 @media (max-width: 480px) { .ig-head h1 { font-size: 1.625rem; } .ig-card { padding: 16px; } }
+/* On Home: inside the section's white container */
+.hm-sec.is-stack { display: flex; flex-direction: column; gap: var(--s4); }
+.hm-sec.is-stack > .geo-bar, .hm-sec.is-stack > .hm-sub { margin-bottom: 0; }
+.hm-v5 .hm-sec.is-stack > .hm-sub { margin-top: calc(-1 * var(--s2)); }
+.ig-item { align-items: start; }
+.ig-item > button { align-self: center; }
+.ig-text { gap: 4px; }
+/* Card: mark and text on top, the action underneath (no squeeze beside the text) */
+.ig-item { grid-template-columns: auto 1fr; grid-template-areas: 'logo text' 'logo btn'; gap: 10px 12px; }
+.ig-item > button { justify-self: start; align-self: start; }

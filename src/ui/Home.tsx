@@ -4,6 +4,7 @@ import { Icon } from '../components/Icon';
 import { useAccount } from '../lib/store';
 import { PRODUCTS, PRODUCT_ORDER, hasGeography, setupDone, type Product } from '../lib/model';
 import { AccountSetup, HomeHeader } from './AccountSetup';
+import { HealthStack } from './Integrations';
 
 /**
  * Home, in three parts:
@@ -98,6 +99,17 @@ export function Home() {
               </ul>
             </section>
           )}
+
+          {/* The health systems DIGIT plugs into */}
+          <section aria-labelledby={`${uid}-hs`} className="hm-sec is-mine is-stack">
+            <div className="geo-bar">
+              <h2 id={`${uid}-hs`} className="geo-section-h">
+                Built to Plug into Your Health Stack
+              </h2>
+            </div>
+            <p className="hm-sub">Seamless integration with existing health information systems and infrastructure</p>
+            <HealthStack />
+          </section>
         </>
       )}
     </div>

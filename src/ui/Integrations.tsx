@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import { Button } from '@egovernments/digit-ui-components';
 import { usePageToast } from './PageToast';
+import { useAccount } from '../lib/store';
 
 /**
  * Integrations: the health systems DIGIT plugs into. A small map with DIGIT in the middle
@@ -13,16 +13,8 @@ const SYSTEMS = [
 ] as const;
 type SystemId = (typeof SYSTEMS)[number]['id'];
 
+/** The Integrations page: its header, then the health systems in a white card. */
 export function Integrations() {
-  const [on, setOn] = useState<Record<SystemId, boolean>>({ dhis2: false, elmis: false, mosip: false });
-  const [toastEl, showToast] = usePageToast();
-  const count = SYSTEMS.filter((s) => on[s.id]).length;
-  const toggle = (id: SystemId, name: string) => {
-    if (on[id] && !window.confirm(`Disconnect ${name}? Data stops flowing between DIGIT and ${name}.`)) return;
-    setOn((x) => ({ ...x, [id]: !x[id] }));
-    showToast(on[id] ? `${name} disconnected` : `${name} connected`);
-  };
-
   return (
     <div className="ig">
       <header className="ig-head">
@@ -31,40 +23,51 @@ export function Integrations() {
         </h1>
         <p>Seamless integration with existing health information systems and infrastructure</p>
       </header>
-
-      <section className="ig-card" aria-labelledby="ig-systems">
-        <div className="ig-card-head">
-          <h2 id="ig-systems">Health systems</h2>
-          <span className="geo-section-n">{count} of {SYSTEMS.length} connected</span>
-        </div>
-
-        <HubMap on={on} count={count} />
-
-        <ul className="ig-list">
-          {SYSTEMS.map((s) => (
-            <li key={s.id} className={`ig-item${on[s.id] ? ' is-on' : ''}`}>
-              <span className="ig-logo" style={{ background: s.color }} aria-hidden="true">
-                {s.mark}
-              </span>
-              <span className="ig-text">
-                <span className="ig-name">
-                  <strong>{s.name}</strong>
-                  <span className={`geo-status${on[s.id] ? ' is-active' : ''}`}>{on[s.id] ? 'Connected' : 'Not connected'}</span>
-                </span>
-                <span>{s.desc}</span>
-              </span>
-              <Button
-                variation={on[s.id] ? 'secondary' : 'primary'}
-                label={on[s.id] ? 'Disconnect' : 'Connect'}
-                title={`${on[s.id] ? 'Disconnect' : 'Connect'} ${s.name}`}
-                onClick={() => toggle(s.id, s.name)}
-              />
-            </li>
-          ))}
-        </ul>
+      <section className="ig-card" aria-label="Health systems">
+        <HealthStack />
       </section>
-      {toastEl}
     </div>
+  );
+}
+
+/** The map and one row per system, with Connect / Disconnect. Shared by Home and Integrations. */
+export function HealthStack() {
+  const { account, update } = useAccount();
+  const on = Object.fromEntries(SYSTEMS.map((s) => [s.id, !!account.integrations?.[s.id]])) as Record<SystemId, boolean>;
+  const [toastEl, showToast] = usePageToast();
+  const count = SYSTEMS.filter((s) => on[s.id]).length;
+  const toggle = (id: SystemId, name: string) => {
+    if (on[id] && !window.confirm(`Disconnect ${name}? Data stops flowing between DIGIT and ${name}.`)) return;
+    update((a) => ({ ...a, integrations: { ...a.integrations, [id]: !on[id] } }));
+    showToast(on[id] ? `${name} disconnected` : `${name} connected`);
+  };
+  return (
+    <>
+      <HubMap on={on} count={count} />
+      <ul className="ig-list">
+        {SYSTEMS.map((s) => (
+          <li key={s.id} className={`ig-item${on[s.id] ? ' is-on' : ''}`}>
+            <span className="ig-logo" style={{ background: s.color }} aria-hidden="true">
+              {s.mark}
+            </span>
+            <span className="ig-text">
+              <span className="ig-name">
+                <strong>{s.name}</strong>
+                <span className={`geo-status${on[s.id] ? ' is-active' : ''}`}>{on[s.id] ? 'Connected' : 'Not connected'}</span>
+              </span>
+              <span>{s.desc}</span>
+            </span>
+            <Button
+              variation={on[s.id] ? 'secondary' : 'primary'}
+              label={on[s.id] ? 'Disconnect' : 'Connect'}
+              title={`${on[s.id] ? 'Disconnect' : 'Connect'} ${s.name}`}
+              onClick={() => toggle(s.id, s.name)}
+            />
+          </li>
+        ))}
+      </ul>
+      {toastEl}
+    </>
   );
 }
 
