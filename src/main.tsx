@@ -7,6 +7,7 @@ import './i18n';
 import '@egovernments/digit-ui-components-css/dist/index.css';
 import './styles/app.css';
 import './styles/branding.css';
+import './styles/product-home.css';
 import './styles/flow.css';
 import './styles/v4.css';
 import App from './App';

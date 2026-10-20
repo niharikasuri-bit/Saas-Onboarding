@@ -18,7 +18,6 @@ import {
   rowLocked,
   rowState,
   sectionLabel,
-  sectionStatus,
   slug,
   templateById,
   type Account,
@@ -26,6 +25,7 @@ import {
   type Section,
 } from '../lib/model';
 import { UserList } from './Users';
+import { ProductHome } from './ProductHome';
 
 /** A product: its start screen until a template is chosen, then its sections. */
 export function ProductPage() {
@@ -134,7 +134,7 @@ const templateName = (p: Product, a: Account) =>
 /* ---------------------------------------------------------------- */
 
 function Overview({ p }: { p: Product }) {
-  const { account, go, openModal, setWidgetOpen } = useAccount();
+  const { account, openModal, setWidgetOpen } = useAccount();
   const st = account.products[p];
   const pct = percent(p, account);
   const next = nextRow(p, account);
@@ -169,27 +169,7 @@ function Overview({ p }: { p: Product }) {
         </section>
       )}
 
-      <section className="ov-sections" aria-labelledby="ov-s">
-        <h2 id="ov-s" className="tg-h">
-          In {PRODUCTS[p].name}
-        </h2>
-        <ul className="ov-list">
-          {NAVS[p]
-            .filter((s) => s !== 'overview')
-            .map((s) => {
-              const b = sectionStatus(p, s, account);
-              return (
-                <li key={s}>
-                  <button type="button" className="ov-item" onClick={() => go('product', { product: p, section: s })}>
-                    <span className="ov-name">{sectionLabel(p, s)}</span>
-                    {b && <span className={`tag ${b.tone}`}>{b.label}</span>}
-                    <Icon name="ChevronRight" size={20} />
-                  </button>
-                </li>
-              );
-            })}
-        </ul>
-      </section>
+      <ProductHome p={p} />
     </div>
   );
 }

@@ -28,6 +28,17 @@ export function Icon({ name, size = 20 }: { name: string; size?: number }) {
       </span>
     );
   }
+  // Nor a lightning bolt (Quick actions).
+  if (name === 'Bolt') {
+    return (
+      <span className="ux-icon" aria-hidden="true">
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="9.5" />
+          <path d="M13 6.5 8.5 13h3.5l-1 4.5 4.5-6.5H12l1-4.5Z" fill="currentColor" stroke="none" />
+        </svg>
+      </span>
+    );
+  }
   // Nor a type glyph: "Aa" for typography.
   if (name === 'Typography') {
     return (
