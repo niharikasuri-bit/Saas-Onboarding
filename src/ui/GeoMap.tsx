@@ -70,7 +70,7 @@ export function GeoMap({ id, name, country, rows = [], levels = [] }: { id: stri
   }, [id, name, country, rows]);
   return (
     <div className="gm">
-      <div ref={box} className="gm-canvas" role="application" aria-label={`Map showing ${shaped.length ? `the outlines of ${shaped.length} ${shaped.length === 1 ? 'geography' : 'geographies'} in ${name}` : `where ${name} is, in ${country}`}. Use the arrow keys to move and plus or minus to zoom.`} />
+      <div ref={box} className="gm-canvas" role="application" aria-label={`Map showing ${shaped.length ? `the outlines of ${shaped.length} ${shaped.length === 1 ? 'geography' : 'geographies'} in ${name}` : `where ${name} is`}. Use the arrow keys to move and plus or minus to zoom.`} />
       {/* What the map shows, in words */}
       <p className="gm-key">
         {shaped.length ? (

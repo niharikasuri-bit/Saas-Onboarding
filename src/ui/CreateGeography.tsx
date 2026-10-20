@@ -189,7 +189,7 @@ export function CreateGeography({
         name = countryAt(pin) ?? 'Pinned location';
         setCountry(name);
       }
-      if (!name) e.country = method === 'osm' ? 'Search for your country, or move the map to put the pin on your location' : 'Enter the country’s name';
+      if (!name) e.country = method === 'osm' ? 'Search for a place, or move the map to put the pin on your location' : 'Enter the country’s name';
       else if (taken.some((s) => s.name.toLowerCase() === name.toLowerCase()))
         e.country = `${name} is already here. Search for it instead.`;
     }
@@ -244,9 +244,9 @@ export function CreateGeography({
       'Choose how to set up your geography data. Upload a file using the template for bulk setup, or open the map to select them visually.',
     country:
       method === 'osm'
-        ? 'Search for your country or use your location, then move the map so the pin sits where you work. We’ll fetch the geographies for that area from OpenStreetMap.'
+        ? 'Search for a place or use your location, then move the map so the pin sits where you work. We’ll fetch the geographies for that area from OpenStreetMap.'
         : 'Your geography starts here. Everything you add sits inside it.',
-    levels: 'List the geography levels from largest to smallest, for example Country, Region, District. This will help us customize your template for bulk upload.',
+    levels: 'List the geography levels from largest to smallest, for example Region, District, Ward. This will help us customize your template for bulk upload.',
     places:
       method === 'osm'
         ? 'Review the fetched geographies and edit any row before you create them.'
@@ -324,7 +324,7 @@ export function CreateGeography({
             search={
               <div className={`fld osm-fld${errors.country ? ' has-error' : ''}`}>
                 <label htmlFor={`${uid}-country`} className="osm-label">
-                  Search by country
+                  Search for a place
                 </label>
                 <div className="geo-search">
                   <Icon name="Search" size={20} />

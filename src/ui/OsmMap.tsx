@@ -180,7 +180,7 @@ export function OsmMap({
                   </span>
                 </>
               ) : (
-                'Search for your country, or move the map to put the pin on your location.'
+                'Search for a place, or move the map to put the pin on your location.'
               ))}
           </p>
         </div>

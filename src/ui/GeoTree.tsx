@@ -163,7 +163,6 @@ export function GeoTree({
       )}
       <div className="gt-card is-root">
         <span className="gt-name">{root}</span>
-        <span className="geo-tag">Country</span>
       </div>
       {branch('', 0)}
     </div>

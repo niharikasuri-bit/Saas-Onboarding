@@ -147,7 +147,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
   const hits = all.filter(
     (s) =>
       !term ||
-      [s.name, s.country, ...s.levels].some((x) => x.toLowerCase().includes(term)) ||
+      [s.name, ...s.levels].some((x) => x.toLowerCase().includes(term)) ||
       (!!status(s) && status(s).toLowerCase().startsWith(term)),
   );
 
@@ -351,7 +351,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
             <input
               id={`${uid}-q`}
               type="search"
-              placeholder={adding ? 'Search by name, country, level or status' : 'Search by country'}
+              placeholder="Search by name, level or status"
               value={q}
               onChange={(e) => {
                 setQ(e.target.value);
@@ -508,7 +508,6 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                   </th>
                 )}
                 <th scope="col">Name</th>
-                <th scope="col">Country</th>
                 <th scope="col">Levels</th>
                 <th scope="col">Level names</th>
                 <th scope="col">Geographies</th>
@@ -529,7 +528,6 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                     </td>
                   )}
                   <th scope="row">{s.name}</th>
-                  <td>{s.country}</td>
                   <td>{s.levels.length}</td>
                   <td>
                     <span className="geo-tag">{s.levels.join(' › ')}</span>
