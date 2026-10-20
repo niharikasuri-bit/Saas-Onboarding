@@ -4,11 +4,11 @@ import { Button } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
 import { useAccount } from '../lib/store';
 import { PRODUCTS, PRODUCT_ORDER, ROLES, hasGeography, newId, todoDone, todosFor, type Product, type TodoId } from '../lib/model';
-import { firstName } from '../setup/steps';
 import { Geographies } from './Geographies';
 import { Channels } from './Channels';
 import { HealthStack } from './Integrations';
 import { usePageToast } from './PageToast';
+import { HomeHeader } from './AccountSetup';
 
 /**
  * Home, laid out like an admin portal's landing page:
@@ -55,7 +55,7 @@ const TASK: Record<TodoId, { title: string; needs: string[]; why: string; minute
 };
 
 export function Home() {
-  const { account, answers, openProduct, go } = useAccount();
+  const { account, openProduct, go } = useAccount();
   const uid = useId();
   const [toastEl, showToast] = usePageToast();
   const admin = account.ui.viewAs === 'admin';
@@ -82,26 +82,14 @@ export function Home() {
   if (flow === 'geography') return <Geographies embedded onDone={back} />;
   if (flow === 'sender') return <Channels embedded onDone={back} />;
 
-  const org = answers.org.trim() || 'your organisation';
   const geoCount = (account.geography.sets?.length ?? 0) + (account.geography.custom?.length ?? 0);
   const channels = Object.values(account.sender).filter((s) => s.state !== 'none').length;
 
   return (
     <div className="lp">
       {toastEl}
-      <section className="lp-hero" aria-labelledby={`${uid}-h`}>
-        <h1 id={`${uid}-h`} ref={heading} tabIndex={-1}>
-          Hi {firstName(answers)}{' '}
-          <span className="lp-wave" aria-hidden="true">
-            👋
-          </span>
-        </h1>
-        <p>
-          {task
-            ? `Finish your task below and your products are ready for ${org}.`
-            : `Your one stop to access your products for ${org}, manage your account and its settings.`}
-        </p>
-      </section>
+      {/* The orange header, with the same words whatever's done */}
+      <HomeHeader ref={heading} />
 
       {task ? (
         <section className="lp-task" aria-labelledby={`${uid}-t`}>
@@ -428,7 +416,6 @@ function ExploreCard({ p, admin, onAdded }: { p: Product; admin: boolean; onAdde
   return (
     <li className="lp-ex">
       <div className="lp-ex-art" style={{ background: CARD[p].tint }} aria-hidden="true">
-        <span className="lp-ex-tag">{CARD[p].tag}</span>
         <Illustration art={CARD[p].art} />
       </div>
       <div className="lp-ex-body">

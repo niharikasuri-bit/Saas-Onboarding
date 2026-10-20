@@ -138,3 +138,10 @@
 }
 /* DIGIT button labels at the page's usual size */
 .lp-task-acts > button .digit-button-label, .lp-invite-row > button .digit-button-label, .lp-why > button .digit-button-label { font-size: 1rem; font-weight: 500; }
+
+/* Your products: white cards */
+.lp-product { border: 1px solid #EAEAEA; background: #fff !important; box-shadow: 0 1px 3px rgb(16 24 40 / 0.06), 0 6px 18px rgb(16 24 40 / 0.05); }
+.lp-stats > div { background: #F7F8F9; }
+.lp-art { background: #FAFAFA; }
+/* The orange header leads the page; the task card sits right under it */
+.lp > .pk-head { margin-bottom: 0; }
