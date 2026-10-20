@@ -2138,6 +2138,11 @@ input.geo-check:focus-visible { outline: none; box-shadow: var(--focus); }
 /* Map: what it shows */
 .gm-key { display: flex; align-items: center; gap: 8px; margin: 10px 0 0; font-size: 0.875rem; color: var(--c-text-2); }
 .gm-swatch { width: 14px; height: 14px; flex-shrink: 0; border: 2px solid #C84C0E; border-radius: 3px; background: rgb(200 76 14 / 0.12); }
+
+/* Uploaded file row: Re-upload and Download, secondary, beside the file */
+.up-file-acts { gap: 8px; }
+.up-file-acts > button:not(.ag-x) { height: 36px; padding: 0 14px; }
+.up-file-acts > button:not(.ag-x) .digit-button-label { font-size: 0.9375rem; font-weight: 500; }
 /* ---------- Branding: sections | settings | live phone preview ---------- */
 .br { padding-bottom: 88px; }
 .br-head { margin-bottom: var(--s6); }

@@ -98,6 +98,18 @@ function parseCsv(text: string): string[][] {
   return rows.filter((r) => r.some((c) => c.trim()));
 }
 
+/** The uploaded file as it stands now (with any edits), under its own name. */
+function downloadRows(file: string, levels: string[], rows: Path[]) {
+  const esc = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+  const body = [levels, ...rows.filter((r) => r.some((c) => c.trim()))].map((r) => r.map(esc).join(',')).join('\n') + '\n';
+  const url = URL.createObjectURL(new Blob([body], { type: 'text/csv' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = file;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function downloadTemplate(country: string, levels: string[]) {
   const esc = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
   const url = URL.createObjectURL(new Blob([levels.map(esc).join(',') + '\n'], { type: 'text/csv' }));
@@ -280,9 +292,6 @@ export function CreateGeography({
         </h1>
         {step === 'places' && method === 'upload' && !editingFile && (
           <div className="cg-title-acts">
-            {uploaded && (
-              <Button variation="secondary" icon="FileUpload" label="Re-upload" onClick={() => document.getElementById(`${uid}-file`)?.click()} />
-            )}
             <Button variation="secondary" icon="FileDownload" label="Download template" onClick={() => downloadTemplate(country.trim(), cleanLevels)} />
           </div>
         )}
@@ -791,14 +800,16 @@ function Upload({
       </span>
       <span className="up-file-acts">
         {!inDialog && (
-          <button type="button" id={`${uid}-view`} className="up-file-btn" onClick={() => setShowing(true)}>
-            <Icon name="Visibility" size={18} />
-            View data
+          <>
+            <Button variation="secondary" icon="FileUpload" label="Re-upload" title={`Re-upload ${uploaded}`} onClick={browse} />
+            <Button variation="secondary" icon="FileDownload" label="Download" title={`Download ${uploaded}`} onClick={() => downloadRows(uploaded, levels, rows)} />
+          </>
+        )}
+        {!inDialog && (
+          <button type="button" className="ag-x is-sm up-file-x" aria-label={`Remove ${uploaded}`} onClick={remove}>
+            <Icon name="Close" size={20} />
           </button>
         )}
-        <button type="button" className="ag-x is-sm up-file-x" aria-label={`Remove ${uploaded}`} onClick={remove}>
-          <Icon name={inDialog ? 'Delete' : 'Close'} size={20} />
-        </button>
       </span>
     </div>
   );
@@ -859,7 +870,7 @@ function Upload({
         error={error || stepError}
         onClose={() => {
           setShowing(false);
-          requestAnimationFrame(() => document.getElementById(`${uid}-view`)?.focus());
+          requestAnimationFrame(() => document.querySelector<HTMLElement>('.up-file:not(.is-dialog) button')?.focus());
         }}
         onCreate={onCreate}
         onEdit={onEdit}
