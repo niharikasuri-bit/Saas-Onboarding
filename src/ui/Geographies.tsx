@@ -411,14 +411,30 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
       ) : view === 'cards' ? (
         <ul className="geo-cards">
           {hits.map((s) => (
-            <li key={s.id} className="geo-card">
-              <div className="geo-card-top">
-                <span className="geo-icon" aria-hidden="true">
-                  <Icon name="Public" size={20} />
-                </span>
-                <Status value={status(s)} />
-              </div>
-              <CardHeading level={adding ? 2 : 3}>{s.name}</CardHeading>
+            <li key={s.id} className={`geo-card${adding ? '' : ' is-own'}`}>
+              {adding ? (
+                <>
+                  <div className="geo-card-top">
+                    <span className="geo-icon" aria-hidden="true">
+                      <Icon name="Public" size={20} />
+                    </span>
+                    <Status value={status(s)} />
+                  </div>
+                  <CardHeading level={2}>{s.name}</CardHeading>
+                </>
+              ) : (
+                // Their own geography: no icon; the name with Edit beside it, the status under the name
+                <>
+                  <div className="geo-own-top">
+                    <CardHeading level={3}>{s.name}</CardHeading>
+                    <button type="button" className="geo-edit" aria-label={`Edit ${s.name}`} onClick={() => open(s.id, true)}>
+                      <Icon name="Edit" size={18} />
+                      Edit
+                    </button>
+                  </div>
+                  <Status value={status(s)} />
+                </>
+              )}
               <p className="geo-stats">
                 <span>
                   <strong>{s.levels.length}</strong> {s.levels.length === 1 ? 'level' : 'levels'}
@@ -440,10 +456,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                 {adding ? (
                   <Button variation="secondary" icon="Visibility" label="View geography data" title={`View ${s.name} geography data`} onClick={() => open(s.id, false)} />
                 ) : (
-                  <div className="geo-pair">
-                    <Button variation="secondary" icon="Visibility" label="View" title={`View ${s.name}`} onClick={() => open(s.id, false)} />
-                    <Button variation="primary" icon="Edit" label="Edit" title={`Edit ${s.name}`} onClick={() => open(s.id, true)} />
-                  </div>
+                  <Button variation="secondary" icon="Visibility" label="View geography data" title={`View ${s.name} geography data`} onClick={() => open(s.id, false)} />
                 )}
               </div>
             </li>
