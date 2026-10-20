@@ -1036,7 +1036,7 @@ function UploadPreview({
             onEdit();
           }}
         />
-        <Button variation="primary" icon="FileUpload" label="Upload data" onClick={onCreate} />
+        <Button variation="primary" label="Confirm geography data" onClick={onCreate} />
       </div>
     </dialog>,
     document.body,
