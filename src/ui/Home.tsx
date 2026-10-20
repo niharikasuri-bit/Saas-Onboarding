@@ -415,7 +415,7 @@ function ExploreCard({ p, admin, onAdded }: { p: Product; admin: boolean; onAdde
   const meta = PRODUCTS[p];
   return (
     <li className="lp-ex">
-      <div className="lp-ex-art" style={{ background: CARD[p].tint }} aria-hidden="true">
+      <div className="lp-ex-art" aria-hidden="true">
         <Illustration art={CARD[p].art} />
       </div>
       <div className="lp-ex-body">

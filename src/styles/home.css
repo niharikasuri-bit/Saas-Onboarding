@@ -153,3 +153,5 @@
 /* Metric tiles in light blue */
 .lp-stats > div, .lp-glance dl > div { background: var(--c-info-bg); border-color: #C9E2F8; }
 .lp-glance-icon { background: #fff; }
+/* Illustration backgrounds: warm cream */
+.lp-art, .lp-ex-art { background: #FFF9F0 !important; }
