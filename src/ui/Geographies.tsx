@@ -164,9 +164,9 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
     update((a) => addSet(a, s));
     done(`${s.name} added to your account`);
   };
-  // Picking from DIGIT's list: tick any number of geographies, then add them together.
+  // Picking from DIGIT's list: one geography at a time, then add it.
   const [picked, setPicked] = useState<string[]>([]);
-  const togglePick = (id: string) => setPicked((x) => (x.includes(id) ? x.filter((y) => y !== id) : [...x, id]));
+  const togglePick = (id: string) => setPicked([id]);
   const addPicked = () => {
     const sets = catalogue.filter((x) => picked.includes(x.id) && !added.has(x.id));
     update((a) => sets.reduce((acc, x) => addSet(acc, x), a));
@@ -375,17 +375,6 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
 
       {countLine}
 
-      {/* What's ticked, just above the list; the footer has the action */}
-      {createVal === null && adding && picked.length > 0 && (
-        <p className="geo-selline">
-          <span>
-            <strong>{picked.length}</strong> selected
-          </span>
-          <button type="button" className="br-link" onClick={() => setPicked([])}>
-            Clear selection
-          </button>
-        </p>
-      )}
 
 
       {createVal !== null ? (
@@ -448,7 +437,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                   <span className="geo-status is-active">Added</span>
                 ) : (
                   <label className="geo-pick">
-                    <input type="checkbox" checked={picked.includes(s.id)} onChange={() => togglePick(s.id)} />
+                    <input type="radio" name="geo-pick" checked={picked.includes(s.id)} onChange={() => togglePick(s.id)} />
                     <span className="ux-visually-hidden">Select {s.name}</span>
                   </label>
                 )}
@@ -534,7 +523,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                       {added.has(s.id) ? (
                         <span className="geo-status is-active">Added</span>
                       ) : (
-                        <input type="checkbox" aria-label={`Select ${s.name}`} checked={picked.includes(s.id)} onChange={() => togglePick(s.id)} />
+                        <input type="radio" name="geo-pick-row" aria-label={`Select ${s.name}`} checked={picked.includes(s.id)} onChange={() => togglePick(s.id)} />
                       )}
                     </td>
                   )}
@@ -580,9 +569,9 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
       {createVal === null && adding && picked.length > 0 && (
         <footer className="cg-bar geo-pick-bar">
           <p className="ux-visually-hidden" role="status">
-            {picked.length} selected
+            {catalogue.find((x) => x.id === picked[0])?.name} selected
           </p>
-          <Button variation="primary" icon="Add" label="Add geographies to account" onClick={addPicked} />
+          <Button variation="primary" icon="Add" label="Add geography to account" onClick={addPicked} />
         </footer>
       )}
       {createVal === null && adding && hits.length > 0 && picked.length === 0 && (
