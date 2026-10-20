@@ -138,6 +138,8 @@ export function CreateGeography({
   const [rows, setRows] = useState<Path[]>([blankRow(2), blankRow(2)]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploaded, setUploaded] = useState('');
+  // Edit data, from the upload popup: the uploaded rows open on their own edit page
+  const [editingFile, setEditingFile] = useState(false);
   const [toast, setToast] = useState('');
   useEffect(() => {
     if (!toast) return;
@@ -147,7 +149,7 @@ export function CreateGeography({
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     heading.current?.focus();
-  }, [step]);
+  }, [step, editingFile]);
 
   const steps = method === 'osm' ? OSM_STEPS : STEPS;
   const n = steps.indexOf(step) + 1;
@@ -156,6 +158,12 @@ export function CreateGeography({
     setStep(s);
   };
   const back = () => {
+    // From the edit page, Back returns to the upload step with the file still there
+    if (editingFile) {
+      setEditingFile(false);
+      setErrors({});
+      return;
+    }
     if (n === 1) onCancel();
     else go(steps[n - 2]);
   };
@@ -216,7 +224,9 @@ export function CreateGeography({
     method: `How would you like to ${verb} your geographies?`,
     places:
       method === 'upload'
-        ? 'Upload geography data'
+        ? editingFile
+          ? 'Edit geography data'
+          : 'Upload geography data'
         : method === 'osm'
           ? 'View and edit fetched geography data'
           : 'Add geography data',
@@ -233,12 +243,14 @@ export function CreateGeography({
     places:
       method === 'osm'
         ? 'Review the fetched geographies and edit any row before you create them.'
-        : '',
+        : editingFile
+          ? 'Edit any row from your file before you upload it.'
+          : '',
   };
 
-  // Reviewing fetched geographies: no white card, the table takes the page.
-  // (An uploaded file is reviewed in a popup over the upload step instead.)
-  const reviewing = step === 'places' && method === 'osm';
+  // Reviewing fetched geographies, or editing an uploaded file: no white card, the table takes the page.
+  // (An uploaded file is first shown in a popup over the upload step.)
+  const reviewing = step === 'places' && (method === 'osm' || (method === 'upload' && editingFile));
 
   return (
     <div className={`cg-page${step === 'places' || (step === 'country' && method === 'osm') ? ' is-wide' : ''}`}>
@@ -259,7 +271,7 @@ export function CreateGeography({
         <h1 id={`${uid}-h`} ref={heading} tabIndex={-1}>
           {TITLES[step]}
         </h1>
-        {step === 'places' && method === 'upload' && (
+        {step === 'places' && method === 'upload' && !editingFile && (
           <Button variation="secondary" icon="FileDownload" label="Download template" onClick={() => downloadTemplate(country.trim(), cleanLevels)} />
         )}
       </div>
@@ -380,7 +392,7 @@ export function CreateGeography({
 
         {step === 'places' && (
           <div className="cg-places">
-            {method === 'upload' && (
+            {method === 'upload' && !editingFile && (
               <Upload
                 uid={uid}
                 levels={cleanLevels}
@@ -400,9 +412,10 @@ export function CreateGeography({
                   setToast('File removed');
                 }}
                 onCreate={next}
+                onEdit={() => setEditingFile(true)}
               />
             )}
-            {method === 'osm' && (
+            {(method === 'osm' || editingFile) && (
               <>
                 <div className="cg-places-bar">
                   <div className="pt-tabs" role="group" aria-label="View as">
@@ -431,7 +444,7 @@ export function CreateGeography({
                   </p>
                 )}
                 <div className="pt-panel">
-                <SheetIntro action="Create geographies" tree={view === 'tree'} />
+                <SheetIntro action={editingFile ? 'Upload data' : 'Create geographies'} tree={view === 'tree'} />
                 {view === 'table' ? (
                   <Grid
                     levels={cleanLevels}
@@ -471,7 +484,7 @@ export function CreateGeography({
         />
         <Button
           variation="primary"
-          label={step === 'places' ? 'Create geographies' : 'Next'}
+          label={step === 'places' ? (editingFile ? 'Upload data' : 'Create geographies') : 'Next'}
           icon={step === 'places' ? undefined : 'ArrowForward'}
           isSuffix
           onClick={next}
@@ -707,6 +720,7 @@ function Upload({
   onRows,
   onRemove,
   onCreate,
+  onEdit,
 }: {
   uid: string;
   levels: string[];
@@ -718,6 +732,7 @@ function Upload({
   onRows: (rows: Path[], file: string) => void;
   onRemove: () => void;
   onCreate: () => void;
+  onEdit: () => void;
 }) {
   const [error, setError] = useState('');
   const [over, setOver] = useState(false);
@@ -763,12 +778,14 @@ function Upload({
             View data
           </button>
         )}
-        <button type="button" className="up-file-btn" onClick={browse}>
-          <Icon name="FileUpload" size={18} />
-          Re-upload
-        </button>
+        {!inDialog && (
+          <button type="button" className="up-file-btn" onClick={browse}>
+            <Icon name="FileUpload" size={18} />
+            Re-upload
+          </button>
+        )}
         <button type="button" className="ag-x is-sm up-file-x" aria-label={`Remove ${uploaded}`} onClick={remove}>
-          <Icon name="Close" size={20} />
+          <Icon name={inDialog ? 'Delete' : 'Close'} size={20} />
         </button>
       </span>
     </div>
@@ -833,6 +850,7 @@ function Upload({
           requestAnimationFrame(() => document.getElementById(`${uid}-view`)?.focus());
         }}
         onCreate={onCreate}
+        onEdit={onEdit}
       />
     )}
     </>
@@ -850,6 +868,7 @@ function UploadPreview({
   error,
   onClose,
   onCreate,
+  onEdit,
 }: {
   levels: string[];
   rows: Path[];
@@ -858,6 +877,7 @@ function UploadPreview({
   error?: string;
   onClose: () => void;
   onCreate: () => void;
+  onEdit: () => void;
 }) {
   const uid = useId();
   const ref = useRef<HTMLDialogElement>(null);
@@ -872,8 +892,8 @@ function UploadPreview({
   };
   const shown = rows.filter((r) => r.some((c) => c.trim()));
   const bad = problems.map((_, i) => (problems[i] ? i : -1)).filter((i) => i >= 0);
-  // Rows as they sit in the file: row 1 is the header, so data starts at row 2
-  const rowNo = (r: Path) => rows.indexOf(r) + 2;
+  // Numbered as on the edit page, so a row is the same number in both
+  const rowNo = (r: Path) => rows.indexOf(r) + 1;
   return createPortal(
     <dialog
       ref={ref}
@@ -897,13 +917,13 @@ function UploadPreview({
       </div>
       <div className="upv-body">
         <InfoNote icon="Info" title="Need to make changes?">
-          Edit your file in Excel, then re-upload it here.
+          Select Edit data to change any row before you upload it.
         </InfoNote>
         {(error || bad.length > 0) && (
           <p className="fld-error" role="alert">
             <span className="ux-visually-hidden">Error: </span>
             {bad.length
-              ? `${bad.length === 1 ? 'Row' : 'Rows'} ${bad.map((i) => i + 2).join(', ')} ${bad.length === 1 ? 'has' : 'have'} gaps. Fix ${bad.length === 1 ? 'it' : 'them'} in your file and re-upload it.`
+              ? `${bad.length === 1 ? 'Row' : 'Rows'} ${bad.map((i) => i + 1).join(', ')} ${bad.length === 1 ? 'has' : 'have'} gaps. Select Edit data to fix ${bad.length === 1 ? 'it' : 'them'}.`
               : error}
           </p>
         )}
@@ -918,7 +938,7 @@ function UploadPreview({
               </tr>
               <tr>
                 <th scope="col" className="cg-grid-n">
-                  1<span className="ux-visually-hidden"> Row</span>
+                  <span className="ux-visually-hidden">Row</span>
                 </th>
                 {levels.map((l) => (
                   <th key={l} scope="col">
@@ -941,8 +961,16 @@ function UploadPreview({
         </div>
       </div>
       <div className="ag-foot">
-        <Button variation="secondary" label="Cancel" onClick={close} />
-        <Button variation="primary" label="Create geographies" onClick={onCreate} />
+        <Button
+          variation="secondary"
+          icon="Edit"
+          label="Edit data"
+          onClick={() => {
+            ref.current?.close();
+            onEdit();
+          }}
+        />
+        <Button variation="primary" icon="FileUpload" label="Upload data" onClick={onCreate} />
       </div>
     </dialog>,
     document.body,
