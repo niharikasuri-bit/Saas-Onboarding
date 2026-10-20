@@ -108,7 +108,7 @@ export function Channels({ embedded, onDone }: { embedded?: boolean; onDone?: (m
             submitted.
           </p>
         </div>
-        {left.length > 0 && <Button variation="primary" icon="Add" label="Add notification channels" onClick={() => setChosen(true)} />}
+        {left.length > 0 && <Button variation="primary" icon="Add" label={left.length === 1 ? 'Add notification channel' : 'Add notification channels'} onClick={() => setChosen(true)} />}
       </header>
       <div className="geo-bar">
         <h2 className="geo-section-h">
@@ -237,7 +237,7 @@ function ChannelFlow({
 
   return (
     <div className="cg-page">
-      <Crumbs items={[...trail, { label: edit ? `Edit ${channels[0].label}` : 'Add notification channels' }]} />
+      <Crumbs items={[...trail, { label: edit ? `Edit ${channels[0].label}` : channels.length === 1 ? 'Add notification channel' : 'Add notification channels' }]} />
       <section className="cg" aria-labelledby={`${uid}-h`}>
         <h1 id={`${uid}-h`} ref={heading} tabIndex={-1}>
           {edit ? `Edit ${channels[0].label} details` : step === 1 ? 'Add sender details' : 'Which channels do you want to set up?'}
@@ -369,7 +369,7 @@ function ChannelFlow({
         )}
         <Button
           variation="primary"
-          label={edit ? 'Save changes' : last ? 'Connect channels' : 'Next'}
+          label={edit ? 'Save changes' : last ? (order.length === 1 ? 'Connect channel to account' : 'Connect channels to account') : 'Next'}
           icon={last ? undefined : 'ArrowForward'}
           isSuffix
           onClick={next}
