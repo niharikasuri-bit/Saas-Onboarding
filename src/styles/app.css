@@ -2134,3 +2134,16 @@ input.geo-check:focus-visible { outline: none; box-shadow: var(--focus); }
 .up-file-acts { gap: 8px; }
 .up-file-acts > button:not(.ag-x) { height: 36px; padding: 0 14px; }
 .up-file-acts > button:not(.ag-x) .digit-button-label { font-size: 0.9375rem; font-weight: 500; }
+
+/* Error toast: errors that aren't one field's. A popover, so it shows above open popups too */
+.err-toast-host { position: fixed; inset: auto auto 84px 50%; transform: translateX(-50%); margin: 0; padding: 0; border: 0; background: none; overflow: visible; }
+.err-toast { display: flex; align-items: center; gap: 10px; min-width: min(420px, calc(100vw - 32px)); max-width: calc(100vw - 32px); box-sizing: border-box; padding: 12px 12px 12px 16px; border-radius: 2px; background: #B91900; color: #fff; font-weight: 500; box-shadow: 0 4px 16px rgb(16 24 40 / 0.2); }
+.err-toast .ux-icon { flex-shrink: 0; color: #fff; }
+.err-toast-text { flex: 1; }
+.err-toast-x { display: grid; place-items: center; width: 32px; height: 32px; flex-shrink: 0; border: 0; border-radius: 4px; background: none; color: #fff; cursor: pointer; }
+.err-toast-x .ux-icon { color: #fff; }
+.err-toast-x:hover { background: rgb(255 255 255 / 0.15); }
+.err-toast-x:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
+@media (forced-colors: active) { .err-toast { border: 2px solid CanvasText; } }
+.err-toast-host { z-index: 40; }
+.err-toast-host:empty { display: none; }

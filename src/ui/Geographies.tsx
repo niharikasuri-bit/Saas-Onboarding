@@ -252,7 +252,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
             v === 'map' ? null : editable ? (
               <SheetIntro action="Save" tree={v === 'tree'} />
             ) : !isAdded ? (
-              <InfoNote title="Can’t find a boundary?" grey>
+              <InfoNote title="Geography missing from the preset?" grey>
                 Add the geography to your account, then edit it manually to include any missing boundaries.
               </InfoNote>
             ) : null
@@ -527,7 +527,15 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                       )}
                     </td>
                   )}
-                  <th scope="row">{s.name}</th>
+                  <th scope="row">
+                    {adding ? (
+                      s.name
+                    ) : (
+                      <button type="button" className="geo-name-link" onClick={() => open(s.id, false)}>
+                        {s.name}
+                      </button>
+                    )}
+                  </th>
                   <td>{s.levels.length}</td>
                   <td>
                     <span className="geo-tag">{s.levels.join(' › ')}</span>
@@ -538,16 +546,25 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                   </td>
                   <td>
                     <div className="geo-row-actions">
-                      <Button
-                        variation="secondary"
-                        size="small"
-                        icon="Visibility"
-                        label={adding ? 'View geography data' : 'View'}
-                        title={`View ${s.name}${adding ? ' geography data' : ''}`}
-                        onClick={() => open(s.id, false)}
-                      />
-                      {!adding && (
-                        <Button variation="primary" size="small" icon="Edit" label="Edit" title={`Edit ${s.name}`} onClick={() => open(s.id, true)} />
+                      {adding ? (
+                        <Button
+                          variation="secondary"
+                          size="small"
+                          icon="Visibility"
+                          label="View geography data"
+                          title={`View ${s.name} geography data`}
+                          onClick={() => open(s.id, false)}
+                        />
+                      ) : (
+                        // Your geographies: one action, as on the cards; the name opens the data
+                        <Button
+                          variation="secondary"
+                          size="small"
+                          icon="Edit"
+                          label="Edit Geography Data"
+                          title={`Edit ${s.name} geography data`}
+                          onClick={() => open(s.id, true)}
+                        />
                       )}
                       {adding && added.has(s.id) && (
                         <p className="geo-added">

@@ -5,6 +5,7 @@ import { useAccount } from '../lib/store';
 import { PRODUCTS, PRODUCT_ORDER, ROLES, newId, type Product, type User } from '../lib/model';
 import { Crumbs } from './Crumbs';
 import { SheetIntro, UploadSteps, colLetter } from './Sheet';
+import { showError } from './ErrorToast';
 
 /**
  * Team, set up the same way as geographies and notification channels:
@@ -589,7 +590,6 @@ function AddTeam({
   const [method, setMethod] = useState<'manual' | 'upload' | ''>('');
   const [people, setPeople] = useState<Person[]>(() => [blank()]);
   const [uploaded, setUploaded] = useState('');
-  const [fileError, setFileError] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [toast, setToast] = useState('');
   const input = useRef<HTMLInputElement>(null);
@@ -609,10 +609,9 @@ function AddTeam({
     const data = parseCsv(await f.text());
     const head = (data[0] ?? []).map((c) => c.trim().toLowerCase());
     if (head[0] !== 'name' || !head[1]?.includes('email')) {
-      setFileError('The columns should be Name, Work email, Role and Product access. Download the template and try again.');
+      showError('The columns should be Name, Work email, Role and Product access. Download the template and try again.');
       return;
     }
-    setFileError('');
     const byName = (s: string) => PRODUCT_ORDER.find((p) => PRODUCTS[p].name.toLowerCase() === s.trim().toLowerCase());
     const rows = data.slice(1).map((r) => {
       const listed = (r[3] ?? '')
@@ -648,6 +647,7 @@ function AddTeam({
       const seen = new Set<string>();
       for (const p of filled) checkPerson(p, taken, seen, e);
     } else e.file = 'Upload the filled-in template first';
+    if (e.file) showError(e.file);
     setErrors(e);
     if (Object.keys(e).length) {
       document.getElementById(`${uid}-${Object.keys(e)[0]}`)?.focus();
@@ -781,11 +781,6 @@ function AddTeam({
                     </button>
                   </p>
                 </div>
-                {(fileError || errors.file) && (
-                  <p className="fld-error" role="alert">
-                    {fileError || errors.file}
-                  </p>
-                )}
               </div>
             </>
           )}

@@ -8,6 +8,7 @@ import { AddGeographyDialog, GeoTree } from './GeoTree';
 import { OsmMap, countryAt, type Pin } from './OsmMap';
 import { InfoNote, SheetIntro, UploadSteps, colLetter } from './Sheet';
 import { Crumbs } from './Crumbs';
+import { showError } from './ErrorToast';
 
 /**
  * Create a geography, one step at a time:
@@ -217,6 +218,8 @@ export function CreateGeography({
       else if (!places.length) e.places = `Add at least one ${cleanLevels[0] || 'geography'}`;
       else if (problems.some(Boolean)) e.places = 'Some rows have gaps. Fix the highlighted rows.';
     }
+    // Not one field's error: the toast says it (the rows with gaps are marked in the table)
+    if (e.places) showError(e.places);
     setErrors(e);
     if (Object.keys(e).length) {
       const firstKey = Object.keys(e)[0];
@@ -421,7 +424,6 @@ export function CreateGeography({
                 rows={rows}
                 problems={problems}
                 count={places.length}
-                error={errors.places}
                 onRows={(r, file) => {
                   setRows(r.length ? r.map((p) => fit(p, cleanLevels.length)) : [blankRow(cleanLevels.length)]);
                   setUploaded(file);
@@ -457,12 +459,6 @@ export function CreateGeography({
                     onAdd={(r) => setRows([...toPaths([...places, r], cleanLevels.length), ...rows.filter((_, i) => problems[i])])}
                     onClose={() => setAddingPlace(false)}
                   />
-                )}
-                {errors.places && (
-                  <p id={`${uid}-places`} className="fld-error" tabIndex={-1}>
-                    <span className="ux-visually-hidden">Error: </span>
-                    {errors.places}
-                  </p>
                 )}
                 <div className="pt-panel">
                 <SheetIntro action={editingFile ? 'Confirm geography data' : 'Create geographies'} tree={view === 'tree'} />
@@ -743,7 +739,6 @@ function Upload({
   rows,
   problems,
   count,
-  error: stepError,
   onRows,
   onRemove,
   onCreate,
@@ -755,13 +750,11 @@ function Upload({
   rows: Path[];
   problems: string[];
   count: number;
-  error?: string;
   onRows: (rows: Path[], file: string) => void;
   onRemove: () => void;
   onCreate: () => void;
   onEdit: () => void;
 }) {
-  const [error, setError] = useState('');
   const [over, setOver] = useState(false);
   const [showing, setShowing] = useState(false);
   const input = useRef<HTMLInputElement>(null);
@@ -770,17 +763,15 @@ function Upload({
     const data = parseCsv(await f.text());
     const head = (data[0] ?? []).map((c) => c.trim().toLowerCase());
     if (head.join(',') !== levels.map((l) => l.toLowerCase()).join(',')) {
-      setError(`The columns should be ${levels.join(', ')}, in that order. Download the template and try again.`);
+      showError(`The columns should be ${levels.join(', ')}, in that order. Download the template and try again.`);
       return;
     }
-    setError('');
     onRows(data.slice(1), f.name);
     setShowing(true);
   };
   const browse = () => input.current?.click();
   const remove = () => {
     setShowing(false);
-    setError('');
     onRemove();
     requestAnimationFrame(() => document.getElementById(`${uid}-browse`)?.focus());
   };
@@ -855,11 +846,6 @@ function Upload({
           </p>
         </div>
       )}
-      {(error || stepError) && !showing && (
-        <p id={`${uid}-places`} className="fld-error" role="alert" tabIndex={-1}>
-          {error || stepError}
-        </p>
-      )}
     </div>
     {showing && uploaded && (
       <UploadPreview
@@ -867,7 +853,6 @@ function Upload({
         rows={rows}
         problems={problems}
         file={file(true)}
-        error={error || stepError}
         onClose={() => {
           setShowing(false);
           requestAnimationFrame(() => document.querySelector<HTMLElement>('.up-file:not(.is-dialog) button')?.focus());
@@ -942,7 +927,6 @@ function UploadPreview({
   rows,
   problems,
   file,
-  error,
   onClose,
   onCreate,
   onEdit,
@@ -951,7 +935,6 @@ function UploadPreview({
   rows: Path[];
   problems: string[];
   file: ReactNode;
-  error?: string;
   onClose: () => void;
   onCreate: () => void;
   onEdit: () => void;
@@ -959,16 +942,20 @@ function UploadPreview({
   const uid = useId();
   const ref = useRef<HTMLDialogElement>(null);
   const head = useRef<HTMLHeadingElement>(null);
+  const bad = problems.map((_, i) => (problems[i] ? i : -1)).filter((i) => i >= 0);
   useEffect(() => {
     ref.current?.showModal();
     requestAnimationFrame(() => head.current?.focus());
+    // Rows with gaps: said once in a toast; the cells are marked Missing in the sheet
+    if (bad.length)
+      showError(`${bad.length === 1 ? 'Row' : 'Rows'} ${bad.map((i) => i + 1).join(', ')} ${bad.length === 1 ? 'has' : 'have'} gaps. Select Edit data to fix ${bad.length === 1 ? 'it' : 'them'}.`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const close = () => {
     ref.current?.close();
     onClose();
   };
   const shown = rows.filter((r) => r.some((c) => c.trim()));
-  const bad = problems.map((_, i) => (problems[i] ? i : -1)).filter((i) => i >= 0);
   // Numbered as on the edit page, so a row is the same number in both
   const rowNo = (r: Path) => rows.indexOf(r) + 1;
   return createPortal(
@@ -996,14 +983,6 @@ function UploadPreview({
         <InfoNote icon="Info" title="Need to make changes?">
           Select Edit data to change any row before you confirm it.
         </InfoNote>
-        {(error || bad.length > 0) && (
-          <p className="fld-error" role="alert">
-            <span className="ux-visually-hidden">Error: </span>
-            {bad.length
-              ? `${bad.length === 1 ? 'Row' : 'Rows'} ${bad.map((i) => i + 1).join(', ')} ${bad.length === 1 ? 'has' : 'have'} gaps. Select Edit data to fix ${bad.length === 1 ? 'it' : 'them'}.`
-              : error}
-          </p>
-        )}
         <div className="upv-sheet" tabIndex={0} role="region" aria-label="Data in your file">
           <table className="cg-grid is-sheet is-read">
             <thead>

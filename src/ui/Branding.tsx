@@ -4,6 +4,7 @@ import { Icon } from '../components/Icon';
 import { useAccount } from '../lib/store';
 import { PRODUCTS, enabledProducts, type BrandTheme } from '../lib/model';
 import { usePageToast } from './PageToast';
+import { showError } from './ErrorToast';
 
 /**
  * Branding: how their app looks to citizens and staff. Three columns, like a theme editor:
@@ -78,7 +79,6 @@ export function Branding() {
   const [name, setName] = useState(account.branding.name);
   const [logo, setLogo] = useState(account.branding.logo);
   const [section, setSection] = useState<Section>('themes');
-  const [fileError, setFileError] = useState('');
   const [toastEl, showToast] = usePageToast();
   const fileInput = useRef<HTMLInputElement>(null);
   const set = (t: Partial<BrandTheme>) => setTheme((x) => ({ ...x, ...t }));
@@ -86,8 +86,7 @@ export function Branding() {
 
   const pickFile = (f?: File) => {
     if (!f) return;
-    if (!/image\/(png|svg\+xml|jpeg)/.test(f.type)) return setFileError('Choose a PNG, SVG or JPG file');
-    setFileError('');
+    if (!/image\/(png|svg\+xml|jpeg)/.test(f.type)) return showError('Choose a PNG, SVG or JPG file');
     const r = new FileReader();
     r.onload = () => setLogo(String(r.result));
     r.readAsDataURL(f);
@@ -276,11 +275,6 @@ export function Branding() {
                     </button>
                   )}
                 </div>
-                {fileError && (
-                  <p className="fld-error" role="alert">
-                    {fileError}
-                  </p>
-                )}
               </div>
             </>
           )}

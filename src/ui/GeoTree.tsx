@@ -4,6 +4,7 @@ import { Button } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
 import { newId, type GeoRow } from '../lib/model';
 import { GeoMap } from './GeoMap';
+import { showError } from './ErrorToast';
 
 /**
  * A geography's places as a tree or a table, read-only or editable.
@@ -356,9 +357,8 @@ export function AddGeographyDialog({
       const g = await readShapeFile(file);
       setShape(file.name);
       setGeo(g);
-      setErrors(({ shape: _gone, ...rest }) => rest);
     } catch (err) {
-      setErrors((x) => ({ ...x, shape: err instanceof Error && err.message ? err.message : 'We couldn’t read this file. Use a .zip, .shp or .geojson file.' }));
+      showError(err instanceof Error && err.message ? err.message : 'We couldn’t read this file. Use a .zip, .shp or .geojson file.');
     }
     setReading(false);
   };
@@ -557,12 +557,7 @@ export function AddGeographyDialog({
             <p className="ag-hint" id={`${uid}-shape-hint`}>
               A .zip, .shp or .geojson file with this geography’s outline.
             </p>
-            {errors.shape && (
-              <p className="fld-error" id={`${uid}-shape`} tabIndex={-1}>
-                <span className="ux-visually-hidden">Error: </span>
-                {errors.shape}
-              </p>
-            )}
+
             <input
               ref={shapeInput}
               className="ux-visually-hidden"

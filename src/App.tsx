@@ -5,6 +5,7 @@ import type { Answers } from './setup/steps';
 import { AccountProvider, loadSaved, useAccount } from './lib/store';
 import { METRICS, PRODUCTS, enabledProducts, type Account } from './lib/model';
 import { Shell } from './ui/Shell';
+import { ErrorToastHost } from './ui/ErrorToast';
 import { Home } from './ui/Home';
 import { Branding } from './ui/Branding';
 import { ProductPage } from './ui/ProductPage';
@@ -21,13 +22,20 @@ import { Page } from './ui/StepFrame';
 export default function App() {
   const [saved, setSaved] = useState<{ answers: Answers; account?: Account } | null>(() => loadSaved());
 
-  if (!saved) return <SetupFlow onDone={(answers) => setSaved({ answers })} />;
+  if (!saved)
+    return (
+      <>
+        <SetupFlow onDone={(answers) => setSaved({ answers })} />
+        <ErrorToastHost />
+      </>
+    );
 
   return (
     <AccountProvider answers={saved.answers} initial={saved.account} onRestart={() => setSaved(null)}>
       <Shell>
         <Pages />
       </Shell>
+      <ErrorToastHost />
     </AccountProvider>
   );
 }
