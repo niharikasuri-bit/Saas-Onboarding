@@ -106,7 +106,7 @@ export function Home() {
         <section className="lp-task" aria-labelledby={`${uid}-t`}>
           {/* The same progress row as the first landing: Your progress, x of y done, the green bar */}
           <div className="lp-task-top as-progress">
-            <p id={`${uid}-step`}>Your progress</p>
+            <p id={`${uid}-step`}>Your account setup progress</p>
             <p className="as-count">
               <strong>{todos.length - open.length}</strong> of {todos.length} done
             </p>

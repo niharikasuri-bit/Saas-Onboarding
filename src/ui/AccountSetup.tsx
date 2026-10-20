@@ -154,7 +154,7 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
           </h1>
           <p className="as-lead">Complete the following tasks to set up your account and get your products ready to use.</p>
           <div className="as-progress">
-            <p id="as-prog-l">Your progress</p>
+            <p id="as-prog-l">Your account setup progress</p>
             <p className="as-count">
               <strong>{doneCount}</strong> of {todos.length} done
             </p>
