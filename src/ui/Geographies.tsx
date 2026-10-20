@@ -452,33 +452,29 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                       {s.name}
                     </button>
                   </h3>
-                  <p className="gc-country">{s.country}</p>
+                  <p className="gc-country">
+                    <Icon name="LocationOn" size={16} />
+                    {s.country}
+                  </p>
                 </div>
                 <Status value={status(s)} />
               </div>
-              <dl className="gc-stats">
-                <div>
-                  <dt>{s.levels.length === 1 ? 'Level' : 'Levels'}</dt>
-                  <dd>{s.levels.length}</dd>
-                </div>
-                <div>
-                  <dt>{countOf(s) === 1 ? 'Geography' : 'Geographies'}</dt>
-                  <dd>{countOf(s).toLocaleString('en')}</dd>
-                </div>
-              </dl>
-              <p className="gc-path">
-                <span className="ux-visually-hidden">Levels: </span>
-                {s.levels.map((l, i) => (
-                  <span key={l} className="gc-step">
-                    {i > 0 && (
-                      <span className="gc-sep" aria-hidden="true">
-                        ›
-                      </span>
-                    )}
-                    {l}
+              <div className="gc-body">
+                <p className="gc-stats">
+                  <span>
+                    <strong>{s.levels.length}</strong> {s.levels.length === 1 ? 'level' : 'levels'}
                   </span>
-                ))}
-              </p>
+                  <span className="gc-dot" aria-hidden="true" />
+                  <span>
+                    <strong>{countOf(s).toLocaleString('en')}</strong> {countOf(s) === 1 ? 'geography' : 'geographies'}
+                  </span>
+                </p>
+                <ol className="gc-path" aria-label="Levels, largest first">
+                  {s.levels.map((l) => (
+                    <li key={l}>{l}</li>
+                  ))}
+                </ol>
+              </div>
               <div className="gc-foot">
                 <button type="button" className="geo-edit" aria-label={`Edit Geography Data for ${s.name}`} onClick={() => open(s.id, true)}>
                   <Icon name="Edit" size={18} />

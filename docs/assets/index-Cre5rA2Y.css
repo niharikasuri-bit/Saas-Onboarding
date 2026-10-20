@@ -1963,6 +1963,29 @@ select:focus, textarea:focus {
 .gc-sep { color: #8A9399; }
 .gc-foot { margin-top: auto; padding: 8px 12px; border-top: 1px solid var(--c-divider); }
 .gc-foot .geo-edit { margin: 0; }
+
+/* Your geographies card, v2: tinted header (name, country, status), body (numbers, level chips), footer */
+.geo-card.gc { border: 1px solid #E6E8EB; border-radius: 14px; background: #fff; box-shadow: 0 1px 2px rgb(16 24 40 / 0.05), 0 4px 14px rgb(16 24 40 / 0.05); transition: box-shadow 0.15s ease, border-color 0.15s ease; }
+.geo-card.gc:hover, .geo-card.gc:focus-within { border-color: #F0C9B4; box-shadow: 0 2px 4px rgb(16 24 40 / 0.06), 0 10px 24px rgb(200 76 14 / 0.10); }
+.gc-head { padding: 18px 20px 16px; background: #FFF7F2; border-bottom: 1px solid #F6E4DA; }
+.gc-name { font-size: 1.25rem; letter-spacing: -0.01em; }
+.gc-name .geo-name-link { text-decoration: none; color: var(--digitv2-lightTheme-primary-2); }
+.gc-name .geo-name-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+.gc-country { display: flex; align-items: center; gap: 4px; margin-top: 4px; font-size: 0.875rem; color: #505A5F; }
+.gc-country .ux-icon { color: var(--c-primary); }
+.gc-head .geo-status { padding: 3px 10px; font-size: 0.8125rem; font-weight: 600; letter-spacing: 0; text-transform: none; color: #505A5F; background: #fff; border: 1px solid #E3E3E3; }
+.gc-head .geo-status.is-active { color: #00703C; background: #E6F4EC; border-color: #BFE3CD; }
+.gc-body { display: flex; flex-direction: column; gap: 14px; padding: 16px 20px 18px; }
+.gc-stats { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 12px; margin: 0; border: 0; font-size: 0.9375rem; color: #505A5F; }
+.gc-stats strong { font-size: 1.375rem; font-weight: 700; color: #1F2933; margin-right: 2px; }
+.gc-dot { width: 4px; height: 4px; border-radius: 50%; background: #B9C1C8; align-self: center; }
+.gc-path { list-style: none; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 4px; margin: 0; padding: 0; }
+.gc-path li { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; background: #EAF2F6; font-size: 0.8125rem; font-weight: 500; color: var(--digitv2-lightTheme-primary-2); }
+.gc-path { gap: 8px 18px; }
+.gc-path li { position: relative; }
+.gc-path li + li::before { content: '›'; position: absolute; left: -13px; top: 50%; transform: translateY(-52%); font-size: 1rem; color: #8A9399; }
+.gc-foot { padding: 10px 14px; border-top: 1px solid #EEF0F2; }
+@media (prefers-reduced-motion: reduce) { .geo-card.gc { transition: none; } }
 /* ---------- Branding: sections | settings | live phone preview ---------- */
 .br { padding-bottom: 88px; }
 .br-head { margin-bottom: var(--s6); }
