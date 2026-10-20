@@ -1,5 +1,4 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { Button } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
 import { useAccount } from '../lib/store';
@@ -7,6 +6,7 @@ import { PRODUCTS, PRODUCT_ORDER, ROLES, hasGeography, newId, todoDone, todosFor
 import { Geographies } from './Geographies';
 import { Channels } from './Channels';
 import { HealthStack } from './Integrations';
+import { TaskBody } from './TaskCard';
 import { usePageToast } from './PageToast';
 import { AccountSetup, HomeHeader } from './AccountSetup';
 import cmsArt from '../assets/undraw/cms.svg?raw';
@@ -30,32 +30,6 @@ const CARD: Record<Product, { stats: [string, string][]; tint: string; art: Art;
   lnp: { stats: [['3', 'Licence templates'], ['6', 'Modules'], ['10', 'Features']], tint: '#FDF0E7', art: 'doc', tag: 'Revenue' },
 };
 
-const TASK: Record<TodoId, { title: string; needs: string; why: string; minutes: number; icon: string; action: string }> = {
-  geography: {
-    title: 'Add your geographies',
-    needs: 'your country, its levels and the places in it',
-    why: 'Every product uses your geographies to know where things happen, so work reaches the right place. Your products unlock once they’re in.',
-    minutes: 5,
-    icon: 'Public',
-    action: 'Add geographies',
-  },
-  sender: {
-    title: 'Set up notification channels',
-    needs: 'SMS, email and sender details',
-    why: 'Updates go out in your organisation’s name, so your products need your services and sender details before they go live.',
-    minutes: 5,
-    icon: 'Email',
-    action: 'Add notification channels',
-  },
-  users: {
-    title: 'Invite your team',
-    needs: 'work emails and roles',
-    why: 'Once your team is in, you can give each person a role and assign them work.',
-    minutes: 2,
-    icon: 'Group',
-    action: 'Add team members',
-  },
-};
 
 export function Home() {
   const { account, openProduct, go } = useAccount();
@@ -70,7 +44,6 @@ export function Home() {
   const started = hasGeography(account);
   // A setup step opens here, in place of the page
   const [flow, setFlow] = useState<TodoId | null>(null);
-  const [why, setWhy] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const wasFlow = useRef(false);
   useEffect(() => {
@@ -122,22 +95,7 @@ export function Home() {
           >
             <span style={{ width: `${((todos.length - open.length) / todos.length) * 100}%` }} />
           </div>
-          <div className="lp-task-body">
-            <span className="lp-task-icon" aria-hidden="true">
-              <Icon name={TASK[task.id].icon} size={24} />
-            </span>
-            <div className="lp-task-text">
-              <h2 id={`${uid}-t`}>{TASK[task.id].title}</h2>
-              <p>
-                You’ll need {TASK[task.id].needs}. About {TASK[task.id].minutes} minutes.
-              </p>
-              <button type="button" className="lp-link" onClick={() => setWhy(true)}>
-                Why complete this?
-              </button>
-            </div>
-            <Button variation="primary" label={TASK[task.id].action} icon="ArrowForward" isSuffix onClick={() => (task.id === 'users' ? go('team') : setFlow(task.id))} />
-          </div>
-          {why && <WhyDialog title={TASK[task.id].title} text={TASK[task.id].why} onClose={() => setWhy(false)} />}
+          <TaskBody id={task.id} headingId={`${uid}-t`} onStart={() => (task.id === 'users' ? go('team') : setFlow(task.id))} />
         </section>
       ) : (
         <section className="lp-glance" aria-label="Your account at a glance">
@@ -227,39 +185,6 @@ export function Home() {
   );
 }
 
-/** "Why complete this": a short popup with what the step is for. */
-function WhyDialog({ title, text, onClose }: { title: string; text: string; onClose: () => void }) {
-  const uid = useId();
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    ref.current?.showModal();
-  }, []);
-  const close = () => {
-    ref.current?.close();
-    onClose();
-  };
-  return createPortal(
-    <dialog
-      ref={ref}
-      className="ag lp-why"
-      aria-labelledby={`${uid}-h`}
-      aria-describedby={`${uid}-d`}
-      onCancel={(e) => {
-        e.preventDefault();
-        close();
-      }}
-    >
-      <span className="lp-why-icon" aria-hidden="true">
-        <Icon name="Info" size={24} />
-      </span>
-      <h2 id={`${uid}-h`}>Why complete this</h2>
-      <p className="lp-why-step">{title}</p>
-      <p id={`${uid}-d`}>{text}</p>
-      <Button variation="primary" label="Got it" onClick={close} />
-    </dialog>,
-    document.body,
-  );
-}
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const initials = (s: string) =>

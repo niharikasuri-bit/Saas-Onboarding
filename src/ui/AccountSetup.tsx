@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { Button, Card } from '@egovernments/digit-ui-components';
+import { Button } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
 import { useAccount } from '../lib/store';
 import { Geographies } from './Geographies';
 import { Channels } from './Channels';
 import { Team } from './Team';
 import { usePageToast } from './PageToast';
+import { TaskBody } from './TaskCard';
 import { firstName } from '../setup/steps';
 import { todoDone, todosFor, type PageId, type TodoId } from '../lib/model';
 
@@ -175,35 +176,14 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
 
       <section className="as-wrap" aria-label="What you need to do">
         <ol className="as-list">
-          {open.map((t) => {
-            const task = TASK[t.id];
-            return (
-              <li key={t.id}>
-                <Card className="as-card">
-                  <div className="as-top">
-                    <h2>
-                      <span className="as-icon" aria-hidden="true">
-                        <Icon name={task.icon} size={18} />
-                      </span>
-                      {task.title}
-                    </h2>
-                    <p className="as-time">
-                      <Icon name="Schedule" size={16} />
-                      {task.minutes} min
-                    </p>
-                  </div>
-                  <div className="as-body">
-                    <p className="as-what">
-                      {task.what} {task.why}
-                    </p>
-                    <div className="as-foot">
-                      <Button variation="primary" label={task.action} icon="ArrowForward" isSuffix onClick={() => start(t.id)} />
-                    </div>
-                  </div>
-                </Card>
-              </li>
-            );
-          })}
+          {open.map((t) => (
+            <li key={t.id}>
+              {/* The same card as Home's task, with its orange edge */}
+              <section className="lp-task as-task" aria-labelledby={`as-t-${t.id}`}>
+                <TaskBody id={t.id} headingId={`as-t-${t.id}`} onStart={() => start(t.id)} />
+              </section>
+            </li>
+          ))}
         </ol>
       </section>
     </div>
