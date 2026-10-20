@@ -86,7 +86,7 @@ export function InfoNote({ icon, title, grey, children }: { icon?: string; title
 export function SheetIntro({ action, tree }: { action: string; tree?: boolean }) {
   return (
     <InfoNote icon="Edit" title={tree ? 'Editable tree' : 'Editable table'}>
-      {tree ? 'Click any geography to edit it.' : 'Click any cell to edit it.'} Your edits are not saved until you click {action}.
+      {tree ? 'Select the edit icon on any geography to change its details.' : 'Click any cell to edit it.'} Your edits are not saved until you click {action}.
     </InfoNote>
   );
 }

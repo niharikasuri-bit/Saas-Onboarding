@@ -2131,6 +2131,13 @@ input.geo-check:focus-visible { outline: none; box-shadow: var(--focus); }
 @media (max-width: 400px) { .tpl-foot { grid-template-columns: 1fr; } }
 .ag.tpl { width: min(540px, calc(100vw - 32px)); }
 .tpl-foot > button .digit-button-label { overflow: visible; text-overflow: clip; white-space: nowrap; }
+
+/* Tree: a geography with a shape file */
+.gt-shape { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 6px; background: var(--c-primary-bg); color: #B8460C; }
+.gt-shape .ux-icon { color: #B8460C; }
+/* Map: what it shows */
+.gm-key { display: flex; align-items: center; gap: 8px; margin: 10px 0 0; font-size: 0.875rem; color: var(--c-text-2); }
+.gm-swatch { width: 14px; height: 14px; flex-shrink: 0; border: 2px solid #C84C0E; border-radius: 3px; background: rgb(200 76 14 / 0.12); }
 /* ---------- Branding: sections | settings | live phone preview ---------- */
 .br { padding-bottom: 88px; }
 .br-head { margin-bottom: var(--s6); }

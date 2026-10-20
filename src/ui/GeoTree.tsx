@@ -68,7 +68,7 @@ export function PlacesTabs({
       <div className="pt-panel">
         {note?.(view)}
         {view === 'map' && map ? (
-          <GeoMap id={map.id} name={map.name} country={map.country} />
+          <GeoMap id={map.id} name={map.name} country={map.country} rows={rows} levels={levels} />
         ) : view === 'tree' ? (
           <GeoTree root={root} levels={levels} rows={rows} onChange={onChange} />
         ) : (
@@ -99,6 +99,7 @@ export function GeoTree({
     setClosed(n);
   };
   const [adding, setAdding] = useState<{ level: number; parent: string; parentName: string } | null>(null);
+  const [editing, setEditing] = useState<GeoRow | null>(null);
 
   const branch = (parent: string, level: number): ReactNode => (
     <ul className="gt-list">
@@ -115,7 +116,8 @@ export function GeoTree({
               level={levels[r.level]}
               open={canOpen ? open : undefined}
               onToggle={() => toggle(r.key)}
-              onRename={onChange && ((name) => onChange(rows.map((x) => (x.key === r.key ? { ...x, name } : x))))}
+              shape={!!r.geo}
+              onEdit={onChange && (() => setEditing(r))}
               onRemove={
                 onChange &&
                 (() => {
@@ -150,6 +152,15 @@ export function GeoTree({
       {adding && onChange && (
         <AddGeographyDialog levels={levels} rows={rows} fixed={adding} onAdd={(r) => onChange([...rows, r])} onClose={() => setAdding(null)} />
       )}
+      {editing && onChange && (
+        <AddGeographyDialog
+          levels={levels}
+          rows={rows}
+          edit={editing}
+          onAdd={(r) => onChange(rows.map((x) => (x.key === r.key ? r : x)))}
+          onClose={() => setEditing(null)}
+        />
+      )}
       <div className="gt-card is-root">
         <span className="gt-name">{root}</span>
         <span className="geo-tag">Country</span>
@@ -163,30 +174,21 @@ function PlaceCard({
   name,
   level,
   open,
+  shape,
   onToggle,
-  onRename,
+  onEdit,
   onRemove,
 }: {
   name: string;
   level: string;
   open?: boolean;
+  /** Has a shape file: shown on the map. */
+  shape?: boolean;
   onToggle: () => void;
-  onRename?: (name: string) => void;
+  /** Opens the Edit geography popup. */
+  onEdit?: () => void;
   onRemove?: () => void;
 }) {
-  const [editing, setEditing] = useState(false);
-  const [v, setV] = useState(name);
-  const input = useRef<HTMLInputElement>(null);
-  const editBtn = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
-    if (editing) input.current?.select();
-  }, [editing]);
-  const finish = (save: boolean) => {
-    if (save && v.trim() && v.trim() !== name) onRename?.(v.trim());
-    else setV(name);
-    setEditing(false);
-    requestAnimationFrame(() => editBtn.current?.focus());
-  };
   return (
     <div className="gt-card">
       {open === undefined ? (
@@ -196,29 +198,20 @@ function PlaceCard({
           <Icon name={open ? 'ArrowDropDown' : 'ArrowRight'} size={20} />
         </button>
       )}
-      {editing ? (
-        <input
-          ref={input}
-          className="gt-input"
-          value={v}
-          aria-label={`New name for ${name}`}
-          onChange={(e) => setV(e.target.value)}
-          onBlur={() => finish(true)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') e.preventDefault(), finish(true);
-            if (e.key === 'Escape') finish(false);
-          }}
-        />
-      ) : (
-        <span className="gt-name">{name}</span>
-      )}
+      <span className="gt-name">{name}</span>
       <span className="geo-tag">{level}</span>
-      {onRename && !editing && (
-        <button ref={editBtn} type="button" className="gt-icon" aria-label={`Rename ${name}`} onClick={() => setEditing(true)}>
+      {shape && (
+        <span className="gt-shape" title="Has a shape file">
+          <Icon name="Map" size={16} />
+          <span className="ux-visually-hidden">Has a shape file</span>
+        </span>
+      )}
+      {onEdit && (
+        <button type="button" className="gt-icon" aria-label={`Edit ${name}`} onClick={onEdit}>
           <Icon name="Edit" size={18} />
         </button>
       )}
-      {onRemove && !editing && (
+      {onRemove && (
         <button type="button" className="gt-icon" aria-label={`Remove ${name}`} onClick={onRemove}>
           <Icon name="Delete" size={18} />
         </button>
@@ -330,6 +323,7 @@ export function AddGeographyDialog({
   levels,
   rows,
   fixed,
+  edit,
   onAdd,
   onClose,
 }: {
@@ -337,6 +331,9 @@ export function AddGeographyDialog({
   rows: GeoRow[];
   /** Set when adding from the tree: the level and parent are known. */
   fixed?: { level: number; parent: string; parentName: string };
+  /** Editing this geography: every field filled in; its level stays. */
+  edit?: GeoRow;
+  /** Called with the new geography, or the edited one (same key). */
   onAdd: (row: GeoRow) => void;
   onClose: () => void;
 }) {
@@ -345,8 +342,27 @@ export function AddGeographyDialog({
   const opener = useRef<HTMLElement | null>(null);
   const shapeInput = useRef<HTMLInputElement>(null);
   const uid = useId();
-  const [f, setF] = useState({ level: fixed ? String(fixed.level) : '', name: '', parent: fixed?.parent ?? '', latlong: '', code: '' });
-  const [shape, setShape] = useState('');
+  const [f, setF] = useState(
+    edit
+      ? { level: String(edit.level), name: edit.name, parent: edit.parent, latlong: edit.latlong ?? '', code: edit.code ?? '' }
+      : { level: fixed ? String(fixed.level) : '', name: '', parent: fixed?.parent ?? '', latlong: '', code: '' },
+  );
+  const [shape, setShape] = useState(edit?.shape ?? '');
+  const [geo, setGeo] = useState<GeoJSON.GeoJsonObject | undefined>(edit?.geo);
+  const [reading, setReading] = useState(false);
+  const readShape = async (file: File | undefined) => {
+    if (!file) return;
+    setReading(true);
+    try {
+      const g = await readShapeFile(file);
+      setShape(file.name);
+      setGeo(g);
+      setErrors(({ shape: _gone, ...rest }) => rest);
+    } catch (err) {
+      setErrors((x) => ({ ...x, shape: err instanceof Error && err.message ? err.message : 'We couldn’t read this file. Use a .zip, .shp or .geojson file.' }));
+    }
+    setReading(false);
+  };
   const [errors, setErrors] = useState<Record<string, string>>({});
   useEffect(() => {
     opener.current = document.activeElement as HTMLElement;
@@ -361,6 +377,7 @@ export function AddGeographyDialog({
   const level = f.level === '' ? -1 : Number(f.level);
   const parents = level > 0 ? rows.filter((r) => r.level === level - 1) : [];
   const needsParent = !fixed && level > 0;
+  const locked = !!fixed || !!edit;
 
   const save = () => {
     const e: Record<string, string> = {};
@@ -375,13 +392,14 @@ export function AddGeographyDialog({
       return;
     }
     onAdd({
-      key: newId(),
+      key: edit?.key ?? newId(),
       name: f.name.trim(),
       level,
       parent: fixed ? fixed.parent : level > 0 ? f.parent : '',
       latlong: f.latlong.trim() || undefined,
       code: f.code.trim() || undefined,
       shape: shape || undefined,
+      geo: shape ? geo : undefined,
     });
     close();
   };
@@ -440,10 +458,10 @@ export function AddGeographyDialog({
         <div className="ag-top">
           <div>
             <h2 id={`${uid}-h`} ref={head} tabIndex={-1}>
-              Add a geography
+              {edit ? 'Edit geography' : 'Add a geography'}
             </h2>
             <p id={`${uid}-d`} className="ag-desc">
-              Add details about the geography you are adding.
+              {edit ? `Update the details of ${edit.name}.` : 'Add details about the geography you are adding.'}
             </p>
           </div>
           <button type="button" className="ag-x" aria-label="Close" onClick={close}>
@@ -458,7 +476,7 @@ export function AddGeographyDialog({
             <select
               id={`${uid}-level`}
               value={f.level}
-              disabled={!!fixed}
+              disabled={locked}
               aria-required="true"
               aria-invalid={!!errors.level || undefined}
               aria-describedby={described('level')}
@@ -540,6 +558,12 @@ export function AddGeographyDialog({
             <p className="ag-hint" id={`${uid}-shape-hint`}>
               A .zip, .shp or .geojson file with this geography’s outline.
             </p>
+            {errors.shape && (
+              <p className="fld-error" id={`${uid}-shape`} tabIndex={-1}>
+                <span className="ux-visually-hidden">Error: </span>
+                {errors.shape}
+              </p>
+            )}
             <input
               ref={shapeInput}
               className="ux-visually-hidden"
@@ -548,12 +572,12 @@ export function AddGeographyDialog({
               tabIndex={-1}
               aria-hidden="true"
               onChange={(e) => {
-                setShape(e.target.files?.[0]?.name ?? shape);
+                readShape(e.target.files?.[0]);
                 e.target.value = '';
               }}
             />
             <div className="ag-shape">
-              <span className="ag-shape-count">{shape ? '1 uploaded' : 'No file uploaded'}</span>
+              <span className="ag-shape-count" role="status">{reading ? 'Reading the file…' : shape ? '1 uploaded' : 'No file uploaded'}</span>
               <Button
                 variation="secondary"
                 icon="FileUpload"
@@ -566,7 +590,15 @@ export function AddGeographyDialog({
               <p className="ag-shape-file">
                 <Icon name="Description" size={18} />
                 <span>{shape}</span>
-                <button type="button" className="ag-x is-sm" aria-label={`Remove ${shape}`} onClick={() => setShape('')}>
+                <button
+                  type="button"
+                  className="ag-x is-sm"
+                  aria-label={`Remove ${shape}`}
+                  onClick={() => {
+                    setShape('');
+                    setGeo(undefined);
+                  }}
+                >
                   <Icon name="Close" size={16} />
                 </button>
               </p>
@@ -576,10 +608,32 @@ export function AddGeographyDialog({
         </div>
         <div className="ag-foot">
           <Button variation="secondary" label="Cancel" onClick={close} />
-          <Button variation="primary" label="Add geography" submit onClick={() => {}} />
+          <Button variation="primary" label={edit ? 'Save changes' : 'Add geography'} submit onClick={() => {}} />
         </div>
       </form>
     </dialog>,
     document.body,
   );
+}
+
+/**
+ * A shape file's outline as GeoJSON: a zipped shapefile, a bare .shp, or GeoJSON.
+ * Kept small enough to save with the account (this prototype keeps data in the browser).
+ */
+async function readShapeFile(file: File): Promise<GeoJSON.GeoJsonObject> {
+  const name = file.name.toLowerCase();
+  let g: GeoJSON.GeoJsonObject;
+  if (name.endsWith('.geojson') || name.endsWith('.json')) {
+    g = JSON.parse(await file.text());
+    if (!g || typeof g !== 'object' || !('type' in g)) throw new Error('This file isn’t GeoJSON. Use a .zip, .shp or .geojson file.');
+  } else if (name.endsWith('.zip') || name.endsWith('.shp')) {
+    const shp = (await import('shpjs')).default;
+    const buf = await file.arrayBuffer();
+    const out = name.endsWith('.zip') ? await shp(buf) : await shp({ shp: buf });
+    g = Array.isArray(out) ? { type: 'FeatureCollection', features: out.flatMap((c) => c.features) } as GeoJSON.FeatureCollection : (out as GeoJSON.GeoJsonObject);
+  } else {
+    throw new Error('Use a .zip, .shp or .geojson file.');
+  }
+  if (JSON.stringify(g).length > 1_500_000) throw new Error('This outline is too detailed to keep. Simplify it, or upload a smaller area.');
+  return g;
 }
