@@ -140,12 +140,19 @@ export function CreateGeography({
   const [uploaded, setUploaded] = useState('');
   // Edit data, from the upload popup: the uploaded rows open on their own edit page
   const [editingFile, setEditingFile] = useState(false);
+  // Landing on the uploader, before a file is in: a popup offers the template first
+  const [askTemplate, setAskTemplate] = useState(false);
   const [toast, setToast] = useState('');
   useEffect(() => {
     if (!toast) return;
     const t = setTimeout(() => setToast(''), 5000);
     return () => clearTimeout(t);
   }, [toast]);
+  useEffect(() => {
+    if (step === 'places' && method === 'upload' && !uploaded) setAskTemplate(true);
+    // Only on arriving at the step
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     heading.current?.focus();
@@ -272,7 +279,12 @@ export function CreateGeography({
           {TITLES[step]}
         </h1>
         {step === 'places' && method === 'upload' && !editingFile && (
-          <Button variation="secondary" icon="FileDownload" label="Download template" onClick={() => downloadTemplate(country.trim(), cleanLevels)} />
+          <div className="cg-title-acts">
+            {uploaded && (
+              <Button variation="secondary" icon="FileUpload" label="Re-upload" onClick={() => document.getElementById(`${uid}-file`)?.click()} />
+            )}
+            <Button variation="secondary" icon="FileDownload" label="Download template" onClick={() => downloadTemplate(country.trim(), cleanLevels)} />
+          </div>
         )}
       </div>
       )}
@@ -471,6 +483,12 @@ export function CreateGeography({
         <button type="submit" className="ux-visually-hidden" tabIndex={-1} aria-hidden="true" />
       </form>
     </section>
+      {askTemplate && (
+      <TemplateDialog
+        onDownload={() => downloadTemplate(country.trim(), cleanLevels)}
+        onClose={() => setAskTemplate(false)}
+      />
+    )}
       <div className="cg-toast" role="status" aria-live="polite">
         {toast && <Toast type="success" label={toast} onClose={() => setToast('')} />}
       </div>
@@ -778,12 +796,6 @@ function Upload({
             View data
           </button>
         )}
-        {!inDialog && (
-          <button type="button" className="up-file-btn" onClick={browse}>
-            <Icon name="FileUpload" size={18} />
-            Re-upload
-          </button>
-        )}
         <button type="button" className="ag-x is-sm up-file-x" aria-label={`Remove ${uploaded}`} onClick={remove}>
           <Icon name={inDialog ? 'Delete' : 'Close'} size={20} />
         </button>
@@ -792,7 +804,7 @@ function Upload({
   );
   return (
     <>
-    <UploadSteps thing="geography" preview />
+    {!uploaded && <UploadSteps thing="geography" preview />}
     <div className="up" role="group" aria-label="Upload a file">
       <input
         ref={input}
@@ -854,6 +866,60 @@ function Upload({
       />
     )}
     </>
+  );
+}
+
+/** On landing at the uploader: download the template first, then fill it in and upload it here. */
+function TemplateDialog({ onDownload, onClose }: { onDownload: () => void; onClose: () => void }) {
+  const uid = useId();
+  const ref = useRef<HTMLDialogElement>(null);
+  const head = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    ref.current?.showModal();
+    requestAnimationFrame(() => head.current?.focus());
+  }, []);
+  const close = () => {
+    ref.current?.close();
+    onClose();
+  };
+  return createPortal(
+    <dialog
+      ref={ref}
+      className="ag tpl"
+      aria-labelledby={`${uid}-h`}
+      aria-describedby={`${uid}-d`}
+      onCancel={(e) => {
+        e.preventDefault();
+        close();
+      }}
+    >
+      <div className="tpl-top">
+        <h2 id={`${uid}-h`} ref={head} tabIndex={-1}>
+          <Icon name="ErrorOutline" size={28} />
+          Download geography template
+        </h2>
+        <button type="button" className="ag-x" aria-label="Close" onClick={close}>
+          <Icon name="Close" size={22} />
+        </button>
+      </div>
+      <div id={`${uid}-d`} className="tpl-body">
+        <p>To add your geography data, download the Excel template below.</p>
+        <p>Fill in the required information and upload the completed file on this page.</p>
+      </div>
+      <div className="tpl-foot">
+        <Button variation="secondary" label="Cancel" onClick={close} />
+        <Button
+          variation="primary"
+          icon="FileDownload"
+          label="Download template"
+          onClick={() => {
+            onDownload();
+            close();
+          }}
+        />
+      </div>
+    </dialog>,
+    document.body,
   );
 }
 
