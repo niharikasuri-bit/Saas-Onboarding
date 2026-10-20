@@ -2529,6 +2529,8 @@ input.geo-check:focus-visible { outline: none; box-shadow: var(--focus); }
 .lp-glance-icon { background: #fff; }
 /* Illustration backgrounds: warm cream */
 .lp-art, .lp-ex-art { background: #FFF9F0 !important; }
+/* Metric tiles: a very light blue gradient */
+.lp-stats > div, .lp-glance dl > div { background: linear-gradient(135deg, #F2F8FE 0%, #FBFDFF 100%); border: 1px solid #E3EFFA; }
 /* ======================================================================
    Full onboarding flow (template first, setup after)
    ====================================================================== */
