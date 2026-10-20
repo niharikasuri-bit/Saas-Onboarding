@@ -1988,3 +1988,8 @@ select:focus, textarea:focus {
 .geo-card .geo-actions.is-edit > button { display: inline-flex; align-items: center; justify-content: center; }
 .geo-card .geo-actions.is-edit > button > * { display: inline-flex; align-items: center; gap: 4px; height: 100%; margin: 0; }
 .geo-card .geo-actions.is-edit > button .digit-button-label { margin: 0; padding: 0; line-height: 24px; }
+/* Edit buttons on geography and channel cards: 32px tall */
+.geo-card .geo-actions.is-edit > button { height: 32px; min-height: 32px; padding: 0 12px; }
+.geo-card .geo-actions.is-edit > button .digit-button-label { line-height: 32px; font-size: 0.9375rem; }
+.geo-card .geo-actions.is-edit > button svg { width: 18px; height: 18px; }
+.geo-card .geo-actions.is-edit > button .digit-button-label { line-height: 1.2; }
