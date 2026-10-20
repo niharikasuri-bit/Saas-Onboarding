@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Button } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
 import { newId, type GeoRow } from '../lib/model';
+import { GeoMap } from './GeoMap';
 
 /**
  * A geography's places as a tree or a table, read-only or editable.
@@ -28,6 +29,7 @@ export function PlacesTabs({
   onChange,
   aside,
   note,
+  map,
 }: {
   root: string;
   levels: string[];
@@ -37,9 +39,11 @@ export function PlacesTabs({
   /** Shown at the right of the tabs row. */
   aside?: ReactNode;
   /** Shown at the top of the panel, worded for the view showing. */
-  note?: (view: 'table' | 'tree') => ReactNode;
+  note?: (view: 'table' | 'tree' | 'map') => ReactNode;
+  /** Adds a Map tab showing where the geography is. */
+  map?: { id: string; name: string; country: string };
 }) {
-  const [view, setView] = useState<'table' | 'tree'>('tree');
+  const [view, setView] = useState<'table' | 'tree' | 'map'>('tree');
   return (
     <div className="pt">
       <div className="pt-bar">
@@ -52,12 +56,20 @@ export function PlacesTabs({
             <Icon name="TableView" size={18} />
             Table
           </button>
+          {map && (
+            <button type="button" aria-pressed={view === 'map'} onClick={() => setView('map')}>
+              <Icon name="Map" size={18} />
+              Map
+            </button>
+          )}
         </div>
         {aside}
       </div>
       <div className="pt-panel">
         {note?.(view)}
-        {view === 'tree' ? (
+        {view === 'map' && map ? (
+          <GeoMap id={map.id} name={map.name} country={map.country} />
+        ) : view === 'tree' ? (
           <GeoTree root={root} levels={levels} rows={rows} onChange={onChange} />
         ) : (
           <PlacesTable levels={levels} rows={rows} onChange={onChange} />

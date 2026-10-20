@@ -52,6 +52,12 @@ export function countryAt(p: { lat: number; lng: number }) {
   return hits[0]?.[0] ?? null;
 }
 
+/** A country's outline as Leaflet bounds, if it's one the prototype knows. */
+export function countryBounds(name: string): [[number, number], [number, number]] | null {
+  const b = BOXES[name];
+  return b ? [[b[1], b[0]], [b[3], b[2]]] : null;
+}
+
 function find(q: string) {
   const t = q.trim().toLowerCase();
   if (t.length < 3) return null;

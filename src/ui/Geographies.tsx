@@ -237,8 +237,9 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
           levels={viewing.levels}
           rows={rows}
           onChange={editable ? change : undefined}
+          map={{ id: viewing.id, name: viewing.name, country: viewing.country }}
           note={(v) =>
-            editable ? (
+            v === 'map' ? null : editable ? (
               <SheetIntro action="Save" tree={v === 'tree'} />
             ) : !isAdded ? (
               <InfoNote title="Can’t find a boundary?" grey>
@@ -300,11 +301,11 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
       {createVal !== null ? null : adding ? (
         <header className="geo-head">
           <h1 ref={heading} tabIndex={-1}>
-            Add your geographies
+            Select your geographies
           </h1>
           <p className="geo-lead">
-            Add the geographies you’ll serve, wherever your team sits. Every product uses your geographies to know where
-            things happen, so work reaches the right place.
+            Choose the geographies you serve from DIGIT’s ready-made list. Open one to check its levels and places before
+            you add it. If yours isn’t here, create your own.
           </p>
         </header>
       ) : (
@@ -430,13 +431,11 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                 <span className="geo-tag">{s.levels.join(' › ')}</span>
               </p>
               <div className="geo-actions">
-                {!adding ? null : added.has(s.id) ? (
+                {adding && added.has(s.id) && (
                   <p className="geo-added">
                     <Icon name="CheckCircle" size={18} />
                     Added to your account
                   </p>
-                ) : (
-                  <Button variation="primary" icon="Add" label="Add geographies to account" onClick={() => add(s)} />
                 )}
                 {adding ? (
                   <Button variation="secondary" icon="Visibility" label="View geography data" title={`View ${s.name} geography data`} onClick={() => open(s.id, false)} />
@@ -490,20 +489,11 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                       {!adding && (
                         <Button variation="primary" size="small" icon="Edit" label="Edit" title={`Edit ${s.name}`} onClick={() => open(s.id, true)} />
                       )}
-                      {!adding ? null : added.has(s.id) ? (
+                      {adding && added.has(s.id) && (
                         <p className="geo-added">
                           <Icon name="CheckCircle" size={16} />
                           Added
                         </p>
-                      ) : (
-                        <Button
-                          variation="primary"
-                          size="small"
-                          icon="Add"
-                          label="Add to account"
-                          title={`Add ${s.name} to your account`}
-                          onClick={() => add(s)}
-                        />
                       )}
                     </div>
                   </td>
