@@ -375,20 +375,6 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
 
       {countLine}
 
-      {/* Selection bar, above the list, while something is ticked (the usual bulk-action pattern) */}
-      {createVal === null && adding && picked.length > 0 && (
-        <div className="geo-selbar" role="region" aria-label="Selected geographies">
-          <p className="geo-pick-count" role="status">
-            <span>
-              <strong>{picked.length}</strong> selected
-            </span>
-            <button type="button" className="br-link" onClick={() => setPicked([])}>
-              Clear selection
-            </button>
-          </p>
-          <Button variation="primary" icon="Add" label="Add geographies to account" onClick={addPicked} />
-        </div>
-      )}
 
       {createVal !== null ? (
         <CreateGeography
@@ -578,7 +564,16 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
         </div>
       )}
 
-      {createVal === null && adding && hits.length > 0 && (
+      {/* While geographies are ticked, the footer adds them; the Didn't find bar steps aside */}
+      {createVal === null && adding && picked.length > 0 && (
+        <footer className="cg-bar geo-pick-bar">
+          <p className="geo-pick-count" role="status">
+            <strong>{picked.length}</strong> selected
+          </p>
+          <Button variation="primary" icon="Add" label="Add geographies to account" onClick={addPicked} />
+        </footer>
+      )}
+      {createVal === null && adding && hits.length > 0 && picked.length === 0 && (
         <p className="geo-foot">
           <span>Didn’t find your geography?</span>
           <button type="button" className="geo-foot-cta" onClick={() => setCreating(q.trim())}>

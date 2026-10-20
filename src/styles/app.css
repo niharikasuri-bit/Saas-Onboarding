@@ -2047,3 +2047,5 @@ select:focus, textarea:focus {
 .geo-selbar > button .digit-button-label { font-size: 0.9375rem; font-weight: 500; }
 .geo:has(.geo-selbar) .geo-foot { bottom: 16px; }
 .geo:has(.geo-selbar) { padding-bottom: 0; }
+.geo-pick-count { gap: 6px; }
+.geo:has(.geo-pick-bar) { padding-bottom: 88px; }
