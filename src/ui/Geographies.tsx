@@ -426,7 +426,12 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                 // Their own geography: no icon; the name with Edit beside it, the status under the name
                 <>
                   <div className="geo-own-top">
-                    <CardHeading level={3}>{s.name}</CardHeading>
+                    <CardHeading level={3}>
+                      {/* The name opens the geography's data */}
+                      <button type="button" className="geo-name-link" onClick={() => open(s.id, false)}>
+                        {s.name}
+                      </button>
+                    </CardHeading>
                     <button type="button" className="geo-edit" aria-label={`Edit ${s.name}`} onClick={() => open(s.id, true)}>
                       <Icon name="Edit" size={18} />
                       Edit
@@ -453,9 +458,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                     Added to your account
                   </p>
                 )}
-                {adding ? (
-                  <Button variation="secondary" icon="Visibility" label="View geography data" title={`View ${s.name} geography data`} onClick={() => open(s.id, false)} />
-                ) : (
+                {adding && (
                   <Button variation="secondary" icon="Visibility" label="View geography data" title={`View ${s.name} geography data`} onClick={() => open(s.id, false)} />
                 )}
               </div>

@@ -1926,6 +1926,10 @@ select:focus, textarea:focus {
 .geo-edit:hover { background: var(--c-primary-bg); text-decoration: underline; text-underline-offset: 3px; }
 .geo-edit:focus-visible { outline: none; box-shadow: var(--focus); }
 .geo-own-top .geo-card-h { font-size: 1.25rem; font-weight: 700; line-height: 1.3; color: var(--digitv2-lightTheme-primary-2); }
+.geo-name-link { padding: 0; border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; text-decoration: underline; text-decoration-color: rgb(11 75 102 / 0.35); text-underline-offset: 4px; }
+.geo-name-link:hover { text-decoration-color: currentColor; }
+.geo-name-link:focus-visible { outline: none; box-shadow: var(--focus); border-radius: 2px; }
+.geo-card.is-own .geo-actions:empty { display: none; }
 /* ---------- Branding: sections | settings | live phone preview ---------- */
 .br { padding-bottom: 88px; }
 .br-head { margin-bottom: var(--s6); }
