@@ -76,7 +76,9 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
   const todos = todosFor(account);
   // Only what's left: a finished step drops off, so they pick up where they left off.
   const open = todos.filter((t) => !todoDone(t.id, account));
-  const started = open.length < todos.length;
+  // They stay on the setup page until their geographies are in; only then does Home open up.
+  const started = todoDone('geography', account);
+  const doneCount = todos.length - open.length;
   // Adding geographies happens right here on Home, not on the Geographies page.
   const [addingGeo, setAddingGeo] = useState(false);
   const [addingSender, setAddingSender] = useState(false);
@@ -151,6 +153,23 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
             Let’s set up <em>your account</em>
           </h1>
           <p className="as-lead">Complete the following tasks to set up your account and get your products ready to use.</p>
+          <div className="as-progress">
+            <p id="as-prog-l">Your progress</p>
+            <p className="as-count">
+              <strong>{doneCount}</strong> of {todos.length} done
+            </p>
+          </div>
+          <div
+            className="as-bar"
+            role="progressbar"
+            aria-labelledby="as-prog-l"
+            aria-valuemin={0}
+            aria-valuemax={todos.length}
+            aria-valuenow={doneCount}
+            aria-valuetext={`${doneCount} of ${todos.length} done`}
+          >
+            <span style={{ width: `${(doneCount / todos.length) * 100}%` }} />
+          </div>
         </div>
       </header>
 

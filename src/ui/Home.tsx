@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { Button } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
 import { useAccount } from '../lib/store';
-import { PRODUCTS, PRODUCT_ORDER, hasGeography, setupDone, todoDone, todosFor, type Product } from '../lib/model';
+import { PRODUCTS, PRODUCT_ORDER, hasGeography, setupDone, type Product } from '../lib/model';
 import { AccountSetup, HomeHeader } from './AccountSetup';
 
 /**
@@ -53,7 +53,12 @@ export function Home() {
   }, [unlocked]);
 
   const done = setupDone(account);
-  const started = todosFor(account).some((t) => todoDone(t.id, account));
+  // Finishing the last step closes the setup section mid-flow; make sure the products come back.
+  useEffect(() => {
+    if (done) setFlow(false);
+  }, [done]);
+  // Home opens up once geographies are in; until then it's the setup page.
+  const started = hasGeography(account);
 
   return (
     // First landing keeps the original centred setup page; the band layout starts once they've set something up.
