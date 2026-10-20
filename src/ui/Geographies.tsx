@@ -438,7 +438,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                   <span className="geo-status is-active">Added</span>
                 ) : (
                   <label className="geo-pick">
-                    <input type="checkbox" checked={picked.includes(s.id)} onChange={() => togglePick(s.id)} />
+                    <input type="radio" name="geo-pick" className="geo-check" checked={picked.includes(s.id)} onChange={() => togglePick(s.id)} />
                     <span className="ux-visually-hidden">Select {s.name}</span>
                   </label>
                 )}
@@ -524,7 +524,7 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
                       {added.has(s.id) ? (
                         <span className="geo-status is-active">Added</span>
                       ) : (
-                        <input type="checkbox" aria-label={`Select ${s.name}`} checked={picked.includes(s.id)} onChange={() => togglePick(s.id)} />
+                        <input type="radio" name="geo-pick-row" className="geo-check" aria-label={`Select ${s.name}`} checked={picked.includes(s.id)} onChange={() => togglePick(s.id)} />
                       )}
                     </td>
                   )}

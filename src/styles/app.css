@@ -2052,3 +2052,17 @@ select:focus, textarea:focus {
 .geo-pick-bar { justify-content: flex-end; }
 .geo-selline { display: flex; align-items: center; gap: 14px; margin: 0 0 12px; font-size: 0.9375rem; color: var(--c-text); }
 .geo-selline strong { color: var(--digitv2-lightTheme-primary-2); }
+
+/* Select your geographies: one at a time, shown as a round check */
+.geo-pick input.geo-check, .geo-pick-col input.geo-check {
+  appearance: none; -webkit-appearance: none; display: inline-grid; place-items: center;
+  width: 22px; height: 22px; margin: 0; border: 2px solid #787878; border-radius: 50%; background: #fff; cursor: pointer;
+}
+input.geo-check::after { content: ''; width: 6px; height: 11px; margin-top: -2px; border: solid #fff; border-width: 0 2.5px 2.5px 0; transform: rotate(45deg); opacity: 0; }
+input.geo-check:checked { border-color: var(--c-primary); background: var(--c-primary); }
+input.geo-check:checked::after { opacity: 1; }
+input.geo-check:hover:not(:checked) { border-color: var(--c-primary); }
+input.geo-check:focus-visible { outline: none; box-shadow: var(--focus); }
+@media (forced-colors: active) { input.geo-check:checked { background: Highlight; border-color: Highlight; } input.geo-check::after { border-color: HighlightText; } }
+/* Space between the search row and the list while adding */
+.geo:not(.is-overview) .geo-bar { margin-bottom: var(--s6); }
