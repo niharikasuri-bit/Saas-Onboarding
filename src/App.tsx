@@ -14,6 +14,7 @@ import { Geographies } from './ui/Geographies';
 import { Channels } from './ui/Channels';
 import { Team } from './ui/Team';
 import { Page } from './ui/StepFrame';
+import { Integrations } from './ui/Integrations';
 
 /**
  * Sign-up and login first. Then Home, the account pages, and each product.
@@ -62,7 +63,7 @@ function Pages() {
     case 'languages':
       return <Page title="Language" lead="Choose the languages your team and citizens can use DIGIT in. Coming soon." />;
     case 'integrations':
-      return <Page title="Integrations" lead="Connect DIGIT to the systems you already use. Coming soon." />;
+      return <Integrations />;
     case 'tutorials':
       return <Page title="Tutorials and Guides" lead="Step-by-step walkthroughs. Coming soon." />;
     case 'documents':
