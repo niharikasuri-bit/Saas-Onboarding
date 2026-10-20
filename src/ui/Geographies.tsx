@@ -375,6 +375,21 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
 
       {countLine}
 
+      {/* Selection bar, above the list, while something is ticked (the usual bulk-action pattern) */}
+      {createVal === null && adding && picked.length > 0 && (
+        <div className="geo-selbar" role="region" aria-label="Selected geographies">
+          <p className="geo-pick-count" role="status">
+            <span>
+              <strong>{picked.length}</strong> selected
+            </span>
+            <button type="button" className="br-link" onClick={() => setPicked([])}>
+              Clear selection
+            </button>
+          </p>
+          <Button variation="primary" icon="Add" label="Add geographies to account" onClick={addPicked} />
+        </div>
+      )}
+
       {createVal !== null ? (
         <CreateGeography
           trail={addTrail}
@@ -424,20 +439,26 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
             <li
               key={s.id}
               className={`geo-card is-pick${picked.includes(s.id) ? ' is-picked' : ''}${added.has(s.id) ? ' is-added' : ''}`}
+              onClick={(e) => {
+                // The whole card is the selection tile (mouse); the checkbox is the keyboard and screen-reader control
+                if (added.has(s.id) || (e.target as HTMLElement).closest('button, input, label')) return;
+                togglePick(s.id);
+              }}
             >
-              <div className="geo-card-top geo-pick-top">
-                <CardHeading level={2}>{s.name}</CardHeading>
+              <div className="geo-pick-top">
                 {added.has(s.id) ? (
                   <span className="geo-status is-active">Added</span>
                 ) : (
-                  // Only the checkbox selects; View geography data opens it
                   <label className="geo-pick">
                     <input type="checkbox" checked={picked.includes(s.id)} onChange={() => togglePick(s.id)} />
-                    <span>
-                      Select<span className="ux-visually-hidden"> {s.name}</span>
-                    </span>
+                    <span className="ux-visually-hidden">Select {s.name}</span>
                   </label>
                 )}
+                <CardHeading level={2}>{s.name}</CardHeading>
+                <button type="button" className="geo-preview" aria-label={`Preview ${s.name}`} onClick={() => open(s.id, false)}>
+                  <Icon name="Visibility" size={18} />
+                  Preview
+                </button>
               </div>
               <p className="geo-stats">
                 <span>
@@ -450,9 +471,6 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
               <p className="geo-levels">
                 <span className="geo-tag">{s.levels.join(' › ')}</span>
               </p>
-              <div className="geo-actions">
-                <Button variation="secondary" icon="Visibility" label="View geography data" title={`View ${s.name} geography data`} onClick={() => open(s.id, false)} />
-              </div>
             </li>
             ) : (
             // Their own geography, laid out like a channel card: icon and status, the name (it opens the
@@ -560,19 +578,6 @@ export function Geographies({ embedded, onDone }: { embedded?: boolean; onDone?:
         </div>
       )}
 
-      {createVal === null && adding && picked.length > 0 && (
-        <footer className="cg-bar geo-pick-bar">
-          <p className="geo-pick-count" role="status">
-            <span>
-              <strong>{picked.length}</strong> selected
-            </span>
-            <button type="button" className="br-link" onClick={() => setPicked([])}>
-              Clear selection
-            </button>
-          </p>
-          <Button variation="primary" icon="Add" label="Add geographies to account" onClick={addPicked} />
-        </footer>
-      )}
       {createVal === null && adding && hits.length > 0 && (
         <p className="geo-foot">
           <span>Didn’t find your geography?</span>
