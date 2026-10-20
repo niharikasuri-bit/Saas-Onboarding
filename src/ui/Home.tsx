@@ -96,26 +96,36 @@ export function Home() {
 
       {task ? (
         <section className="lp-task" aria-labelledby={`${uid}-t`}>
-          <div className="lp-task-main">
+          <div className="lp-task-top">
+            <p className="lp-eyebrow" id={`${uid}-step`}>Your next task</p>
+            <p className="lp-task-step">
+              Step {todos.length - open.length + 1} of {todos.length}
+            </p>
+          </div>
+          <div
+            className="lp-task-bar"
+            role="progressbar"
+            aria-labelledby={`${uid}-step`}
+            aria-valuemin={0}
+            aria-valuemax={todos.length}
+            aria-valuenow={todos.length - open.length}
+            aria-valuetext={`${todos.length - open.length} of ${todos.length} done`}
+          >
+            <span style={{ width: `${((todos.length - open.length) / todos.length) * 100}%` }} />
+          </div>
+          <div className="lp-task-body">
             <span className="lp-task-icon" aria-hidden="true">
               <Icon name={TASK[task.id].icon} size={24} />
             </span>
             <div className="lp-task-text">
-              <p className="lp-task-meta">
-                <span className="lp-eyebrow">Your task</span>
-                <span className="lp-pill">Pending</span>
-                <span className="lp-task-when">
-                  Step {todos.length - open.length + 1} of {todos.length} · About {TASK[task.id].minutes} min
-                </span>
-              </p>
               <h2 id={`${uid}-t`}>{TASK[task.id].title}</h2>
-              <p className="lp-needs">You’ll need {TASK[task.id].needs}</p>
+              <p>
+                You’ll need {TASK[task.id].needs}. About {TASK[task.id].minutes} minutes.
+              </p>
+              <button type="button" className="lp-link" onClick={() => setWhy(true)}>
+                Why complete this?
+              </button>
             </div>
-          </div>
-          <div className="lp-task-acts">
-            <button type="button" className="lp-link" onClick={() => setWhy(true)}>
-              Why complete this
-            </button>
             <Button variation="primary" label={TASK[task.id].action} icon="ArrowForward" isSuffix onClick={() => (task.id === 'users' ? go('team') : setFlow(task.id))} />
           </div>
           {why && <WhyDialog title={TASK[task.id].title} text={TASK[task.id].why} onClose={() => setWhy(false)} />}
