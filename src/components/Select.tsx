@@ -181,7 +181,8 @@ export function Select({
               </li>
             ))}
           </ul>,
-          document.body,
+          // Inside a modal dialog, the rest of the page is inert, so the list has to live in the dialog
+          btn.current?.closest('dialog') ?? document.body,
         )}
     </div>
   );

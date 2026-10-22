@@ -62,6 +62,16 @@ export function Icon({ name, size = 20 }: { name: string; size?: number }) {
       </span>
     );
   }
+  // A revert arrow (restart), the same as the side nav's Restart.
+  if (name === 'Revert') {
+    return (
+      <span className="ux-icon" aria-hidden="true">
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+          <path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </span>
+    );
+  }
   // A play button (Videos) and a question in a bubble (FAQ), for the Help panel.
   if (name === 'PlayVideo') {
     return (

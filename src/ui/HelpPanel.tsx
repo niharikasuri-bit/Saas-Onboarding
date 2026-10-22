@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Icon } from '../components/Icon';
 import type { PageId } from '../lib/model';
-import { FAQS, PAGE_TOPIC } from '../lib/helpContent';
+import { DOCS, FAQS, PAGE_TOPIC, TUTORIALS, topicLabel } from '../lib/helpContent';
 
 type Props = {
   id: string;
@@ -13,7 +13,7 @@ type Props = {
 };
 
 /** A small scene for the top of the panel: someone at a laptop with a question bubble. Decorative. */
-function HelpArt() {
+export function HelpArt() {
   return (
     <svg className="ux-hp-art" viewBox="0 0 220 140" aria-hidden="true" focusable="false">
       <ellipse cx="112" cy="128" rx="92" ry="8" fill="rgb(var(--c-primary-rgb) / 0.12)" />
@@ -61,7 +61,10 @@ export function HelpPanel({ id, onClose, onGo, onReplay, page }: Props) {
     { key: 'faq', label: 'FAQs', hint: 'Common questions', icon: 'Faq', tone: 'is-faq', page: 'faq' },
   ];
   const quickShown = quick.filter((x) => !term || has(`${x.label} ${x.hint}`));
-  const count = articles.length + quickShown.length;
+  // Searching covers everything: documents and videos too, not just questions
+  const docHits = term ? DOCS.filter((d) => has(`${d.title} ${d.desc} ${topicLabel(d.topic)}`)) : [];
+  const vidHits = term ? TUTORIALS.filter((t) => has(`${t.title} ${t.desc} ${topicLabel(t.topic)}`)) : [];
+  const count = articles.length + quickShown.length + docHits.length + vidHits.length;
 
   return (
     <aside
@@ -84,7 +87,7 @@ export function HelpPanel({ id, onClose, onGo, onReplay, page }: Props) {
           <h2 id={`${id}-title`} ref={titleRef} tabIndex={-1}>
             How can we help you?
           </h2>
-          <p>Search help, or pick a topic below.</p>
+          <p>Find documents, short videos and answers to common questions about setting up and running your console.</p>
           <div className="geo-search ux-hp-search">
             <label htmlFor={`${id}-q`} className="ux-visually-hidden">
               Search help
@@ -121,12 +124,57 @@ export function HelpPanel({ id, onClose, onGo, onReplay, page }: Props) {
                   );
                 })}
               </ul>
-              <button type="button" className="lp-link ux-hp-all" onClick={() => onGo('faq')}>
-                See all FAQs
-              </button>
             </section>
           )}
 
+          {docHits.length > 0 && (
+            <section aria-labelledby={`${id}-d`}>
+              <h3 id={`${id}-d`} className="ux-hp-h">
+                Documents
+              </h3>
+              <ul className="ux-hp-articles">
+                {docHits.map((d) => (
+                  <li key={d.id}>
+                    <button type="button" onClick={() => onGo('documents')}>
+                      <span className={`ux-hp-file is-${d.format.toLowerCase()}`} aria-hidden="true">
+                        {d.format}
+                      </span>
+                      <span className="ux-hp-article-t">
+                        {d.title}
+                        <span className="ux-hp-article-sub">{topicLabel(d.topic)}</span>
+                      </span>
+                      <Icon name="ChevronRight" size={18} />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+          {vidHits.length > 0 && (
+            <section aria-labelledby={`${id}-v`}>
+              <h3 id={`${id}-v`} className="ux-hp-h">
+                Videos
+              </h3>
+              <ul className="ux-hp-articles">
+                {vidHits.map((t) => (
+                  <li key={t.id}>
+                    <button type="button" onClick={() => onGo('tutorials')}>
+                      <span className="ux-hp-vid" aria-hidden="true">
+                        <Icon name="PlayVideo" size={14} />
+                      </span>
+                      <span className="ux-hp-article-t">
+                        {t.title}
+                        <span className="ux-hp-article-sub">
+                          {t.length} · {topicLabel(t.topic)}
+                        </span>
+                      </span>
+                      <Icon name="ChevronRight" size={18} />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
           {quickShown.length > 0 && (
             <section aria-labelledby={`${id}-k`}>
               <h3 id={`${id}-k`} className="ux-hp-h">
@@ -164,7 +212,7 @@ export function HelpPanel({ id, onClose, onGo, onReplay, page }: Props) {
       {/* Always at the bottom: the onboarding tour, to see where everything is again */}
       <div className="ux-hp-foot">
         <button type="button" className="ux-hp-tour" onClick={onReplay}>
-          <Icon name="AutoAwesome" size={18} />
+          <Icon name="Revert" size={18} />
           Restart onboarding tour
         </button>
       </div>

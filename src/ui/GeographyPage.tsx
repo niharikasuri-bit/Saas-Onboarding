@@ -112,7 +112,7 @@ export function GeographyBody({ create }: { create?: boolean }) {
           kind="areas"
           noun="areas"
           manual={<ManualArea />}
-          extra={{ label: 'Fetch from OpenStreetMap', icon: 'Public', panel: <FromOsm /> }}
+          extra={{ label: 'Fetch from source', icon: 'Public', panel: <FromOsm /> }}
         />
         <PendingFixes kind="areas" />
         {has && <AreaTree />}
@@ -330,7 +330,7 @@ function FromOsm() {
         <Button variation="secondary" label="Fetch Boundaries" submit onClick={() => {}} />
       </form>
       <p role="status" className={state === 'loading' ? 'form-note' : 'ux-visually-hidden'}>
-        {state === 'loading' ? 'Fetching boundaries from OpenStreetMap…' : state === 'found' ? 'Boundaries found.' : ''}
+        {state === 'loading' ? 'Fetching boundaries from the source…' : state === 'found' ? 'Boundaries found.' : ''}
       </p>
       {state === 'found' && (
         <fieldset className="fld osm-found">
@@ -366,7 +366,7 @@ function FromOsm() {
       {state === 'done' && (
         <p className="up-result" role="status">
           <span>
-            <strong>Imported from OpenStreetMap.</strong> They’re in your areas below.
+            <strong>Imported from the source.</strong> They’re in your areas below.
           </span>
         </p>
       )}

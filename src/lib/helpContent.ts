@@ -39,7 +39,7 @@ export const FAQS: Faq[] = [
   { id: 'f7', topic: 'notifications', q: 'Which notification channels can I use?', a: 'SMS, email and WhatsApp. Add the ones your citizens use; each needs sender details in your organisation’s name.' },
   { id: 'f8', topic: 'notifications', q: 'Why do sender details need approval?', a: 'Telecom and messaging providers check that messages really come from your organisation. Approval can take a few days, so add your details early.' },
   { id: 'f9', topic: 'team', q: 'How do I invite my team?', a: 'Enter their work emails on Home or the Team page, choose their role and the products they can use, and send the invite.' },
-  { id: 'f10', topic: 'team', q: 'What happens after someone accepts an invite?', a: 'They show as Accepted on the Team page. Select Assign access to add their designation and the geography they cover, and they become Active.' },
+  { id: 'f10', topic: 'team', q: 'What happens after someone accepts an invite?', a: 'They show as Accepted on the Team page. Select Assign access to check their role and products, and they become Active.' },
   { id: 'f11', topic: 'team', q: 'Can I resend or cancel an invite?', a: 'Yes. On the Team page, people who haven’t accepted yet have Resend invite and Cancel invite.' },
   { id: 'f12', topic: 'team', q: 'What can each role do?', a: 'Admins manage the whole account. Supervisors manage work in their geography, Staff do the day-to-day work, and Viewers can only look.' },
   { id: 'f13', topic: 'integrations', q: 'How do I connect another system?', a: 'Go to Integrations and select Add integrations. Pick the system, enter its connection details and choose the products that use it.' },
@@ -70,12 +70,12 @@ export const DOCS: Doc[] = [
 export type Tutorial = { id: string; title: string; desc: string; topic: HelpTopic; format: 'Video' | 'Guide'; length: string; popular?: boolean };
 export const TUTORIALS: Tutorial[] = [
   { id: 't1', topic: 'start', format: 'Video', length: '4 min', popular: true, title: 'A tour of the DIGIT console', desc: 'Where everything is, and what to do first.' },
-  { id: 't2', topic: 'start', format: 'Guide', length: '6 steps', title: 'Set up your account', desc: 'Geographies, notification channels and your team, in order.' },
+  { id: 't2', topic: 'start', format: 'Video', length: '7 min', title: 'Set up your account', desc: 'Geographies, notification channels and your team, in order.' },
   { id: 't3', topic: 'geographies', format: 'Video', length: '5 min', popular: true, title: 'Upload your geography data', desc: 'Fill in the template, upload it and fix any gaps.' },
-  { id: 't4', topic: 'geographies', format: 'Guide', length: '4 steps', title: 'Use a ready-made geography', desc: 'Pick your country’s geography and check its levels.' },
+  { id: 't4', topic: 'geographies', format: 'Video', length: '4 min', title: 'Use a ready-made geography', desc: 'Pick your country’s geography and check its levels.' },
   { id: 't5', topic: 'notifications', format: 'Video', length: '3 min', title: 'Add SMS and email senders', desc: 'Enter sender details and send them for approval.' },
-  { id: 't6', topic: 'team', format: 'Guide', length: '5 steps', popular: true, title: 'Invite your team', desc: 'Send invites, then assign access when people accept.' },
+  { id: 't6', topic: 'team', format: 'Video', length: '5 min', popular: true, title: 'Invite your team', desc: 'Send invites, then assign access when people accept.' },
   { id: 't7', topic: 'integrations', format: 'Video', length: '6 min', title: 'Connect DHIS2', desc: 'From connection details to choosing products.' },
-  { id: 't8', topic: 'branding', format: 'Guide', length: '3 steps', title: 'Apply your branding', desc: 'Choose a theme, add your logo and apply it.' },
+  { id: 't8', topic: 'branding', format: 'Video', length: '3 min', title: 'Apply your branding', desc: 'Choose a theme, add your logo and apply it.' },
   { id: 't9', topic: 'languages', format: 'Video', length: '4 min', title: 'Translate with AI', desc: 'Add a language, let AI draft it and review the texts.' },
 ];

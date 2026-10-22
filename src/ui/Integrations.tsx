@@ -824,7 +824,7 @@ export function IntegrationsSummary({ view = 'cards' }: { view?: IntegrationsVie
       </ul>
       )}
       <div className="ig-sum-foot">
-        <Button variation="secondary" label={setUp ? 'Manage integrations' : 'Add integration'} icon="ArrowForward" isSuffix onClick={() => go('integrations')} />
+        <Button variation={setUp ? 'secondary' : 'primary'} label={setUp ? 'Manage integrations' : 'Add integration'} icon="ArrowForward" isSuffix onClick={() => go('integrations')} />
       </div>
     </>
   );

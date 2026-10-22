@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { GeoMap } from './GeoMap';
 import { createPortal } from 'react-dom';
 import { Button, Toast } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
@@ -25,6 +26,8 @@ import { showError } from './ErrorToast';
 type Path = string[];
 type Step = 'country' | 'levels' | 'method' | 'places';
 type Method = 'upload' | 'osm';
+/** A stable empty list for the map (no shape files at this step). */
+const NO_ROWS: never[] = [];
 const STEPS: Step[] = ['method', 'country', 'levels', 'places'];
 /** OpenStreetMap: search and fetch, then check. No levels step. */
 const OSM_STEPS: Step[] = ['method', 'country', 'places'];
@@ -143,7 +146,7 @@ export function CreateGeography({
   const [country, setCountry] = useState(initial);
   const [levels, setLevels] = useState<string[]>(['', '']);
   const [method, setMethod] = useState<Method | ''>('');
-  const [view, setView] = useState<'table' | 'tree'>('tree');
+  const [view, setView] = useState<'table' | 'tree' | 'map'>('tree');
   const [addingPlace, setAddingPlace] = useState(false);
   // OpenStreetMap: where they pinned their location.
   const [pin, setPin] = useState<Pin | null>(null);
@@ -259,7 +262,7 @@ export function CreateGeography({
       'Choose how to set up your geography data. Upload a file using the template for bulk setup, or open the map to select them visually.',
     country:
       method === 'osm'
-        ? 'Search for a place or use your location, then move the map so the pin sits where you work. We’ll fetch the geographies for that area from OpenStreetMap.'
+        ? 'Search for a place or use your location, then move the map so the pin sits where you work. We’ll fetch the geographies for that area from the source.'
         : 'Your geography starts here. Everything you add sits inside it.',
     levels: 'List the geography levels from largest to smallest, for example Region, District, Ward. This will help us customize your template for bulk upload.',
     places:
@@ -392,7 +395,7 @@ export function CreateGeography({
               {(
                 [
                   ['upload', 'FileUpload', 'Bulk Upload Geography Data'],
-                  ['osm', 'Public', 'Fetch from OpenStreetMap'],
+                  ['osm', 'Public', 'Fetch from source'],
                 ] as const
               ).map(([value, icon, title], i) => (
                 <label key={value} className={`qz-tile${method === value ? ' is-on' : ''}`}>
@@ -450,6 +453,10 @@ export function CreateGeography({
                       <Icon name="TableView" size={18} />
                       Table
                     </button>
+                    <button type="button" aria-pressed={view === 'map'} onClick={() => setView('map')}>
+                      <Icon name="Public" size={18} />
+                      Map
+                    </button>
                   </div>
                 </div>
                 {addingPlace && (
@@ -461,8 +468,11 @@ export function CreateGeography({
                   />
                 )}
                 <div className="pt-panel">
-                <SheetIntro action={editingFile ? 'Confirm geography data' : 'Create geographies'} tree={view === 'tree'} />
-                {view === 'table' ? (
+                {view !== 'map' && <SheetIntro action={editingFile ? 'Confirm geography data' : 'Create geographies'} tree={view === 'tree'} />}
+                {view === 'map' ? (
+                  // Where these geographies are; outlines show once shape files are added in the tree
+                  <GeoMap id={country.trim().toLowerCase()} name={country.trim() || 'Your geography'} country={country.trim()} rows={NO_ROWS} levels={cleanLevels} />
+                ) : view === 'table' ? (
                   <Grid
                     levels={cleanLevels}
                     rows={rows}

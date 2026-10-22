@@ -1887,7 +1887,7 @@ p { margin: 0; line-height: 1.5; }
 
 /* Focused inputs use primary 1 (orange), not the teal-blue: orange border plus a matching ring.
    Orange is 4.67:1 on white, above the 3:1 a focus indicator needs. */
-input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not(.geo-search input):not(.search input):not(.lp-chips input):focus,
+input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not(.geo-search input):not(.search input):not(.lp-chips input):not(.hcv-search input):focus,
 select:focus, textarea:focus {
   outline: none !important; border-color: var(--c-primary) !important; box-shadow: 0 0 0 1px var(--c-primary) !important;
 }

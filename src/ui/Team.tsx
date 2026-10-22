@@ -63,7 +63,6 @@ const productsOf = (u: User, on: Product[]) => u.products ?? on;
 const productNames = (ps: Product[]) => (ps.length ? ps.map((p) => PRODUCTS[p].name).join(', ') : 'Not set yet');
 const deptName = (a: Account, id: string) => a.departments.find((d) => d.id === id)?.name ?? id;
 const areaName = (a: Account, id: string) => (id === 'all' ? 'All geographies' : a.geography.areas.find((x) => x.id === id)?.name ?? id);
-type Access = { department: string; designation: string; jurisdiction: string; employeeId: string };
 
 export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => void } = {}) {
   const { account, update, go } = useAccount();
@@ -421,146 +420,6 @@ function PersonFields({
           invalid={!!err('products')}
           describedBy={err('products') ? `${id('products')}-err` : undefined}
           onChange={(v) => onChange({ ...p, products: v as Product[] })}
-        />,
-      )}
-    </div>
-  );
-}
-
-/** An info button next to a field title; its text shows on hover or focus (Escape hides it) and is also
- *  the field's description for screen readers. */
-function InfoTip({ id, label, text }: { id: string; label: string; text: string }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <span className="tm-tip" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
-      <button
-        type="button"
-        className="tm-tip-btn"
-        aria-label={label}
-        aria-describedby={id}
-        onFocus={() => setOpen(true)}
-        onBlur={() => setOpen(false)}
-        onClick={() => setOpen((o) => !o)}
-        onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}
-      >
-        <Icon name="InfoOutline" size={18} />
-      </button>
-      <span id={id} role="tooltip" className={`tm-tip-text${open ? ' is-open' : ''}`}>
-        {text}
-      </span>
-    </span>
-  );
-}
-
-/** What the person works on, set by the admin: department, designation, the geography they cover, employee ID. */
-function AccessFields({
-  uid,
-  k,
-  acc,
-  errors,
-  onChange,
-}: {
-  uid: string;
-  k: string;
-  acc: Access;
-  errors: Record<string, string>;
-  onChange: (a: Access) => void;
-}) {
-  const { account } = useAccount();
-  const id = (f: string) => `${uid}-${k}-${f}`;
-  const err = (f: string) => errors[`${k}-${f}`];
-  const row = (f: string, label: string, control: ReactNode, extra?: ReactNode, tip?: string) => (
-    <div className={`tm-line${err(f) ? ' has-error' : ''}`}>
-      {tip ? (
-        <div className="tm-line-head">
-          <label htmlFor={id(f)}>{label}</label>
-          <InfoTip id={`${id(f)}-tip`} label={`About ${label.toLowerCase()}`} text={tip} />
-        </div>
-      ) : (
-        <label htmlFor={id(f)}>{label}</label>
-      )}
-      <div className="tm-line-ctl">
-        {control}
-        {extra}
-        {err(f) && (
-          <p className="fld-error" id={`${id(f)}-err`}>
-            <span className="ux-visually-hidden">Error: </span>
-            {err(f)}
-          </p>
-        )}
-      </div>
-    </div>
-  );
-  const desc = (f: string) => (err(f) ? `${id(f)}-err` : undefined);
-  const depts = account.departments;
-  const areas = account.geography.areas;
-  return (
-    <div className="tm-lines tm-access">
-      <h2 className="tm-access-h">Access</h2>
-      {/* Only when the account has departments */}
-      {depts.length > 0 &&
-        row(
-          'department',
-          'Department',
-          <Select
-            id={id('department')}
-            value={acc.department}
-            aria-invalid={!!err('department') || undefined}
-            aria-describedby={desc('department')}
-            onChange={(e) => onChange({ ...acc, department: e.target.value })}
-          >
-            <option value="">Choose</option>
-            {depts.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </Select>,
-        )}
-      {row(
-        'designation',
-        'Designation',
-        <input
-          id={id('designation')}
-          value={acc.designation}
-          placeholder="Field supervisor"
-          autoComplete="off"
-          aria-invalid={!!err('designation') || undefined}
-          aria-describedby={desc('designation')}
-          onChange={(e) => onChange({ ...acc, designation: e.target.value })}
-        />,
-      )}
-      {row(
-        'jurisdiction',
-        'Geography',
-        <Select
-          id={id('jurisdiction')}
-          value={acc.jurisdiction}
-          disabled={!areas.length}
-          aria-invalid={!!err('jurisdiction') || undefined}
-          aria-describedby={[`${id('jurisdiction')}-tip`, err('jurisdiction') ? `${id('jurisdiction')}-err` : ''].filter(Boolean).join(' ')}
-          onChange={(e) => onChange({ ...acc, jurisdiction: e.target.value })}
-        >
-          <option value="">{areas.length ? 'Choose' : 'No geography yet'}</option>
-          {areas.length > 0 && <option value="all">All geographies</option>}
-          {areas.map((x) => (
-            <option key={x.id} value={x.id}>
-              {'\u2003'.repeat(x.level)}
-              {x.name}
-            </option>
-          ))}
-        </Select>,
-        undefined,
-        'The geography they cover. They see work from this geography and the ones inside it.',
-      )}
-      {row(
-        'employeeId',
-        'Employee ID (optional)',
-        <input
-          id={id('employeeId')}
-          value={acc.employeeId}
-          autoComplete="off"
-          onChange={(e) => onChange({ ...acc, employeeId: e.target.value })}
         />,
       )}
     </div>
@@ -1050,15 +909,8 @@ function EditMember({
   onRemove: () => void;
 }) {
   const uid = useId();
-  const { account } = useAccount();
-  // Accepted: the admin assigns access. Name and email are theirs, so they're shown, not edited.
+  // Accepted: the admin completes their profile. Name and email are theirs, so they're shown, not edited.
   const adding = statusOf(member) === 'accepted';
-  const [acc, setAcc] = useState<Access>({
-    department: member.department ?? '',
-    designation: member.designation ?? '',
-    jurisdiction: member.jurisdiction ?? '',
-    employeeId: member.employeeId ?? '',
-  });
   const [p, setP] = useState<Person>({
     key: member.id,
     name: member.name,
@@ -1074,9 +926,6 @@ function EditMember({
   const save = () => {
     const e: Record<string, string> = {};
     checkPerson(p, taken, new Set(), e);
-    if (account.departments.length && !acc.department) e[`${p.key}-department`] = 'Choose their department';
-    if (!acc.designation.trim()) e[`${p.key}-designation`] = 'Enter their designation, like Field supervisor';
-    if (account.geography.areas.length && !acc.jurisdiction) e[`${p.key}-jurisdiction`] = 'Choose the geography they cover';
     setErrors(e);
     if (Object.keys(e).length) return document.getElementById(`${uid}-${Object.keys(e)[0]}`)?.focus();
     onSave({
@@ -1085,10 +934,6 @@ function EditMember({
       email: p.email.trim(),
       role: p.role,
       products: p.products,
-      department: acc.department || undefined,
-      designation: acc.designation.trim(),
-      jurisdiction: acc.jurisdiction || undefined,
-      employeeId: acc.employeeId.trim() || undefined,
     });
   };
   return (
@@ -1110,7 +955,6 @@ function EditMember({
           <div className="tm-row ch-sec is-edit">
             <div>
               <PersonFields uid={uid} p={p} products={products} errors={errors} onChange={setP} readOnlyIdentity={adding} />
-              <AccessFields uid={uid} k={p.key} acc={acc} errors={errors} onChange={setAcc} />
             </div>
           </div>
           <button type="submit" className="ux-visually-hidden" tabIndex={-1} aria-hidden="true" />
