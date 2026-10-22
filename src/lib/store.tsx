@@ -22,7 +22,7 @@ const KEY = 'digit-console-v4';
 type Saved = { answers: Answers; account: Account };
 
 /** Which product and section is open; which Home to-do to point at. */
-export type Params = { product?: Product; section?: Section; highlight?: TodoId };
+export type Params = { product?: Product; section?: Section; highlight?: TodoId; setup?: string };
 
 /** Everything that opens over the page and returns them to where they were. */
 export type Modal =

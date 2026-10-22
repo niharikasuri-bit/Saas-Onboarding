@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
+import { Select } from '../components/Select';
 import { newId, type GeoRow } from '../lib/model';
 import { GeoMap } from './GeoMap';
 import { showError } from './ErrorToast';
@@ -472,7 +473,7 @@ export function AddGeographyDialog({
             'level',
             'Select geography level',
             true,
-            <select
+            <Select
               id={`${uid}-level`}
               value={f.level}
               disabled={locked}
@@ -487,14 +488,14 @@ export function AddGeographyDialog({
                   {l}
                 </option>
               ))}
-            </select>,
+            </Select>,
           )}
           {needsParent &&
             field(
               'parent',
               `Sits inside (${levels[level - 1]})`,
               true,
-              <select
+              <Select
                 id={`${uid}-parent`}
                 value={f.parent}
                 aria-required="true"
@@ -508,7 +509,7 @@ export function AddGeographyDialog({
                     {p.name}
                   </option>
                 ))}
-              </select>,
+              </Select>,
             )}
           <div className="ag-box">
           {field(

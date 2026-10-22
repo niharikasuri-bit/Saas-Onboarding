@@ -614,14 +614,14 @@ function Status({ value }: { value: string }) {
 function EmptyGlobe() {
   return (
     <svg className="geo-empty-art" width="120" height="104" viewBox="0 0 120 104" aria-hidden="true" focusable="false">
-      <circle cx="56" cy="52" r="44" fill="#EEF3F5" stroke="#0B4B66" strokeOpacity="0.35" strokeWidth="2" />
-      <ellipse cx="56" cy="52" rx="18" ry="44" fill="none" stroke="#0B4B66" strokeOpacity="0.35" strokeWidth="2" />
-      <path d="M12 52h88M18 30h76M18 74h76" fill="none" stroke="#0B4B66" strokeOpacity="0.35" strokeWidth="2" />
-      <circle cx="82" cy="28" r="5" fill="#C84C0E" />
-      <circle cx="34" cy="62" r="4" fill="#0B4B66" fillOpacity="0.6" />
-      <circle cx="62" cy="78" r="3" fill="#0B4B66" fillOpacity="0.45" />
-      <circle cx="98" cy="88" r="13" fill="#fff" stroke="#0B4B66" strokeOpacity="0.5" strokeWidth="2" />
-      <path d="M98 82v12M92 88h12" stroke="#0B4B66" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="56" cy="52" r="44" fill="#EEF3F5" strokeOpacity="0.35" strokeWidth="2" style={{ stroke: 'var(--digitv2-lightTheme-primary-2)' }} />
+      <ellipse cx="56" cy="52" rx="18" ry="44" fill="none" strokeOpacity="0.35" strokeWidth="2" style={{ stroke: 'var(--digitv2-lightTheme-primary-2)' }} />
+      <path d="M12 52h88M18 30h76M18 74h76" fill="none" strokeOpacity="0.35" strokeWidth="2" style={{ stroke: 'var(--digitv2-lightTheme-primary-2)' }} />
+      <circle cx="82" cy="28" r="5" style={{ fill: 'var(--c-primary)' }} />
+      <circle cx="34" cy="62" r="4" fillOpacity="0.6" style={{ fill: 'var(--digitv2-lightTheme-primary-2)' }} />
+      <circle cx="62" cy="78" r="3" fillOpacity="0.45" style={{ fill: 'var(--digitv2-lightTheme-primary-2)' }} />
+      <circle cx="98" cy="88" r="13" fill="#fff" strokeOpacity="0.5" strokeWidth="2" style={{ stroke: 'var(--digitv2-lightTheme-primary-2)' }} />
+      <path d="M98 82v12M92 88h12" strokeWidth="2" strokeLinecap="round" style={{ stroke: 'var(--digitv2-lightTheme-primary-2)' }} />
     </svg>
   );
 }

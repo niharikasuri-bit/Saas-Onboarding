@@ -12,7 +12,7 @@ export const TASK: Record<TodoId, { title: string; needs: string; why: string; m
   geography: {
     title: 'Add your geographies',
     needs: 'your country, its levels and the places in it',
-    why: 'Every product uses your geographies to know where things happen, so work reaches the right place. Your products unlock once they’re in.',
+    why: 'Every product uses your geographies to know where things happen. Your products unlock once they’re in.',
     minutes: 5,
     icon: 'Public',
     action: 'Add geographies',
@@ -20,7 +20,7 @@ export const TASK: Record<TodoId, { title: string; needs: string; why: string; m
   sender: {
     title: 'Set up notification channels',
     needs: 'SMS, email and sender details',
-    why: 'Updates go out in your organisation’s name, so your products need your services and sender details before they go live.',
+    why: 'Updates go out in your organisation’s name, so your products need your sender details before they go live.',
     minutes: 5,
     icon: 'Email',
     action: 'Add notification channels',
@@ -35,7 +35,7 @@ export const TASK: Record<TodoId, { title: string; needs: string; why: string; m
   },
 };
 
-export function TaskBody({ id, headingId, onStart }: { id: TodoId; headingId: string; onStart: () => void }) {
+export function TaskBody({ id, headingId, onStart, showWhy = true }: { id: TodoId; headingId: string; onStart: () => void; showWhy?: boolean }) {
   const [why, setWhy] = useState(false);
   const t = TASK[id];
   return (
@@ -51,10 +51,13 @@ export function TaskBody({ id, headingId, onStart }: { id: TodoId; headingId: st
             {t.minutes} min
           </span>
         </div>
-        <p>You’ll need {t.needs}.</p>
-        <button type="button" className="lp-link" onClick={() => setWhy(true)}>
-          Why complete this?
-        </button>
+        {/* Without the Why link, the reason itself is the line under the title */}
+        <p>{showWhy ? `You’ll need ${t.needs}.` : t.why}</p>
+        {showWhy && (
+          <button type="button" className="lp-link" onClick={() => setWhy(true)}>
+            Why complete this?
+          </button>
+        )}
       </div>
       <Button variation="primary" label={t.action} icon="ArrowForward" isSuffix onClick={onStart} />
       {why && <WhyDialog title={t.title} text={t.why} onClose={() => setWhy(false)} />}

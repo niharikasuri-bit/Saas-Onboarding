@@ -1,8 +1,9 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { Button, Toast } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
+import { Select } from '../components/Select';
 import { useAccount } from '../lib/store';
-import { PRODUCTS, PRODUCT_ORDER, ROLES, newId, type Product, type User } from '../lib/model';
+import { MEMBER_STATUS, PRODUCTS, PRODUCT_ORDER, ROLES, newId, statusOf, type Account, type Product, type User } from '../lib/model';
 import { Crumbs } from './Crumbs';
 import { SheetIntro, UploadSteps, colLetter } from './Sheet';
 import { showError } from './ErrorToast';
@@ -17,6 +18,11 @@ import { showError } from './ErrorToast';
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /** A toast to show when the Team page opens, after adding from somewhere else (Home). */
 let flash = '';
+/** A member whose details to open when the Team page opens (from Home's Add details). */
+let openOnArrive = '';
+export const openMemberDetails = (id: string) => {
+  openOnArrive = id;
+};
 type Person = { key: string; name: string; email: string; role: string; products: Product[] };
 
 /** A small CSV reader: commas, quoted cells, doubled quotes. */
@@ -54,14 +60,21 @@ function downloadTemplate() {
 /** What a member can see: their role and products, defaulting to Staff on every product that's on. */
 const roleOf = (u: User) => u.role ?? 'Staff';
 const productsOf = (u: User, on: Product[]) => u.products ?? on;
-const productNames = (ps: Product[]) => (ps.length ? ps.map((p) => PRODUCTS[p].name).join(', ') : 'None');
+const productNames = (ps: Product[]) => (ps.length ? ps.map((p) => PRODUCTS[p].name).join(', ') : 'Not set yet');
+const deptName = (a: Account, id: string) => a.departments.find((d) => d.id === id)?.name ?? id;
+const areaName = (a: Account, id: string) => (id === 'all' ? 'All geographies' : a.geography.areas.find((x) => x.id === id)?.name ?? id);
+type Access = { department: string; designation: string; jurisdiction: string; employeeId: string };
 
 export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => void } = {}) {
   const { account, update, go } = useAccount();
   const uid = useId();
   const on = PRODUCT_ORDER.filter((p) => account.products[p].enabled);
   const [adding, setAdding] = useState(!!embedded);
-  const [editing, setEditing] = useState<string | null>(null);
+  const [editing, setEditing] = useState<string | null>(() => {
+    const id = openOnArrive;
+    openOnArrive = '';
+    return id || null;
+  });
   const [view, setView] = useState<'cards' | 'list'>('cards');
   const [q, setQ] = useState('');
   const [toast, setToast] = useState(() => {
@@ -102,7 +115,7 @@ export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => 
           onSent={(people) => {
             update((a) => ({
               ...a,
-              users: [...a.users, ...people.map((p) => ({ id: newId(), name: p.name.trim(), email: p.email.trim(), role: p.role, products: p.products }))],
+              users: [...a.users, ...people.map((p) => ({ id: newId(), name: p.name.trim(), email: p.email.trim(), role: p.role, products: p.products, status: 'invited' as const, invitedAt: Date.now() }))],
             }));
             const msg = `${people.length} ${people.length === 1 ? 'member' : 'members'} added. Invites sent.`;
             // After adding, go to Your team, from Home too.
@@ -128,9 +141,12 @@ export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => 
           taken={(e) => taken(e, member.id)}
           onCancel={() => setEditing(null)}
           onSave={(u) => {
-            update((a) => ({ ...a, users: a.users.map((x) => (x.id === u.id ? u : x)) }));
+            // Assigning an accepted member's access makes them active
+            const assigning = statusOf(u) === 'accepted';
+            const done = assigning ? { ...u, status: 'active' as const } : u;
+            update((a) => ({ ...a, users: a.users.map((x) => (x.id === u.id ? done : x)) }));
             setEditing(null);
-            setToast(`${u.name}’s details saved`);
+            setToast(assigning ? `${u.name} can now start working` : `${u.name}’s details saved`);
           }}
           onRemove={() => {
             update((a) => ({ ...a, users: a.users.filter((x) => x.id !== member.id) }));
@@ -142,6 +158,15 @@ export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => 
       </div>
     );
 
+  const resend = (u: User) => {
+    update((a) => ({ ...a, users: a.users.map((x) => (x.id === u.id ? { ...x, invitedAt: Date.now() } : x)) }));
+    setToast(`Invite sent again to ${u.email}`);
+  };
+  const cancel = (u: User) => {
+    if (!window.confirm(`Cancel the invite to ${u.email}? The link in their email will stop working.`)) return;
+    update((a) => ({ ...a, users: a.users.filter((x) => x.id !== u.id) }));
+    setToast(`Invite to ${u.email} cancelled`);
+  };
   const everyone: (User & { admin?: boolean })[] = [
     { id: 'admin', name: account.admin.name, email: account.admin.email, role: 'Admin', products: on, admin: true },
     ...account.users,
@@ -203,7 +228,7 @@ export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => 
                   {u.name}
                   {u.admin && ' (you)'}
                 </h3>
-                <span className={`geo-status${u.admin ? ' is-active' : ''}`}>{u.admin ? 'Admin' : 'Invited'}</span>
+                <MemberTag u={u} />
               </div>
               <dl className="tm-fields">
                 <div>
@@ -218,6 +243,18 @@ export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => 
                   <dt>Product access</dt>
                   <dd>{productNames(productsOf(u, on))}</dd>
                 </div>
+                {u.department && (
+                  <div>
+                    <dt>Department</dt>
+                    <dd>{deptName(account, u.department)}</dd>
+                  </div>
+                )}
+                {u.jurisdiction && (
+                  <div>
+                    <dt>Geography</dt>
+                    <dd>{areaName(account, u.jurisdiction)}</dd>
+                  </div>
+                )}
               </dl>
               <div className="geo-actions">
                 {u.admin ? (
@@ -225,6 +262,13 @@ export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => 
                     <Icon name="Info" size={18} />
                     Your access cannot be changed.
                   </p>
+                ) : statusOf(u) === 'accepted' ? (
+                  <Button variation="primary" label="Assign access" title={`Assign access for ${u.name}`} onClick={() => setEditing(u.id)} />
+                ) : statusOf(u) === 'invited' ? (
+                  <div className="tm-invite-actions">
+                    <Button variation="secondary" icon="Email" label="Resend invite" title={`Resend the invite to ${u.email}`} onClick={() => resend(u)} />
+                    <Button variation="secondary" icon="Close" label="Cancel invite" title={`Cancel the invite to ${u.email}`} onClick={() => cancel(u)} />
+                  </div>
                 ) : (
                   <Button variation="secondary" icon="Edit" label="Edit member details" title={`Edit ${u.name}’s details`} onClick={() => setEditing(u.id)} />
                 )}
@@ -256,12 +300,21 @@ export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => 
                   <td>{roleOf(u)}</td>
                   <td>{productNames(productsOf(u, on))}</td>
                   <td>
-                    <span className={`geo-status${u.admin ? ' is-active' : ''}`}>{u.admin ? 'Admin' : 'Invited'}</span>
+                    <MemberTag u={u} />
                   </td>
                   <td>
                     {!u.admin && (
                       <div className="geo-row-actions">
-                        <Button variation="secondary" size="small" icon="Edit" label="Edit" title={`Edit ${u.name}’s details`} onClick={() => setEditing(u.id)} />
+                        {statusOf(u) === 'accepted' ? (
+                          <Button variation="primary" size="small" label="Assign access" title={`Assign access for ${u.name}`} onClick={() => setEditing(u.id)} />
+                        ) : statusOf(u) === 'invited' ? (
+                          <>
+                            <Button variation="secondary" size="small" label="Resend" title={`Resend the invite to ${u.email}`} onClick={() => resend(u)} />
+                            <Button variation="secondary" size="small" label="Cancel invite" title={`Cancel the invite to ${u.email}`} onClick={() => cancel(u)} />
+                          </>
+                        ) : (
+                          <Button variation="secondary" size="small" icon="Edit" label="Edit" title={`Edit ${u.name}’s details`} onClick={() => setEditing(u.id)} />
+                        )}
                       </div>
                     )}
                   </td>
@@ -276,6 +329,13 @@ export function Team({ embedded, onDone }: { embedded?: boolean; onDone?: () => 
   );
 }
 
+/** A member's status tag: Admin for you, else Invited, Accepted (access still to assign) or Active. */
+export function MemberTag({ u }: { u: User & { admin?: boolean } }) {
+  if (u.admin) return <span className="geo-status is-active">Admin</span>;
+  const st = statusOf(u);
+  return <span className={`geo-status${st === 'active' ? ' is-active' : st === 'invited' ? ' is-pending' : ' is-info'}`}>{MEMBER_STATUS[st]}</span>;
+}
+
 /**
  * One person's fields as a form list, like the sender details: each field on
  * its own row, label on the left, control on the right, error under it.
@@ -286,12 +346,15 @@ function PersonFields({
   products,
   errors,
   onChange,
+  readOnlyIdentity,
 }: {
   uid: string;
   p: Person;
   products: Product[];
   errors: Record<string, string>;
   onChange: (p: Person) => void;
+  /** Their name and email are set by them on accepting, so they're shown as text */
+  readOnlyIdentity?: boolean;
 }) {
   const id = (k: string) => `${uid}-${p.key}-${k}`;
   const err = (k: string) => errors[`${p.key}-${k}`];
@@ -322,16 +385,31 @@ function PersonFields({
   );
   return (
     <div className="tm-lines">
-      {row('name', 'Name', text('name'))}
-      {row('email', 'Work email', text('email', 'email'))}
+      {readOnlyIdentity ? (
+        <>
+          <div className="tm-line">
+            <span className="tm-line-label">Name</span>
+            <p className="tm-line-value">{p.name}</p>
+          </div>
+          <div className="tm-line">
+            <span className="tm-line-label">Work email</span>
+            <p className="tm-line-value">{p.email}</p>
+          </div>
+        </>
+      ) : (
+        <>
+          {row('name', 'Name', text('name'))}
+          {row('email', 'Work email', text('email', 'email'))}
+        </>
+      )}
       {row(
         'role',
         'Role',
-        <select id={id('role')} value={p.role} onChange={(e) => onChange({ ...p, role: e.target.value })}>
+        <Select id={id('role')} value={p.role} onChange={(e) => onChange({ ...p, role: e.target.value })}>
           {ROLES.map((r) => (
             <option key={r}>{r}</option>
           ))}
-        </select>,
+        </Select>,
       )}
       {row(
         'products',
@@ -349,11 +427,151 @@ function PersonFields({
   );
 }
 
+/** An info button next to a field title; its text shows on hover or focus (Escape hides it) and is also
+ *  the field's description for screen readers. */
+function InfoTip({ id, label, text }: { id: string; label: string; text: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <span className="tm-tip" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+      <button
+        type="button"
+        className="tm-tip-btn"
+        aria-label={label}
+        aria-describedby={id}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setOpen(false)}
+        onClick={() => setOpen((o) => !o)}
+        onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}
+      >
+        <Icon name="InfoOutline" size={18} />
+      </button>
+      <span id={id} role="tooltip" className={`tm-tip-text${open ? ' is-open' : ''}`}>
+        {text}
+      </span>
+    </span>
+  );
+}
+
+/** What the person works on, set by the admin: department, designation, the geography they cover, employee ID. */
+function AccessFields({
+  uid,
+  k,
+  acc,
+  errors,
+  onChange,
+}: {
+  uid: string;
+  k: string;
+  acc: Access;
+  errors: Record<string, string>;
+  onChange: (a: Access) => void;
+}) {
+  const { account } = useAccount();
+  const id = (f: string) => `${uid}-${k}-${f}`;
+  const err = (f: string) => errors[`${k}-${f}`];
+  const row = (f: string, label: string, control: ReactNode, extra?: ReactNode, tip?: string) => (
+    <div className={`tm-line${err(f) ? ' has-error' : ''}`}>
+      {tip ? (
+        <div className="tm-line-head">
+          <label htmlFor={id(f)}>{label}</label>
+          <InfoTip id={`${id(f)}-tip`} label={`About ${label.toLowerCase()}`} text={tip} />
+        </div>
+      ) : (
+        <label htmlFor={id(f)}>{label}</label>
+      )}
+      <div className="tm-line-ctl">
+        {control}
+        {extra}
+        {err(f) && (
+          <p className="fld-error" id={`${id(f)}-err`}>
+            <span className="ux-visually-hidden">Error: </span>
+            {err(f)}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+  const desc = (f: string) => (err(f) ? `${id(f)}-err` : undefined);
+  const depts = account.departments;
+  const areas = account.geography.areas;
+  return (
+    <div className="tm-lines tm-access">
+      <h2 className="tm-access-h">Access</h2>
+      {/* Only when the account has departments */}
+      {depts.length > 0 &&
+        row(
+          'department',
+          'Department',
+          <Select
+            id={id('department')}
+            value={acc.department}
+            aria-invalid={!!err('department') || undefined}
+            aria-describedby={desc('department')}
+            onChange={(e) => onChange({ ...acc, department: e.target.value })}
+          >
+            <option value="">Choose</option>
+            {depts.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name}
+              </option>
+            ))}
+          </Select>,
+        )}
+      {row(
+        'designation',
+        'Designation',
+        <input
+          id={id('designation')}
+          value={acc.designation}
+          placeholder="Field supervisor"
+          autoComplete="off"
+          aria-invalid={!!err('designation') || undefined}
+          aria-describedby={desc('designation')}
+          onChange={(e) => onChange({ ...acc, designation: e.target.value })}
+        />,
+      )}
+      {row(
+        'jurisdiction',
+        'Geography',
+        <Select
+          id={id('jurisdiction')}
+          value={acc.jurisdiction}
+          disabled={!areas.length}
+          aria-invalid={!!err('jurisdiction') || undefined}
+          aria-describedby={[`${id('jurisdiction')}-tip`, err('jurisdiction') ? `${id('jurisdiction')}-err` : ''].filter(Boolean).join(' ')}
+          onChange={(e) => onChange({ ...acc, jurisdiction: e.target.value })}
+        >
+          <option value="">{areas.length ? 'Choose' : 'No geography yet'}</option>
+          {areas.length > 0 && <option value="all">All geographies</option>}
+          {areas.map((x) => (
+            <option key={x.id} value={x.id}>
+              {'\u2003'.repeat(x.level)}
+              {x.name}
+            </option>
+          ))}
+        </Select>,
+        undefined,
+        'The geography they cover. They see work from this geography and the ones inside it.',
+      )}
+      {row(
+        'employeeId',
+        'Employee ID (optional)',
+        <input
+          id={id('employeeId')}
+          value={acc.employeeId}
+          autoComplete="off"
+          onChange={(e) => onChange({ ...acc, employeeId: e.target.value })}
+        />,
+      )}
+    </div>
+  );
+}
+
 /**
  * A dropdown that holds checkboxes: the button shows what's chosen and
  * opens the list; Escape or clicking outside closes it.
  */
-function MultiSelect({
+export function MultiSelect({
   id,
   label,
   options,
@@ -512,11 +730,11 @@ function PeopleTable({
                 {cellErr(p, 'email')}
               </td>
               <td>
-                <select aria-label={`Role, row ${i + 1}`} value={p.role} onChange={(e) => set(p.key, { role: e.target.value })}>
+                <Select aria-label={`Role, row ${i + 1}`} value={p.role} onChange={(e) => set(p.key, { role: e.target.value })}>
                   {ROLES.map((r) => (
                     <option key={r}>{r}</option>
                   ))}
-                </select>
+                </Select>
               </td>
               <td>
                 <MultiSelect
@@ -832,6 +1050,15 @@ function EditMember({
   onRemove: () => void;
 }) {
   const uid = useId();
+  const { account } = useAccount();
+  // Accepted: the admin assigns access. Name and email are theirs, so they're shown, not edited.
+  const adding = statusOf(member) === 'accepted';
+  const [acc, setAcc] = useState<Access>({
+    department: member.department ?? '',
+    designation: member.designation ?? '',
+    jurisdiction: member.jurisdiction ?? '',
+    employeeId: member.employeeId ?? '',
+  });
   const [p, setP] = useState<Person>({
     key: member.id,
     name: member.name,
@@ -847,17 +1074,31 @@ function EditMember({
   const save = () => {
     const e: Record<string, string> = {};
     checkPerson(p, taken, new Set(), e);
+    if (account.departments.length && !acc.department) e[`${p.key}-department`] = 'Choose their department';
+    if (!acc.designation.trim()) e[`${p.key}-designation`] = 'Enter their designation, like Field supervisor';
+    if (account.geography.areas.length && !acc.jurisdiction) e[`${p.key}-jurisdiction`] = 'Choose the geography they cover';
     setErrors(e);
     if (Object.keys(e).length) return document.getElementById(`${uid}-${Object.keys(e)[0]}`)?.focus();
-    onSave({ ...member, name: p.name.trim(), email: p.email.trim(), role: p.role, products: p.products });
+    onSave({
+      ...member,
+      name: p.name.trim(),
+      email: p.email.trim(),
+      role: p.role,
+      products: p.products,
+      department: acc.department || undefined,
+      designation: acc.designation.trim(),
+      jurisdiction: acc.jurisdiction || undefined,
+      employeeId: acc.employeeId.trim() || undefined,
+    });
   };
   return (
     <div className="cg-page">
-      <Crumbs items={[...trail, { label: `Edit ${member.name}` }]} />
+      <Crumbs items={[...trail, { label: adding ? `Set up ${member.name}’s profile` : `Edit ${member.name}` }]} />
       <section className="cg" aria-labelledby={`${uid}-h`}>
         <h1 id={`${uid}-h`} ref={heading} tabIndex={-1}>
-          Edit {member.name}’s details
+          {adding ? `Set up ${member.name}’s profile` : `Edit ${member.name}’s details`}
         </h1>
+        {adding && <p className="cg-lead">Add details about {member.name} to complete their profile.</p>}
         <div className="cg-gap" />
         <form
           noValidate
@@ -868,7 +1109,8 @@ function EditMember({
         >
           <div className="tm-row ch-sec is-edit">
             <div>
-              <PersonFields uid={uid} p={p} products={products} errors={errors} onChange={setP} />
+              <PersonFields uid={uid} p={p} products={products} errors={errors} onChange={setP} readOnlyIdentity={adding} />
+              <AccessFields uid={uid} k={p.key} acc={acc} errors={errors} onChange={setAcc} />
             </div>
           </div>
           <button type="submit" className="ux-visually-hidden" tabIndex={-1} aria-hidden="true" />
@@ -883,7 +1125,7 @@ function EditMember({
             label="Remove from team"
             onClick={() => window.confirm(`Remove ${member.name} from the team? They won’t be able to sign in.`) && onRemove()}
           />
-          <Button variation="primary" label="Save changes" onClick={save} />
+          <Button variation="primary" label={adding ? 'Assign access' : 'Save changes'} onClick={save} />
         </div>
       </footer>
     </div>

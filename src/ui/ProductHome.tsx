@@ -86,7 +86,7 @@ function Illustration() {
       <rect x="30" y="8" width="60" height="38" rx="3" fill="#fff" stroke="#3B4752" strokeWidth="2" />
       {[0, 1, 2, 3, 4, 5].map((c) =>
         [0, 1, 2].map((r) => (
-          <rect key={`${c}-${r}`} x={37 + c * 8} y={15 + r * 8} width="5" height="4" rx="1" fill={r === 0 && c < 3 ? '#C84C0E' : '#B9C1C8'} />
+          <rect key={`${c}-${r}`} x={37 + c * 8} y={15 + r * 8} width="5" height="4" rx="1" style={{ fill: r === 0 && c < 3 ? 'var(--c-primary)' : '#B9C1C8' }} />
         )),
       )}
       <rect x="56" y="46" width="8" height="10" fill="#3B4752" />

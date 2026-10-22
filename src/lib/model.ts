@@ -20,6 +20,7 @@ export type PageId =
   | 'golive'
   | 'tutorials'
   | 'documents'
+  | 'faq'
   | 'helpcenter';
 
 export const newId = () => Math.random().toString(36).slice(2, 9);
@@ -31,6 +32,13 @@ export const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export type Product = 'hcm' | 'cms' | 'lnp';
 export const PRODUCT_ORDER: Product[] = ['hcm', 'cms', 'lnp'];
+
+/** The full product names, used on Home and Integrations. */
+export const PRODUCT_FULL_NAME: Record<Product, string> = {
+  hcm: 'Health Campaign Management',
+  cms: 'Complaints Management',
+  lnp: 'Licence and Permit Management',
+};
 
 export const PRODUCTS: Record<Product, { name: string; icon: string; about: string; data: string }> = {
   hcm: {
@@ -53,18 +61,18 @@ export const PRODUCTS: Record<Product, { name: string; icon: string; about: stri
   },
 };
 
-export type Section = 'overview' | 'data' | 'departments' | 'users' | 'notifications' | 'translations';
+export type Section = 'overview' | 'data' | 'departments' | 'users' | 'notifications' | 'integrations' | 'translations';
 
 export const NAVS: Record<Product, Section[]> = {
-  cms: ['overview', 'data', 'departments', 'users', 'notifications', 'translations'],
-  hcm: ['overview', 'data', 'users', 'notifications', 'translations'],
-  lnp: ['overview', 'data', 'users', 'notifications', 'translations'],
+  cms: ['overview', 'data', 'departments', 'users', 'notifications', 'integrations', 'translations'],
+  hcm: ['overview', 'data', 'users', 'notifications', 'integrations', 'translations'],
+  lnp: ['overview', 'data', 'users', 'notifications', 'integrations', 'translations'],
 };
 
 export const sectionLabel = (p: Product, s: Section) =>
   s === 'data'
     ? PRODUCTS[p].data
-    : { overview: 'Overview', departments: 'Departments', users: 'Users', notifications: 'Notifications', translations: 'Translations' }[s];
+    : { overview: 'Overview', departments: 'Departments', users: 'Users', notifications: 'Notifications', integrations: 'Integrations', translations: 'Translations' }[s];
 
 export const SECTION_ICON: Record<Section, string> = {
   overview: 'Dashboard',
@@ -72,6 +80,7 @@ export const SECTION_ICON: Record<Section, string> = {
   departments: 'Business',
   users: 'Group',
   notifications: 'Notifications',
+  integrations: 'Extension',
   translations: 'Translate',
 };
 
@@ -314,7 +323,20 @@ export const LNP_FLOW = ['Applied', 'Fee paid', 'Documents checked', 'Inspected'
 export type Dept = { id: string; name: string; parentId: string | null };
 export type Area = { id: string; name: string; parentId: string | null; level: number };
 /** role and products are optional: older members default to Staff on every product that's on. */
-export type User = { id: string; name: string; email: string; role?: string; products?: Product[] };
+/** invited: the invite is out. accepted: they've joined (and set their own name) and the admin still has to
+ *  assign their access. active: done. Missing means invited. */
+export type MemberStatus = 'invited' | 'accepted' | 'active';
+
+/** Home's sections, set in Customize home: their order, which are hidden, and how integrations show. */
+export type HomeWidget = 'products' | 'integrations' | 'team';
+export type IntegrationsLayout = 'cards' | 'list' | 'connections';
+export type HomeLayout = { order: HomeWidget[]; hidden: HomeWidget[]; integrationsView: IntegrationsLayout };
+export const DEFAULT_HOME: HomeLayout = { order: ['products', 'integrations', 'team'], hidden: [], integrationsView: 'cards' };
+export type User = { id: string; name: string; email: string; role?: string; products?: Product[]; status?: MemberStatus; invitedAt?: number;
+  /** Set by the admin when assigning access: what the person works on. jurisdiction is an area id. */
+  department?: string; designation?: string; jurisdiction?: string; employeeId?: string };
+export const MEMBER_STATUS: Record<MemberStatus, string> = { invited: 'Invited', accepted: 'Accepted', active: 'Active' };
+export const statusOf = (u: User): MemberStatus => u.status ?? 'invited';
 export const ROLES = ['Admin', 'Supervisor', 'Staff', 'Viewer'];
 export type Channel = 'sms' | 'email' | 'whatsapp';
 export type SenderState = 'none' | 'submitted' | 'approved';
@@ -368,12 +390,14 @@ export type BrandTheme = {
   primary: string;
   header: string;
   background: string;
-  font: 'roboto' | 'system' | 'serif';
+  font: 'roboto' | 'dm-sans' | 'public-sans' | 'inter' | 'system' | 'serif';
   scale: 'small' | 'default' | 'large';
-  radius: 'sharp' | 'rounded' | 'soft';
+  radius: 'sharp' | 'rounded' | 'soft' | 'pill';
   footer: string;
   poweredBy: boolean;
 };
+
+export type LanguageState = { state: 'translating' | 'review' | 'live'; method: 'ai' | 'upload' | 'manual'; progress?: number };
 
 export type Account = {
   admin: { name: string; email: string };
@@ -388,9 +412,12 @@ export type Account = {
   departments: Dept[];
   mapping: Record<string, string>;
   items: Record<DataItem, ItemMeta>;
-  ui: { viewAs: 'admin' | 'member' };
-  /** Health systems connected on Integrations (DHIS2, eLMIS, MOSIP). */
-  integrations?: Record<string, boolean>;
+  ui: { viewAs: 'admin' | 'member'; home?: HomeLayout; /** The onboarding tour was taken or skipped */ tourDone?: boolean };
+  /** Systems connected on Integrations, by id. */
+  /** products: where the connection is used; it's set up once for the account. */
+  /** Added languages (English is always there). */
+  languages?: Record<string, LanguageState>;
+  integrations?: Record<string, boolean | { state: 'connected' | 'requested'; fields: Record<string, string>; products?: Product[] }>;
 };
 
 const META = (): ItemMeta => ({ imported: 0, pending: [] });
@@ -532,14 +559,13 @@ export const GEO_SETS: GeoSet[] = [
 ];
 
 
+/** The main colour choices in sign-up: the primary 1 colour of each design-system theme (src/lib/theme.ts). */
 export const BRAND_COLOURS = [
-  { value: '#C84C0E', label: 'Orange' },
-  { value: '#0B4B66', label: 'Teal blue' },
-  { value: '#1D4ED8', label: 'Blue' },
-  { value: '#00703C', label: 'Green' },
-  { value: '#6D28D9', label: 'Purple' },
-  { value: '#B91C1C', label: 'Red' },
-];
+  { value: '#C84C0E', label: 'DIGIT Classic', theme: 'digit' },
+  { value: '#047575', label: 'Lagoon', theme: 'teal' },
+  { value: '#0B5FD7', label: 'Horizon', theme: 'blue' },
+  { value: '#B94C1C', label: 'Ember', theme: 'black-orange' },
+] as const;
 
 export const CHANNELS: {
   id: Channel;

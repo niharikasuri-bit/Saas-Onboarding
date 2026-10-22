@@ -2,6 +2,7 @@ import { useId, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Button } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
+import { Select } from '../components/Select';
 import { patchData, useAccount } from '../lib/store';
 import { download, parseCsv, toCsv } from '../lib/csv';
 import {
@@ -206,7 +207,7 @@ function CmsOwners() {
             {used.map((d) => (
               <li key={d.id}>
                 <label htmlFor={`${uid}-${d.id}`}>{d.name}</label>
-                <select
+                <Select
                   id={`${uid}-${d.id}`}
                   value={owners[d.id] ?? ''}
                   className={owners[d.id] ? undefined : 'is-empty'}
@@ -218,7 +219,7 @@ function CmsOwners() {
                       {u.name}
                     </option>
                   ))}
-                </select>
+                </Select>
               </li>
             ))}
           </ul>
@@ -307,7 +308,7 @@ function Sla() {
     <>
       <section className="card form">
         <Field id={`${uid}-d`} label="Days to resolve a complaint" hint="After this, it’s late.">
-          <select
+          <Select
             id={`${uid}-d`}
             value={sla.days}
             aria-describedby={`${uid}-d-hint`}
@@ -318,7 +319,7 @@ function Sla() {
                 {d} {d === 1 ? 'day' : 'days'}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
         <fieldset className="fld">
           <legend className="fld-label">When it’s late, alert</legend>
@@ -539,7 +540,7 @@ function LnpOwners() {
           {d.types.map((id) => (
             <li key={id}>
               <label htmlFor={`${uid}-${id}`}>{t.types.find((x) => x.id === id)?.label}</label>
-              <select
+              <Select
                 id={`${uid}-${id}`}
                 value={d.owners[id] ?? ''}
                 className={d.owners[id] ? undefined : 'is-empty'}
@@ -551,7 +552,7 @@ function LnpOwners() {
                     {u.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </li>
           ))}
         </ul>
@@ -649,7 +650,7 @@ function CampaignAreas() {
           </div>
           <label className="lvl-inline">
             Level{' '}
-            <select
+            <Select
               value={level}
               onChange={(e) => {
                 setLevel(Number(e.target.value));
@@ -663,7 +664,7 @@ function CampaignAreas() {
                     {LEVELS[l]}
                   </option>
                 ))}
-            </select>
+            </Select>
           </label>
         </div>
         <div className="rd-actions">
@@ -716,7 +717,7 @@ function Strategy() {
       </fieldset>
       <section className="card form">
         <Field id={`${uid}-r`} label="Rounds" hint="How many times you go back to the same people.">
-          <select
+          <Select
             id={`${uid}-r`}
             value={s.rounds}
             aria-describedby={`${uid}-r-hint`}
@@ -727,7 +728,7 @@ function Strategy() {
                 {n}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
       </section>
       <Save

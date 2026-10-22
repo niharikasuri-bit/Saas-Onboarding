@@ -1,6 +1,7 @@
 import { useId, useState } from 'react';
 import { Button } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
+import { Select } from '../components/Select';
 import { useAccount } from '../lib/store';
 import { didYouMean, findName } from '../lib/csv';
 import { addArea } from '../lib/importers';
@@ -240,25 +241,25 @@ function ManualArea() {
           />
         </Field>
         <Field id={`${uid}-l`} label="Level">
-          <select id={`${uid}-l`} value={f.level} onChange={(e) => setF({ ...f, level: e.target.value, parentId: '' })}>
+          <Select id={`${uid}-l`} value={f.level} onChange={(e) => setF({ ...f, level: e.target.value, parentId: '' })}>
             {LEVELS.map((l, i) => (
               <option key={l} value={i} disabled={i > 0 && !areas.some((x) => x.level < i)}>
                 {l}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
       </div>
       {level > 0 && (
         <Field id={`${uid}-p`} label="Sits inside">
-          <select id={`${uid}-p`} value={f.parentId} onChange={(e) => setF({ ...f, parentId: e.target.value })}>
+          <Select id={`${uid}-p`} value={f.parentId} onChange={(e) => setF({ ...f, parentId: e.target.value })}>
             <option value="">Choose</option>
             {parents.map((x) => (
               <option key={x.id} value={x.id}>
                 {x.name} ({LEVELS[x.level]})
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
       )}
       {similar && (

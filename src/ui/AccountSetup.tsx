@@ -154,6 +154,11 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
             Let’s set up <em>your account</em>
           </h1>
           <p className="as-lead">Complete the following tasks to set up your account and get your products ready to use.</p>
+        </div>
+      </header>
+
+      <section className="as-wrap as-sheet" aria-label="What you need to do">
+        <div className="as-sheet-head">
           <div className="as-progress">
             <p id="as-prog-l">Your account setup progress</p>
             <p className="as-count">
@@ -172,15 +177,12 @@ export function AccountSetup({ onFlow }: { onFlow?: (open: boolean) => void } = 
             <span style={{ width: `${(doneCount / todos.length) * 100}%` }} />
           </div>
         </div>
-      </header>
-
-      <section className="as-wrap" aria-label="What you need to do">
         <ol className="as-list">
           {open.map((t) => (
             <li key={t.id}>
-              {/* The same card as Home's task, with its orange edge */}
+              {/* A row in the setup sheet */}
               <section className="lp-task as-task" aria-labelledby={`as-t-${t.id}`}>
-                <TaskBody id={t.id} headingId={`as-t-${t.id}`} onStart={() => start(t.id)} />
+                <TaskBody id={t.id} headingId={`as-t-${t.id}`} onStart={() => start(t.id)} showWhy={false} />
               </section>
             </li>
           ))}

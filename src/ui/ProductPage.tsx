@@ -26,6 +26,7 @@ import {
 } from '../lib/model';
 import { UserList } from './Users';
 import { ProductHome } from './ProductHome';
+import { ProductIntegrations } from './Integrations';
 
 /** A product: its start screen until a template is chosen, then its sections. */
 export function ProductPage() {
@@ -37,6 +38,8 @@ export function ProductPage() {
   }, [ok, go]);
   if (!ok || !p) return null;
   const st = account.products[p];
+  // Integrations belong to the account, so this section works before a template is chosen
+  if (params.section === 'integrations') return <ProductIntegrations p={p} />;
   if (!st.templateId) return <Start p={p} />;
   const section = params.section && NAVS[p].includes(params.section) ? params.section : 'overview';
   if (section === 'overview') return <Overview p={p} />;

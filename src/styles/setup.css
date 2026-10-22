@@ -4,7 +4,7 @@
   /* White, not off-white: the library's orange links need it for 4.5:1. */
   background: var(--c-surface);
 }
-.sf h1 { font-family: 'Roboto', sans-serif; font-size: 1.75rem; font-weight: 700; line-height: 1.25; margin-bottom: var(--s2); }
+.sf h1 { font-family: var(--c-font); font-size: 1.75rem; font-weight: 700; line-height: 1.25; margin-bottom: var(--s2); }
 .sf h1:focus { outline: none !important; }
 
 /* Gentle entrance, staggered; off for reduced motion. */
@@ -439,8 +439,8 @@
   border: 1px solid var(--c-divider); background: var(--c-surface);
   transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
-.qz-tile:hover { border-color: var(--c-primary); background: #FFFAF7; box-shadow: 0 4px 12px rgb(200 76 14 / 0.12); transform: translateY(-2px); }
-.qz-tile.is-on:hover { box-shadow: inset 0 0 0 1px var(--c-primary), 0 4px 12px rgb(200 76 14 / 0.16); background: var(--c-primary-bg); }
+.qz-tile:hover { border-color: var(--c-primary); background: var(--c-primary-tint); box-shadow: 0 4px 12px rgb(var(--c-primary-rgb) / 0.12); transform: translateY(-2px); }
+.qz-tile.is-on:hover { box-shadow: inset 0 0 0 1px var(--c-primary), 0 4px 12px rgb(var(--c-primary-rgb) / 0.16); background: var(--c-primary-bg); }
 .qz-tile:active { transform: translateY(0); }
 @media (prefers-reduced-motion: reduce) { .qz-tile, .qz-tile:hover { transition: none; transform: none; } }
 .qz-tile input { position: absolute; opacity: 0; width: 1px; height: 1px; }
@@ -573,4 +573,4 @@
 .qz-card.is-single .qz-actions { position: static; margin: var(--s6) 0 0; padding: 0; border-top: 0; box-shadow: none; background: none; }
 /* Add team member (invite step): a secondary button, orange text and border on white */
 .qz-add-row { gap: 6px; min-height: 40px; padding: 0 16px; border: 1px solid var(--c-primary); border-radius: 4px; background: #fff; color: var(--c-primary); font-weight: 500; }
-.qz-add-row:hover { box-shadow: none; background: #FBEEE8; color: #B8460C; }
+.qz-add-row:hover { box-shadow: none; background: var(--c-primary-bg); color: var(--c-primary-ink); }

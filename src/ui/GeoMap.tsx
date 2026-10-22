@@ -4,6 +4,9 @@ import 'leaflet/dist/leaflet.css';
 import { countryBounds } from './OsmMap';
 import type { GeoRow } from '../lib/model';
 
+/** The theme's primary colour (Leaflet needs a real colour, not a CSS variable). */
+const brand = () => getComputedStyle(document.documentElement).getPropertyValue('--c-primary').trim() || '#C84C0E';
+
 /**
  * Where a geography is, on OpenStreetMap: centred on it with a pin and its name.
  * Prototype: known centres for DIGIT's ready-made geographies; a geography they
@@ -44,7 +47,7 @@ export function GeoMap({ id, name, country, rows = [], levels = [] }: { id: stri
     // Shape files: each outline, named; the map fits them
     const drawn = L.featureGroup().addTo(m);
     shaped.forEach((r) => {
-      L.geoJSON(r.geo as GeoJSON.GeoJsonObject, { style: { color: '#C84C0E', weight: 2, fillColor: '#C84C0E', fillOpacity: 0.12 } })
+      L.geoJSON(r.geo as GeoJSON.GeoJsonObject, { style: { color: brand(), weight: 2, fillColor: brand(), fillOpacity: 0.12 } })
         .bindTooltip(`${r.name} (${levels[r.level] ?? ''})`, { sticky: true, className: 'gm-label' })
         .addTo(drawn);
     });

@@ -20,7 +20,7 @@ export function HelpButton({ open, controls, onToggle, buttonRef }: Props) {
   }, [open, controls, buttonRef]);
 
   return (
-    <span className="ux-help-btn">
+    <span className="ux-help-btn" data-tour="help">
       <Button
         ref={buttonRef}
         variation="secondary"

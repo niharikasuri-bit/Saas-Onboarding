@@ -12,6 +12,8 @@ import './styles/integrations.css';
 import './styles/home.css';
 import './styles/flow.css';
 import './styles/v4.css';
+import { applyTheme, savedMix, savedTheme } from './lib/theme';
+applyTheme(savedTheme(), savedMix());
 import App from './App';
 
 const queryClient = new QueryClient();

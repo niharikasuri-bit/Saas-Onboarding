@@ -28,6 +28,72 @@ export function Icon({ name, size = 20 }: { name: string; size?: number }) {
       </span>
     );
   }
+  // An outlined info glyph (the library's Info is filled), for tooltips next to field titles.
+  if (name === 'InfoOutline') {
+    return (
+      <span className="ux-icon" aria-hidden="true">
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 11v5" />
+          <circle cx="12" cy="7.8" r="0.6" fill="currentColor" />
+        </svg>
+      </span>
+    );
+  }
+  // Up and down chevrons, for moving items in a list.
+  if (name === 'MoveUp' || name === 'MoveDown') {
+    return (
+      <span className="ux-icon" aria-hidden="true">
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d={name === 'MoveUp' ? 'M6 15l6-6 6 6' : 'M6 9l6 6 6-6'} />
+        </svg>
+      </span>
+    );
+  }
+  // Sliders, for Customize home.
+  if (name === 'Tune') {
+    return (
+      <span className="ux-icon" aria-hidden="true">
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <path d="M4 7h10M18 7h2M4 17h4M12 17h8" />
+          <circle cx="16" cy="7" r="2" />
+          <circle cx="10" cy="17" r="2" />
+        </svg>
+      </span>
+    );
+  }
+  // A play button (Videos) and a question in a bubble (FAQ), for the Help panel.
+  if (name === 'PlayVideo') {
+    return (
+      <span className="ux-icon" aria-hidden="true">
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
+          <rect x="3" y="5" width="18" height="14" rx="3" />
+          <path d="M10 9.5v5l4.5-2.5z" fill="currentColor" />
+        </svg>
+      </span>
+    );
+  }
+  if (name === 'Faq') {
+    return (
+      <span className="ux-icon" aria-hidden="true">
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M5 4h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7l-4 3v-3H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />
+          <path d="M9.8 8.6a2.3 2.3 0 0 1 4.4.9c0 1.5-2.2 1.7-2.2 3" />
+          <circle cx="12" cy="14.6" r="0.4" fill="currentColor" />
+        </svg>
+      </span>
+    );
+  }
+  // Nor a sparkle (AI translation).
+  if (name === 'AutoAwesome') {
+    return (
+      <span className="ux-icon" aria-hidden="true">
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+          <path d="M10 3l1.8 4.9L16.7 9.7l-4.9 1.8L10 16.4l-1.8-4.9L3.3 9.7l4.9-1.8L10 3Zm8 9l.9 2.3 2.3.9-2.3.9L18 18.4l-.9-2.3-2.3-.9 2.3-.9L18 12Zm-1.5-9l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8Z" />
+        </svg>
+      </span>
+    );
+  }
   // Nor a lightning bolt (Quick actions).
   if (name === 'Bolt') {
     return (

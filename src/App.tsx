@@ -2,7 +2,10 @@ import { useState } from 'react';
 import { Button } from '@egovernments/digit-ui-components';
 import { SetupFlow } from './setup/SetupFlow';
 import type { Answers } from './setup/steps';
+import { Languages } from './ui/Languages';
 import { AccountProvider, loadSaved, useAccount } from './lib/store';
+import { BRAND_COLOURS } from './lib/model';
+import { applyTheme } from './lib/theme';
 import { METRICS, PRODUCTS, enabledProducts, type Account } from './lib/model';
 import { Shell } from './ui/Shell';
 import { ErrorToastHost } from './ui/ErrorToast';
@@ -15,6 +18,7 @@ import { Channels } from './ui/Channels';
 import { Team } from './ui/Team';
 import { Page } from './ui/StepFrame';
 import { Integrations } from './ui/Integrations';
+import { HelpLibrary } from './ui/HelpLibrary';
 
 /**
  * Sign-up and login first. Then Home, the account pages, and each product.
@@ -26,7 +30,14 @@ export default function App() {
   if (!saved)
     return (
       <>
-        <SetupFlow onDone={(answers) => setSaved({ answers })} />
+        <SetupFlow
+          onDone={(answers) => {
+            // The main colour picked in sign-up sets the console theme
+            const pick = BRAND_COLOURS.find((c) => c.value === answers.colour);
+            if (pick) applyTheme(pick.theme);
+            setSaved({ answers });
+          }}
+        />
         <ErrorToastHost />
       </>
     );
@@ -61,15 +72,15 @@ function Pages() {
     case 'health':
       return <Health />;
     case 'languages':
-      return <Page title="Language" lead="Choose the languages your team and citizens can use DIGIT in. Coming soon." />;
+      return <Languages />;
     case 'integrations':
       return <Integrations />;
     case 'tutorials':
-      return <Page title="Tutorials and Guides" lead="Step-by-step walkthroughs. Coming soon." />;
     case 'documents':
-      return <Page title="Documents" lead="Reference documents and downloads. Coming soon." />;
+    case 'faq':
+      return <HelpLibrary kind={page} />;
     case 'helpcenter':
-      return <Page title="Help Center" lead="Answers to common questions, and ways to contact us. Coming soon." />;
+      return <HelpLibrary />;
   }
 }
 

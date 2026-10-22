@@ -1,4 +1,5 @@
 import { useId, useState } from 'react';
+import { Select } from '../components/Select';
 import { Button } from '@egovernments/digit-ui-components';
 import { useAccount } from '../lib/store';
 import { findName } from '../lib/csv';
@@ -104,10 +105,10 @@ function AddDept() {
           />
         </Field>
         <Field id={`${uid}-p`} label="Sits under" optional>
-          <select id={`${uid}-p`} value={parent} onChange={(e) => setParent(e.target.value)}>
+          <Select id={`${uid}-p`} value={parent} onChange={(e) => setParent(e.target.value)}>
             <option value="">Nothing, it’s a top department</option>
             <DeptOptions account={account} />
-          </select>
+          </Select>
         </Field>
       </div>
       <div className="form-foot">
@@ -162,7 +163,7 @@ function Mapping() {
             <legend>{g}</legend>
             <label className="map-rule">
               <span>Send all {g.toLowerCase()} complaints to</span>
-              <select
+              <Select
                 value=""
                 onChange={(e) => {
                   if (!e.target.value) return;
@@ -172,13 +173,13 @@ function Mapping() {
               >
                 <option value="">Choose a department</option>
                 <DeptOptions account={account} />
-              </select>
+              </Select>
             </label>
             <ul className="map-list">
               {types.map((t) => (
                 <li key={t}>
                   <label htmlFor={`${uid}-${t}`}>{typeById(t)?.label}</label>
-                  <select
+                  <Select
                     id={`${uid}-${t}`}
                     value={account.mapping[t] ?? ''}
                     className={account.mapping[t] ? undefined : 'is-empty'}
@@ -186,7 +187,7 @@ function Mapping() {
                   >
                     <option value="">No department yet</option>
                     <DeptOptions account={account} />
-                  </select>
+                  </Select>
                 </li>
               ))}
             </ul>

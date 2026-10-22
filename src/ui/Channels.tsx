@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Button, Toast } from '@egovernments/digit-ui-components';
 import { Icon } from '../components/Icon';
+import { Select } from '../components/Select';
 import { useAccount } from '../lib/store';
 import { CHANNELS, type Channel } from '../lib/model';
 import { Field, describedBy } from './StepFrame';
@@ -33,6 +34,7 @@ export function Channels({ embedded, onDone }: { embedded?: boolean; onDone?: (m
   const [chosen, setChosen] = useState(!setUp.length);
   const [toast, setToast] = useState('');
   const [editing, setEditing] = useState<Channel | null>(null);
+  const [view, setView] = useState<'cards' | 'list'>('cards');
   const setting = embedded || (chosen && left.length > 0) || !setUp.length;
   const heading = useRef<HTMLHeadingElement>(null);
   const first = useRef(true);
@@ -114,7 +116,64 @@ export function Channels({ embedded, onDone }: { embedded?: boolean; onDone?: (m
         <h2 className="geo-section-h">
           Your channels <span className="geo-section-n">{setUp.length}</span>
         </h2>
+        <div className="geo-tools is-end">
+          <div className="geo-view" role="group" aria-label="View as">
+            <button type="button" aria-pressed={view === 'cards'} onClick={() => setView('cards')}>
+              <Icon name="GridView" size={18} />
+              Cards
+            </button>
+            <button type="button" aria-pressed={view === 'list'} onClick={() => setView('list')}>
+              <Icon name="List" size={18} />
+              List
+            </button>
+          </div>
+        </div>
       </div>
+      {view === 'list' ? (
+        <div className="geo-table-wrap">
+          <table className="geo-table">
+            <thead>
+              <tr>
+                <th scope="col">Channel</th>
+                <th scope="col">Sender</th>
+                <th scope="col">Status</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...setUp, ...left].map((c) => {
+                const st = account.sender[c.id];
+                const sender = c.fields.find((f) => !f.secret);
+                return (
+                  <tr key={c.id}>
+                    <th scope="row">
+                      <span className="ig-row-name">
+                        <span className="geo-icon" aria-hidden="true">
+                          <Icon name={ICON[c.id]} size={18} />
+                        </span>
+                        {c.label}
+                      </span>
+                    </th>
+                    <td>{st.state !== 'none' && sender ? st.fields[sender.key] || '—' : '—'}</td>
+                    <td>
+                      <span className={`geo-status${st.state !== 'none' ? ' is-active' : ''}`}>{st.state === 'none' ? 'Not connected' : 'Connected'}</span>
+                    </td>
+                    <td>
+                      {st.state !== 'none' ? (
+                        <div className="geo-row-actions">
+                          <Button variation="secondary" size="small" icon="Edit" label="Edit channel details" title={`Edit ${c.label} details`} ariaLabel={`Edit ${c.label} details`} onClick={() => setEditing(c.id)} />
+                        </div>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : (
       <ul className="geo-cards">
         {/* Connected first, then the ones not set up yet */}
         {[...setUp, ...left].map((c) => {
@@ -130,7 +189,6 @@ export function Channels({ embedded, onDone }: { embedded?: boolean; onDone?: (m
                 </span>
               </div>
               <h3 className="geo-card-h">{c.label}</h3>
-              <p className="ch-note">{c.note}</p>
               {st.state !== 'none' && (
                 <dl className="ch-fields">
                   {c.fields.map((f) => (
@@ -156,6 +214,7 @@ export function Channels({ embedded, onDone }: { embedded?: boolean; onDone?: (m
           );
         })}
       </ul>
+      )}
       {toastEl}
     </div>
   );
@@ -320,7 +379,7 @@ function ChannelFlow({
                         <div key={k} className="cg-split">
                           <Field id={`${uid}-${k}`} label={f.label} hint={f.hint} error={errors[k]}>
                             {f.options ? (
-                              <select
+                              <Select
                                 id={`${uid}-${k}`}
                                 value={v}
                                 aria-invalid={!!errors[k] || undefined}
@@ -331,7 +390,7 @@ function ChannelFlow({
                                 {f.options.map((o) => (
                                   <option key={o}>{o}</option>
                                 ))}
-                              </select>
+                              </Select>
                             ) : (
                               <input
                                 id={`${uid}-${k}`}
