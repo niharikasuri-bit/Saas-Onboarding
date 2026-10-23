@@ -62,6 +62,16 @@ export function Icon({ name, size = 20 }: { name: string; size?: number }) {
       </span>
     );
   }
+  // A filled clock, to sit with the library's filled icons (its Schedule clock is an outline).
+  if (name === 'ClockFilled') {
+    return (
+      <span className="ux-icon" aria-hidden="true">
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm.9 5v4.6l3.8 2.3-.9 1.5-4.7-2.8V7h1.8Z" />
+        </svg>
+      </span>
+    );
+  }
   // A revert arrow (restart), the same as the side nav's Restart.
   if (name === 'Revert') {
     return (

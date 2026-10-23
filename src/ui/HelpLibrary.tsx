@@ -24,7 +24,6 @@ const RES: { id: Res; label: string; icon: string }[] = [
   { id: 'videos', label: 'Videos', icon: 'PlayVideo' },
   { id: 'faq', label: 'FAQs', icon: 'Faq' },
 ];
-const PAGE = 15;
 
 type Item = {
   id: string;
@@ -51,7 +50,6 @@ export function HelpLibrary({ kind }: { kind?: HelpKind }) {
   const [q, setQ] = useState('');
   const [f, setF] = useState<Filters>(NO_FILTERS);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [limit, setLimit] = useState(PAGE);
   const [open, setOpen] = useState<string | null>(null);
   const [rated, setRated] = useState<Record<string, boolean>>({});
 
@@ -71,7 +69,6 @@ export function HelpLibrary({ kind }: { kind?: HelpKind }) {
   const why: 'search' | 'filters' | 'type' = q.trim() && !bySearch ? 'search' : !matching.length ? 'filters' : 'type';
   const cards = rows.filter((i) => i.res !== 'faq');
   const faqs = rows.filter((i) => i.res === 'faq');
-  const [faqLimit, setFaqLimit] = useState(PAGE);
   const countOf = (r: Res) => (r === 'all' ? matching.length : matching.filter((i) => i.res === r).length);
 
   // Active filters as removable chips
@@ -82,8 +79,6 @@ export function HelpLibrary({ kind }: { kind?: HelpKind }) {
     ...(f.popular ? [{ key: 'popular' as const, label: 'Popular only' }] : []),
   ];
   const reset = () => {
-    setLimit(PAGE);
-    setFaqLimit(PAGE);
     setOpen(null);
   };
   const act = (i: Item) => {
@@ -184,7 +179,7 @@ export function HelpLibrary({ kind }: { kind?: HelpKind }) {
             {cards.length > 0 && (
               <>
                 <ul className="hcd-grid">
-                  {cards.slice(0, limit).map((i) => (
+                  {cards.map((i) => (
                     <li key={i.id} className={`hcd-card is-${i.res}`}>
                       <button type="button" className="hcd-card-btn" onClick={() => act(i)}>
                         <span className={`hcd-prev${i.res === 'documents' ? ` is-${i.format!.toLowerCase()}` : ' is-video'}`} aria-hidden="true">
@@ -205,16 +200,6 @@ export function HelpLibrary({ kind }: { kind?: HelpKind }) {
                     </li>
                   ))}
                 </ul>
-                {cards.length > limit && (
-                  <div className="hcd-more">
-                    <span>
-                      Showing {limit} of {cards.length}
-                    </span>
-                    <button type="button" onClick={() => setLimit(limit + PAGE)}>
-                      Show more
-                    </button>
-                  </div>
-                )}
               </>
             )}
 
@@ -225,7 +210,7 @@ export function HelpLibrary({ kind }: { kind?: HelpKind }) {
                   Frequently asked questions <span>{faqs.length}</span>
                 </h2>
                 <ul>
-                  {faqs.slice(0, res === 'faq' ? faqLimit : 6).map((i) => {
+                  {faqs.slice(0, res === 'faq' ? faqs.length : 6).map((i) => {
                     const isOpen = open === i.id;
                     return (
                       <li key={i.id} className={`hcx-faq${isOpen ? ' is-open' : ''}`}>
@@ -264,16 +249,6 @@ export function HelpLibrary({ kind }: { kind?: HelpKind }) {
                   <button type="button" className="hcd-clear hcx-faq-all" onClick={() => (setRes('faq'), reset())}>
                     See all {faqs.length} questions
                   </button>
-                )}
-                {res === 'faq' && faqs.length > faqLimit && (
-                  <div className="hcd-more">
-                    <span>
-                      Showing {faqLimit} of {faqs.length}
-                    </span>
-                    <button type="button" onClick={() => setFaqLimit(faqLimit + PAGE)}>
-                      Show more
-                    </button>
-                  </div>
                 )}
               </section>
             )}

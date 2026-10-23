@@ -30,11 +30,13 @@ const FONTS: { id: BrandTheme['font']; name: string; stack: string }[] = [
   { id: 'inter', name: 'Inter', stack: "'Inter', system-ui, sans-serif" },
 ];
 /** The theme corner styles only: DIGIT Classic rounded, Horizon subtle, Lagoon and Ember pill. */
-const RADII: { id: BrandTheme['radius']; name: string; px: number }[] = [
-  { id: 'sharp', name: 'Sharp', px: 2 },
-  { id: 'rounded', name: 'Rounded', px: 10 },
-  { id: 'soft', name: 'Soft', px: 18 },
-  { id: 'pill', name: 'Pill', px: 999 },
+/** Each corner style has its own button and card corners, so Soft (soft cards, gently rounded buttons) and
+ *  Pill (fully round buttons) look clearly different. px is the button corner. */
+const RADII: { id: BrandTheme['radius']; name: string; px: number; card: number }[] = [
+  { id: 'sharp', name: 'Sharp', px: 2, card: 2 },
+  { id: 'rounded', name: 'Rounded', px: 6, card: 10 },
+  { id: 'soft', name: 'Soft', px: 10, card: 18 },
+  { id: 'pill', name: 'Pill', px: 999, card: 12 },
 ];
 /** The colour names shown under each swatch. */
 const COLOUR_NAME: Record<string, string> = {
@@ -155,6 +157,8 @@ export function Branding() {
           <div className="br-panel-head">
             <h2 id={`${uid}-sec`}>{label}</h2>
           </div>
+          {/* Only the settings scroll; the heading stays put */}
+          <div className="br-panel-scroll">
           <div className="br-panel-card">
           {section === 'themes' && (
             <fieldset className="br-fs is-bare">
@@ -357,13 +361,14 @@ export function Branding() {
               </button>
             )}
           </div>
+          </div>
         </section>
 
         <div className="br-preview-col">
 
           <div className="br-preview-bar">
 
-            <Button variation="secondary" label="Return to last saved" title="Go back to how your branding looked when you last saved it" onClick={reset} isDisabled={!dirty} />
+            <Button variation="secondary" icon="Restore" label="Return to last saved" title="Go back to how your branding looked when you last saved it" onClick={reset} isDisabled={!dirty} />
 
           </div>
 
@@ -391,7 +396,7 @@ function Preview({ theme, name, logo }: { theme: BrandTheme; name: string; logo:
     '--br-p': theme.primary,
     '--br-h': theme.header,
     '--br-bg': theme.background,
-    '--br-r': `${Math.min(radius, 14)}px`,
+    '--br-r': `${RADII.find((r) => r.id === theme.radius)!.card}px`,
     '--br-rb': `${radius}px`,
     fontFamily: font,
   } as React.CSSProperties;

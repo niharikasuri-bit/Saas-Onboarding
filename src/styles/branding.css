@@ -396,3 +396,36 @@
 /* Back lines up with the page content; on Branding with the section menu */
 .sh-sub.has-back { padding-left: clamp(24px, 4vw, 56px); }
 .sh-content:has(.br) .sh-sub.has-back { padding-left: 16px; }
+.br-dash-nav { padding-left: 0; } .br-dash-nav span { padding-left: 14px; border-radius: 0 var(--br-r) var(--br-r) 0; } /* nav items sit on the left edge, rounded on the right only */
+.br-grid { column-gap: 8px; } .br-nav, .br-panel { border-radius: 0 16px 16px 0; overflow: hidden; } .br-nav { border-top-left-radius: 0 !important; } /* the two settings panels: rounded on the right */
+.br-grid { column-gap: 0; } .br-nav { border-radius: 0 16px 16px 0 !important; border-right: 1px solid #ECECEC; } /* both panels rounded on the right, with no grey strip between them */
+/* The section list and settings panel stay put while the page (the preview) scrolls; long settings scroll inside their own panel */
+.br-grid { height: calc(100vh - 112px - 76px); min-height: 0 !important; overflow: hidden; }
+.br-nav, .br-panel { height: 100%; overflow-y: auto; box-sizing: border-box; }
+.br-preview-col { height: 100%; overflow-y: auto; }
+@media (max-width: 900px) { .br-grid { height: auto; overflow: visible; } .br-nav, .br-panel, .br-preview-col { height: auto; overflow: visible; } }
+/* Seamless join between the section list and the settings panel (no grey notch), and the
+   settings scroll under a fixed heading with a thin scrollbar */
+.br-grid { background: #fff !important; }
+.br-preview-col { background: #F7F7F8; }
+.br-panel { display: flex; flex-direction: column; overflow: hidden !important; padding-bottom: 0 !important; }
+.br-panel-head { flex-shrink: 0; }
+.br-panel-scroll { flex: 1; min-height: 0; overflow-y: auto; margin: 0 -12px; padding: 0 12px 20px; scrollbar-width: thin; scrollbar-color: #C9CDD2 transparent; }
+.br-panel-scroll::-webkit-scrollbar { width: 6px; }
+.br-panel-scroll::-webkit-scrollbar-thumb { background: #C9CDD2; border-radius: 6px; }
+.br-nav { overflow-y: auto; scrollbar-width: thin; }
+/* Slim scrollbar with no arrow buttons (Chrome shows arrows when scrollbar-width is set, so use the webkit styles only) */
+.br-panel-scroll, .br-nav { scrollbar-width: auto; scrollbar-color: auto; }
+.br-panel-scroll::-webkit-scrollbar, .br-nav::-webkit-scrollbar { width: 6px; }
+.br-panel-scroll::-webkit-scrollbar-track, .br-nav::-webkit-scrollbar-track { background: transparent; }
+.br-panel-scroll::-webkit-scrollbar-thumb, .br-nav::-webkit-scrollbar-thumb { background: #C9CDD2; border-radius: 6px; }
+.br-panel-scroll::-webkit-scrollbar-button, .br-nav::-webkit-scrollbar-button { display: none; height: 0; }
+.br-preview-col { scrollbar-width: auto; scrollbar-color: auto; }
+.br-preview-col::-webkit-scrollbar { width: 6px; }
+.br-preview-col::-webkit-scrollbar-track { background: transparent; }
+.br-preview-col::-webkit-scrollbar-thumb { background: #C9CDD2; border-radius: 6px; }
+.br-preview-col::-webkit-scrollbar-button { display: none; height: 0; }
+.br-panel-scroll { padding-top: 4px; } .br-panel-head { margin-bottom: 8px !important; } /* room so card borders and focus rings at the top aren't clipped */
+.br-panel, .br-nav { box-shadow: none !important; } /* no grey shadow beside the rounded corners */
+.br-nav, .br-panel-scroll, .br-preview-col { scrollbar-width: thin !important; scrollbar-color: #C9CDD2 transparent !important; } /* the browser's thin scrollbar, with its arrows */
+.br-grid { background: #F7F7F8 !important; } .br-nav { position: relative; z-index: 1; } .br-panel { box-shadow: -16px 0 0 #fff !important; } /* grey behind the outer rounded corners; white only fills the notch between the two panels */

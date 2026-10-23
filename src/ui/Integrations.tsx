@@ -725,7 +725,7 @@ function IntegrationDialog({ system: s, onClose, onAdd, onEdit }: { system: Syst
               [
                 ['Group', 'Who usually does this?', s.who],
                 ['Assignment', 'What will you need?', s.needs],
-                ['Schedule', 'How long does it take?', s.time],
+                ['ClockFilled', 'How long does it take?', s.time],
               ] as const
             ).map(([icon, label, value]) => (
               <li key={label} className="ig-dlg-fact">
